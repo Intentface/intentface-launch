@@ -36,7 +36,7 @@ The skills in `packages/core/skills/` (product-launch-video, creative-direction,
 
 ## Wishlist
 
-[WISHLIST.md](WISHLIST.md) lists the tools that would have made past work faster, easier or cheaper in tokens. When a missing tool costs you time or tokens (a throwaway script, several calls where one should do, an image far larger than needed), add an entry: what happened, what would have helped, and what it would save. Before writing a one-off helper, check whether it is already wished for; building it properly may be the better use of the time. When an entry is built, delete it from the list.
+Tools that would have made past work faster, easier or cheaper in tokens are GitHub issues labelled `wishlist` (public, readable without a login: <https://api.github.com/repos/Intentface/intentface-launch/issues?labels=wishlist>). When a missing tool costs you time or tokens (a throwaway script, several calls where one should do, an image far larger than needed), draft an issue for the person to file: what happened, what would have helped, and what it would save. Before writing a one-off helper, check whether it is already wished for; building it properly may be the better use of the time. When one is built, say which issue it closes.
 
 ## Rules for package code
 
