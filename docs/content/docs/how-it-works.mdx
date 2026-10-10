@@ -1,0 +1,59 @@
+---
+title: How it works
+description: The workflow from brief to render, and what runs underneath it.
+source: packages/core/LAUNCH.md
+---
+
+## A launch folder
+
+A product repo keeps its videos in `launch/`. Each video is a folder:
+
+| Path | What it holds |
+| --- | --- |
+| `launch.config.ts` | Marks the folder and points at the product, so videos can import its components. |
+| `videos/<id>/video.tsx` | The video: its shots, timing and copy. |
+| `videos/<id>/brief.md` | The claim, the features and where each one can be seen. |
+| `videos/<id>/captures/` | Scripts that record the running product, and their manifests. |
+| `videos/<id>/audio/` | The music track and its beats. |
+| `videos/<id>/comments.json` | Review notes left on the storyboard. |
+| `videos/<id>/out/` | Stills, boards and renders. Not committed. |
+
+## The workflow
+
+Each step is agreed with you before the next one starts.
+
+1. **Discover.** Claude reads the product and runs it, then asks what only you
+   know: what sets it apart and who it is for. The result is `brief.md`.
+2. **Script.** One person doing one real task, each feature the next thing
+   that happens in it.
+3. **Music.** Intentface Launch does not make music, but it cuts the video to
+   a track, so the track comes before the sketch. Use music you already have,
+   or generate one (Suno, ElevenLabs Music and the like) from the brief Claude
+   writes from the script. Drop it in `audio/`, and `pnpm launch beats` finds
+   the beats, sections and quiet breaths that the shots are timed to.
+4. **Sketch.** Claude captures the product and builds every shot flat and
+   cheap, on the track's beats. `pnpm launch board` makes a storyboard and an
+   animatic, and lists under each shot any text held too briefly to read; you
+   leave notes per shot in the studio.
+5. **Build.** Shots are finished one at a time: the product's own motion, UI
+   state changes, 3D and motion blur where planned. Claude checks each one in
+   stills and contact sheets.
+6. **Check and render.** `pnpm launch check` measures every piece of text on
+   screen for reading time, size and contrast, and flags layers that cut their
+   own content and end frames that differ from the approved logo. Then `pnpm launch render` makes
+   the mp4.
+
+## Underneath
+
+- **Frames, not playback.** Time comes only from `useFrame()`. The renderer
+  seeks each frame and screenshots it, so nothing depends on how fast a
+  machine is.
+- **Captures.** A capture script drives the running product in a browser one
+  exact frame at a time. A snapshot saves the page's DOM and CSS, so close-ups
+  stay sharp at any zoom.
+- **Rendering.** Work is split into one-second chunks that browser workers take
+  from a queue. Frames with motion blur render several subframes and average
+  them. A stopped render resumes with `--resume`.
+- **Skills.** The method lives in skills that Claude loads: product-launch-video,
+  creative-direction, kinetic-typography, ui-motion, micro-animations,
+  logo-animation, motion-review, music-brief and sound-design.

@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Get started---",
+    "index",
+    "quick-start",
+    "how-it-works",
+    "---Reference---",
+    "commands",
+    "engine",
+    "kit",
+    "three",
+    "skills"
+  ]
+}

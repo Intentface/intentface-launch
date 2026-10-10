@@ -1,0 +1,61 @@
+---
+title: 3D
+description: Live UI on panels in space, a real lens and light, from the @intentface-launch/three add-on.
+source: packages/three
+---
+
+`pnpm launch add three`, then `import { … } from "@intentface-launch/three"`.
+Use 3D for transitions and moments of awe; go flat when the viewer has to read.
+
+## Stage and camera
+
+| Tool | What it does |
+| --- | --- |
+| `Stage3D` | A 3D stage rendered like a film camera: real depth of field, shutter motion blur and anti-aliasing, summed in 32-bit float. |
+| `rig` | A camera move from keyframed framings: target, distance, elevation, azimuth, fov, blur. |
+| `pushIn`, `pullBack`, `orbitMove`, `turntable`, `macroSlide`, `topDown`, `dollyThrough` | Named camera moves, two keys each. |
+| `sequence` | Chains lens functions, each taking over at its frame. |
+| `handheld` | Seeded operator sway on any lens. |
+| `follow` | A lagging look-at. |
+| `fillDistance` | The camera distance at which something fills the frame. |
+| `apertureFor`, `cocPx` | The aperture for a blur size, and the blur size for an aperture. |
+| `project`, `pixelsPerUnit`, `orbit` | Lens maths: where a world point lands on screen, and how large. |
+
+## UI in space
+
+| Tool | What it does |
+| --- | --- |
+| `Panel` | Live DOM on a slab, posed per frame. `region` shows one part, so a snapshot splits into layers. |
+| `centerOf` | Places a region panel where it sits in the UI. |
+| `stack`, `fan`, `grid`, `exploded` | Layouts that give the pose of panel `i` of `n`. |
+| `mixPose`, `offsetPose` | Poses between two layouts, and relative to another. |
+| `Phone`, `Tablet`, `Laptop` | Generic devices whose screens show their children live. |
+| `Overlay3D` | DOM pinned to a point in the scene: sharp labels that follow a panel. |
+| `surfaces` | Slab materials: `frosted`, `glass`, `aluminium`, `anodised`, `matte`, `plastic`, `gloss`. |
+| `Floor` | An invisible ground plane that shows only reflections and soft shadows. |
+
+## Light
+
+| Tool | What it does |
+| --- | --- |
+| `Beam` | A soft or crisp ribbon of light, optionally split into a spectrum. |
+| `Ring` | A ring of light: an echo on a surface, a rim. |
+| `Wave` | A soft wave of light spreading over a surface. |
+| `Glow` | A soft point of light. |
+| `Cone` | A cone of light through haze: a spotlight's beam. |
+| `Prism` | A glass prism that splits a beam into a spectrum by real refraction. |
+| `Smear` | A rainbow where a spectrum lands on a surface. |
+| `Light` | The lights above as components, for scenes with a few of them. |
+| `useStageItem` | Puts your own three.js objects on the stage, posed per sample. |
+| `spectrumBands`, `glasses`, `refractiveIndex`, `wavelengthToLinear` | Spectral colour and glass maths for your own light. |
+
+## Lighting and finish
+
+| Tool | What it does |
+| --- | --- |
+| `threePoint`, `keyLight`, `rimLight` | Soft boxes around a target. |
+| `sweep` | A strip light that runs over glossy faces and edges. |
+| `environment` (prop) | Reflections from a preset or an `.hdr`/`.exr`, animatable. |
+| `post` (prop) | Bloom, vignette, aberration, a grade and a LUT. Off by default. |
+| `grades` | Grade presets: `neutral`, `warm`, `cool`, `premium`. |
+| `htmlInCanvas` | Whether the browser can draw DOM into WebGL (needed for panel textures). |

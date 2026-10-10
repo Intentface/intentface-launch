@@ -1,0 +1,58 @@
+---
+title: Commands
+description: Every pnpm launch command, run from the product repo's root.
+source: packages/core/cli/launch.ts
+---
+
+## Setup
+
+| Command | What it does |
+| --- | --- |
+| `node <checkout>/packages/core/bin/launch.mjs init` | Adds `launch/` to a product repo, a `launch` script and the skills. |
+| `pnpm launch setup` | Downloads the browser renders use. Once per machine. |
+| `pnpm launch addons` | Lists the add-ons. |
+| `pnpm launch add <name>` | Installs an add-on and links its guide into `launch/CLAUDE.md`. |
+| `pnpm launch update` | Refreshes the skills and guides. |
+
+## Making a video
+
+| Command | What it does |
+| --- | --- |
+| `pnpm launch dev` | The studio, at `http://localhost:4400`. |
+| `pnpm launch new <id> --title "…"` | Scaffolds a video. |
+| `pnpm launch look <url> --do "click:Run all" --wait 8` | Pictures of the running product after the load and after each step, as one image, and its fonts, colours, radii and tokens, in `out/look/`. No capture script. |
+| `pnpm launch capture <id> [name]` | Records the running product, frame-stepped. Prints the marks that moved since the last capture. |
+| `pnpm launch marks <id> <cap> <snap> --select "li"` | Adds marks from a saved snapshot, without recapturing. |
+| `pnpm launch board <id>` | A storyboard and animatic, in `out/board/`, and check's text pass: text held too briefly to read, too small or outside the safe area, printed per shot and shown under the stills in the studio's Board view. `--no-reading` skips it. |
+| `pnpm launch beats <id>` | `beats.json` from the track in `audio/`. `--seams` adds the passages of whole bars that can replay to lengthen it (`audio.edit`), with a score per seam. |
+| `pnpm launch levels <id> [file]` | Per-frame loudness, bands (sub, low, mid, high), onsets and phrases. |
+| `pnpm launch sound <id> [file]` | The audio as heard (or a file) as a timeline of events with seconds and frames: impacts, booms, cuts, risers, pulses, the tail. Also loudness with its short-term maximum, the key, band levels and onsets per band, in `out/sound.json`. `--png` adds a spectrogram with a frame ruler and the events marked. |
+| `pnpm launch sfx find [text] --category whoosh --max 1` | Searches the sound library: core's starter pack and the launch folder's own `sfx/`. Use a hit as `src: "sfx:<id>"`. |
+| `pnpm launch sfx index` | Measures new sounds in `sfx/` (length, onset, peak, loudness) into `sfx/index.json`, keeping the tags and licences written there. |
+| `pnpm launch mix <id>` | The music (edited by `audio.edit`), voice-over and sound effects, mastered to the loudness target or preset, in `out/mix.wav`; prints integrated loudness, short-term maximum and true peak. `render` does this itself. |
+
+## Looking at it
+
+| Command | What it does |
+| --- | --- |
+| `pnpm launch still <id> --frame 120,480` | PNGs of single frames. |
+| `pnpm launch sheet <id> --shot <shot> --every 4` | A contact sheet of a shot's motion. |
+| `pnpm launch sheet <id> --beats` | One tile per beat, to see whether something happens on each. |
+| `pnpm launch still <id> --at hero:+30 --samples 8` | A draft of a 3D frame: every `Stage3D` at 8 samples instead of its own (96), for composition. `sheet` takes `--samples` too. |
+| `pnpm launch still <id> --at hero:+30 --stage-debug` | The 3D stage's passes beside the frame, one image per frame: one sample without post, what glass sees, the floor's reflection, alpha, the backdrop. |
+| `pnpm launch diff <id> --frame cut:end --against next` | Two frames side by side with a difference picture, and how much differs and where. `--against` also takes an image file, or a frame of another video with `--against-video <id>`; `--crop x,y,w,h` magnifies a region. |
+| `pnpm launch check [id]` | Source checks; with an id, also checks the rendered video: text, motion, cuts, loudness (with presets such as `"sting"` for EBU R128 s1), declared `hits` against the audio, layers that cut their own content, and frames that must match a reference (`matches` on a shot). 3D stages are drawn at 8 samples while checking (`--samples N` to change). |
+
+## Rendering
+
+| Command | What it does |
+| --- | --- |
+| `pnpm launch render <id> --preview` | 960×540 at 30 fps, in seconds. |
+| `pnpm launch render <id>` | The final 1080p60 mp4. |
+| `pnpm launch render <id> --scale 2` | 4K. |
+| `pnpm launch render <id> --master` | Also writes a ProRes 422 HQ `.mov`. |
+| `pnpm launch render <id> --resume` | Renders only the chunks a failed or stopped render left. |
+| `pnpm launch render <id> --format vertical` | Another shape the video declares in `formats`, as `<id>-vertical.mp4`. `still`, `sheet` and `check` take `--format` too. |
+| `pnpm launch render <id> --variant ep02` | One of the video's `variants`, as `<id>-ep02.mp4`. `--variant all` renders the video and every variant; every command takes `--variant`, and `check` takes `all` too. |
+| `pnpm launch captions <id>` | The video's captions as `out/<id>.srt` and `.vtt`. `render` writes them beside the mp4. |
+| `pnpm launch licences <id>` | Every external file the video uses and its licence, in `out/licences.json`. `render` writes it too. |

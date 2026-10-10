@@ -1,0 +1,333 @@
+/* The token system from intentface-chat's docs (ui.intentface.com): four seeds
+   (background, ink, accent, contrast) and every surface, border and text colour
+   derived from them in OKLCH. Light here, dark under `.dark`. */
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
+
+  /* ─── Seeds ─── */
+  --bg: #ffffff;
+  --fg: #18181b;
+  --acc: #0169cc;
+  --con: 0.3;
+
+  /* State deltas (OKLCH L offsets, scale with --con). Negative in light, so
+     hover, active and border sink toward darker; .dark flips them. */
+  --state-hover: calc(-0.08 * var(--con));
+  --state-active: calc(-0.14 * var(--con));
+  --state-border: calc(-0.2 * var(--con));
+
+  /* Surface lightness steps, offset from --bg by step × --con.
+       0.05   primary  cards, raised controls
+       -0.1   base     app frame and trays, sunk below bg */
+  --primary-lightness: calc(0.05 * var(--con));
+  --base-lightness: calc(-0.1 * var(--con));
+
+  --primary-bg: oklch(from var(--bg) calc(l + var(--primary-lightness)) c h);
+  --primary-border: oklch(from var(--primary-bg) calc(l + var(--state-border)) c h);
+  --secondary-bg: var(--bg);
+  --base-bg: oklch(from var(--bg) calc(l + var(--base-lightness)) c h);
+
+  --accent-bg: var(--acc);
+
+  /* Text. Independent of --con: secondary and tertiary shift toward the
+     background's lightness so they stay opaque and keep the ink's hue. */
+  --text-primary: var(--fg);
+  --text-body: oklch(from var(--fg) calc(l + 0.16) c h);
+  --text-secondary: oklch(from var(--fg) calc(l + 0.34) c h);
+  --text-tertiary: oklch(from var(--fg) calc(l + 0.5) c h);
+
+  /* Elevation. Raised controls are lit from above: a face a touch lighter than
+     the surface, a top highlight and a crisp ring. */
+  --raised-bg: var(--primary-bg);
+  --raised-bg-hover: oklch(from var(--raised-bg) calc(l + var(--raised-hover-shift)) c h);
+  --raised-selected-bg: var(--raised-bg);
+  --raised-spread: 0.004;
+  --raised-hover-shift: -0.012;
+  --elevation-raised:
+    inset 0 1px 0 rgb(255 255 255), 0 0 0 1px rgb(0 0 0 / 0.075), 0 1px 2px rgb(0 0 0 / 0.07),
+    0 2px 6px -2px rgb(0 0 0 / 0.05);
+  --elevation-card: 0 0 0 1px rgb(0 0 0 / 0.075), 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 8px -2px rgb(0 0 0 / 0.05);
+  --elevation-overlay:
+    0 0 0 1px rgb(0 0 0 / 0.075), 0 1px 2px rgb(0 0 0 / 0.06), 0 12px 32px -8px rgb(0 0 0 / 0.16),
+    0 32px 64px -16px rgb(0 0 0 / 0.14);
+  --elevation-logo:
+    inset 0 1px 0 rgb(255 255 255 / 0.28), inset 0 -2px 3px oklch(30% 0.12 258 / 0.35),
+    0 0 0 1px oklch(from var(--acc) calc(l - 0.064) c h), 0 1px 2px oklch(from var(--acc) l c h / 0.35);
+
+  /* Reference tables are two-tone like code blocks: a tray around a lighter
+     panel of rows. */
+  --table-tray: var(--base-bg);
+  --table-panel: var(--primary-bg);
+
+  /* Code is dark in both modes: the frame is the ink seed, the panel a step
+     lighter, so a theme's hue tints both. */
+  --code-bg: var(--fg);
+  --code-panel: oklch(from var(--fg) calc(l + 0.13 * var(--con)) c h);
+  --elevation-code:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 0 0 1px var(--code-bg), 0 1px
+    2px rgb(0 0 0 / 0.12), 0 4px 10px -2px rgb(0 0 0 / 0.12);
+
+  /* The Launch mark's tile (launch-mark.tsx): its light version on a white
+     tile with the tables' card ring. */
+  --launch-tile-bg: var(--primary-bg);
+  --launch-tile-shadow: var(--elevation-card);
+  --launch-mark-ink: #000000;
+  --launch-mark-lines: 0.14;
+
+  --radius: 8px;
+  --sidebar-width: 256px;
+}
+
+.dark {
+  --bg: #18181b;
+  --fg: #f4f4f5;
+  --acc: #4c9bea;
+
+  --state-hover: calc(0.16 * var(--con));
+  --state-active: calc(0.18 * var(--con));
+  --state-border: calc(0.2 * var(--con));
+
+  --primary-lightness: calc(0.1 * var(--con));
+  --base-lightness: calc(-0.075 * var(--con));
+  /* An absolute floor keeps the tier distinct even on a pure black seed. */
+  --primary-floor: calc(0.09 + 0.106 * var(--con));
+
+  --primary-bg: oklch(from var(--bg) max(var(--primary-floor), calc(l + var(--primary-lightness))) c h);
+  --secondary-bg: var(--bg);
+  --base-bg: oklch(from var(--bg) max(0, calc(l + var(--base-lightness))) c h);
+
+  --text-body: oklch(from var(--fg) calc(l - 0.1) c h);
+  --text-secondary: oklch(from var(--fg) calc(l - 0.26) c h);
+  --text-tertiary: oklch(from var(--fg) calc(l - 0.42) c h);
+
+  /* Dark rings stay light: a near-black ring reads as a cut-out. */
+  --raised-bg: oklch(from var(--bg) calc(l + 0.29 * var(--con)) c h);
+  --raised-selected-bg: oklch(from var(--bg) calc(l + 0.21 * var(--con)) c h);
+  --raised-spread: 0.014;
+  --raised-hover-shift: 0.02;
+  --elevation-raised:
+    inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.1);
+  --elevation-card:
+    inset 0 1px 0 rgb(255 255 255 / 0.05), inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.1);
+  --elevation-overlay:
+    inset 0 1px 0 rgb(255 255 255 / 0.06), inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 0 0 1px rgb(0 0 0 / 0.16), 0
+    12px 32px -8px rgb(0 0 0 / 0.4), 0 32px 64px -16px rgb(0 0 0 / 0.36);
+
+  --table-tray: var(--primary-bg);
+  --table-panel: oklch(from var(--bg) calc(l + 0.2 * var(--con)) c h);
+
+  --code-bg: oklch(from var(--bg) calc(l + 0.1 * var(--con)) c h);
+  --code-panel: oklch(from var(--bg) calc(l + 0.2 * var(--con)) c h);
+  --elevation-code:
+    inset 0 0 0 1px rgb(255 255 255 / 0.06), inset 0 1px 0 rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.1);
+
+  /* The mark's dark version on the code frames' dark tile. */
+  --launch-tile-bg: #18181b;
+  --launch-tile-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.12);
+  --launch-mark-ink: #ffffff;
+  --launch-mark-lines: 0.26;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ioskeley-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-weight-normal: 450;
+
+  --shadow-raised: var(--elevation-raised);
+  --shadow-card: var(--elevation-card);
+  --shadow-overlay: var(--elevation-overlay);
+  --shadow-logo: var(--elevation-logo);
+  --shadow-code: var(--elevation-code);
+
+  --color-base-bg: var(--base-bg);
+  --color-secondary-bg: var(--secondary-bg);
+  --color-primary-bg: var(--primary-bg);
+  --color-primary-border: var(--primary-border);
+  --color-accent-bg: var(--accent-bg);
+
+  --color-table-tray: var(--table-tray);
+  --color-table-panel: var(--table-panel);
+  --color-code-bg: var(--code-bg);
+  --color-code-panel: var(--code-panel);
+
+  --color-ink-primary: var(--text-primary);
+  --color-ink-body: var(--text-body);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-tertiary: var(--text-tertiary);
+
+  --radius-xs: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 15px;
+  --text-xl: 16px;
+}
+
+/* Raised face: pair with shadow-raised. The gradient reads --raised-face on the
+   element itself, so the hover and selected utilities only swap that variable. */
+@utility bg-raised {
+  --raised-face: var(--raised-bg);
+  background-color: var(--raised-face);
+  background-image: linear-gradient(
+    180deg,
+    oklch(from var(--raised-face) calc(l + var(--raised-spread)) c h),
+    oklch(from var(--raised-face) calc(l - var(--raised-spread)) c h)
+  );
+}
+
+@utility bg-raised-hover {
+  --raised-face: var(--raised-bg-hover);
+}
+
+@utility bg-raised-selected {
+  --raised-face: var(--raised-selected-bg);
+  background-color: var(--raised-face);
+  background-image: linear-gradient(
+    180deg,
+    oklch(from var(--raised-face) calc(l + var(--raised-spread)) c h),
+    oklch(from var(--raised-face) calc(l - var(--raised-spread)) c h)
+  );
+}
+
+@utility bg-accent-raised {
+  --accent-face: var(--acc);
+  background-color: var(--accent-face);
+  background-image: linear-gradient(180deg, oklch(from var(--accent-face) calc(l + 0.043) c h), var(--accent-face));
+}
+
+@layer base {
+  * {
+    @apply border-primary-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-border) transparent;
+  }
+
+  body {
+    @apply bg-base-bg font-sans font-normal text-ink-primary;
+    font-synthesis: none;
+  }
+
+  /* Ioskeley's web build carries ligatures; code shows what was typed. */
+  code,
+  kbd,
+  pre,
+  samp,
+  .font-mono {
+    font-variant-ligatures: none;
+    font-feature-settings:
+      "liga" 0,
+      "calt" 0;
+  }
+}
+
+/* Scroll masks fade the edges a scroller can still scroll past. Scroll-driven
+   animations size each fade, so an axis that can't scroll gets none. */
+@property --scroll-mask-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-mask-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-mask-left {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-mask-right {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-mask-top {
+  to {
+    --scroll-mask-top: 32px;
+  }
+}
+@keyframes scroll-mask-bottom {
+  from {
+    --scroll-mask-bottom: 32px;
+  }
+}
+@keyframes scroll-mask-left {
+  to {
+    --scroll-mask-left: 32px;
+  }
+}
+@keyframes scroll-mask-right {
+  from {
+    --scroll-mask-right: 32px;
+  }
+}
+
+@utility scroll-mask-y {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 var(--scroll-mask-top),
+    #000 calc(100% - var(--scroll-mask-bottom)),
+    transparent
+  );
+  animation:
+    scroll-mask-top linear both,
+    scroll-mask-bottom linear both;
+  animation-timeline: scroll(self y), scroll(self y);
+  animation-range:
+    0 32px,
+    calc(100% - 32px) 100%;
+}
+
+@utility scroll-mask-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--scroll-mask-left),
+    #000 calc(100% - var(--scroll-mask-right)),
+    transparent
+  );
+  animation:
+    scroll-mask-left linear both,
+    scroll-mask-right linear both;
+  animation-timeline: scroll(self x), scroll(self x);
+  animation-range:
+    0 32px,
+    calc(100% - 32px) 100%;
+}
+
+/* Code blocks: a line-number gutter on multi-line blocks. */
+[data-code-block] pre[data-line-numbers] code {
+  counter-reset: line;
+}
+
+[data-code-block] pre[data-line-numbers] .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 3rem;
+  padding-right: 1.25rem;
+  text-align: right;
+  color: #71717a;
+  user-select: none;
+}

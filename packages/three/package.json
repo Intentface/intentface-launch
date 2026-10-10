@@ -1,0 +1,53 @@
+{
+  "name": "@intentface-launch/three",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "3D for intentface-launch: live UI on panels in space, thin-lens depth of field, soft light, glass, reflections and in-camera motion blur.",
+  "type": "module",
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "pnpm run build"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "files": [
+    "dist",
+    "LAUNCH.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@intentface-launch/core": "^0.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": ">=0.180.0"
+  },
+  "devDependencies": {
+    "@intentface-launch/core": "workspace:*",
+    "@types/react": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "react": "19.3.0",
+    "three": "^0.186.1"
+  },
+  "intentface-launch": {
+    "optimizeDeps": [
+      "three",
+      "three/examples/jsm/lights/RectAreaLightUniformsLib.js",
+      "three/examples/jsm/loaders/HDRLoader.js",
+      "three/examples/jsm/loaders/EXRLoader.js",
+      "three/examples/jsm/loaders/LUTCubeLoader.js"
+    ]
+  }
+}

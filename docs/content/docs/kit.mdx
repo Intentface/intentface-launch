@@ -1,0 +1,102 @@
+---
+title: Kit
+description: Components and helpers for shots, imported from @intentface-launch/core/kit.
+source: packages/core/kit
+---
+
+`import { … } from "@intentface-launch/core/kit"`.
+
+## The product's UI
+
+| Tool | What it does |
+| --- | --- |
+| `Capture` | Plays a captured frame sequence, laid out at the capture's CSS size. For the product's own motion. |
+| `Snapshot` | Rebuilds a saved page from its HTML and CSS, sharp at any zoom. `animate` moves rows, pills and text per frame; `api.isolate` and `api.hide` split it into layers; `api.textRects` gives the boxes of words or characters in the page's own layout, `api.type` shows a partly typed value with a caret in the product's field, and `onLoad` measures before the first frame is let go. |
+| `mark`, `markRect` | A recorded mark, or the box around one or more marks, in content pixels. |
+| `measureSnapshot` | Measures an element in a saved snapshot when the video loads, so it follows a recapture. |
+| `useProductLook` | The product's fonts, colours and radii from a snapshot, for text set outside it. |
+| `BrowserWindow` | Minimal browser chrome around product UI. |
+| `Clip` | Plays a video file, or another video's render, frame exact. |
+
+## Camera and cursor
+
+| Tool | What it does |
+| --- | --- |
+| `Camera` | Pans and pushes between keyframed views. Keys can name marks; `travel` rounds corners instead of stopping. |
+| `cameraAt`, `useCameraView`, `frameRect`, `fit` | The camera's view at a frame, and views that fit a rect or the whole content. |
+| `Cursor` | A synthetic pointer in content coordinates, constant size at any zoom. Clicks, drags, hovers. |
+| `cursorKeys` | Cursor keys that retrace a capture's pointer. |
+| `cursorAt`, `cursorClicks`, `dragWindows` | Where the cursor is, and the frames it clicks and holds. |
+| `cursorSounds` | A sound on every click, ready for a shot's `sfx`. |
+| `dragValue` | A value the cursor drags directly, springing from where it was let go. |
+| `accelerate`, `brake` | Items landing at reading speed then faster and faster, and the shot after that slows into its framing. |
+
+## Attention and depth
+
+| Tool | What it does |
+| --- | --- |
+| `Focus` | Blurs and fades everything outside a feathered area, like a lens focused on the subject. |
+| `Spotlight` | Dims everything except one rounded rect that can travel between elements. |
+| `Lift` | One element rises off the page with a shadow while the rest dims. |
+| `Callout` | A label with a leader line to what it names. Readable at any zoom. |
+| `MotionBlur` | Per-layer motion blur over a range of frames, as in After Effects. |
+| `areaAt`, `toScreen` | An area eased between stops, and a content rect as it lands on screen. |
+
+## Text
+
+| Tool | What it does |
+| --- | --- |
+| `Slam` | A word or phrase that lands on a frame with scale, blur and a fade. Type on the beat. `axes` runs variable-font axes as it lands (letter by letter with `axesEvery`); `cutOff` marks a word the next cut interrupts, left out of the reading check. |
+| `Reveal` | Staggered reveal by line, word or character: rise, mask, blur-in or scale. |
+| `Typewriter` | Characters one by one, with an optional caret. |
+| `typingCadence`, `typingFrames` | Uneven, human typing times, and how long typing takes. |
+| `splitText`, `revealTimes` | Text split as `Reveal` splits it, and when each unit lands. |
+| `Sweep` | A title built in slices that sweep in with a glint of light. |
+| `Count` | A number counting up in tabular figures. |
+| `Captions` | Burned-in captions, clear of the safe area and platform UI. |
+| `useFontsReady`, `useMeasureText`, `measureTextNow` | Wait for a font and measure text with it. |
+
+## UI motion
+
+| Tool | What it does |
+| --- | --- |
+| `Swap` | Content changing inside a container that changes shape: the old leaves fast, the new arrives once there is room. |
+| `edges` | A span whose leading edge rides a stiffer spring: tab indicators, pills, toggle knobs. |
+| `stretch` | Squash and stretch from velocity. |
+| `rubberband` | Resistance past a limit, like a scroll view pulled beyond its end. |
+| `logLerp` | Log-space interpolation for zoom and altitude. |
+| `KeyChip` | Keyboard shortcut chips that press down. |
+| `Skeleton` | A shimmering loading skeleton that hands off to the real content. |
+
+## Data and end cards
+
+| Tool | What it does |
+| --- | --- |
+| `Bars` | Bars growing to their values, counting up at their ends. |
+| `LineChart` | A line that draws on left to right, as data arriving. |
+| `BeforeAfter` | Before and after, split by a moving divider. |
+| `SpeedRace` | Lanes racing the same task; the fastest gets the accent. |
+| `EndCard` | A brand-neutral end card: logo, claim, CTA and URL, locked on the beat. |
+
+## SVG effects
+
+| Tool | What it does |
+| --- | --- |
+| `DrawOn`, `dash` | A stroke that draws on. |
+| `Morph`, `morphPath` | A closed path morphing into the next. |
+| `MaskReveal` | A wipe, circle, clock hand or shape revealing a layer. No filters, so safe over 3D. |
+| `BlurIn` | Arrives out of focus and sharpens. |
+| `Goo` | Shapes that merge like liquid as they approach. |
+| `Glow` | A soft glow around what is inside. |
+| `Displace` | Warps what is inside through seeded noise. |
+| `useTiming` | The eased progress of a timing at the current frame. |
+
+## Shaders
+
+| Tool | What it does |
+| --- | --- |
+| `Shader` | A fragment shader as a layer, painted from the frame. |
+| `MeshGradient` | An animated mesh gradient that does not band. |
+| `NoiseField` | Flowing noise through a colour ramp: smoke, aurora. |
+| `LightGlow`, `LightLeak` | A soft light, and a light leak drifting across. |
+| `FilmGrain`, `Scanlines`, `Halftone`, `Dither` | Texture over a shot. |

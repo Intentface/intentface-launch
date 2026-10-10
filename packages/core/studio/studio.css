@@ -1,0 +1,763 @@
+/* The studio's chrome, on the token system of intentface-chat's docs: four
+   seeds (background, ink, accent, contrast) and every surface, border and text
+   colour derived from them in OKLCH. Light by default, dark when the system is.
+
+   Only the chrome is themed. What scenes inherit (the render page's body and
+   the studio's .frame) is fixed further down, so a video renders the same
+   whatever the studio looks like. */
+
+@font-face {
+  font-family: "Studio Sans";
+  src: url("./fonts/Inter-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Studio Mono";
+  src: url("./fonts/IoskeleyMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Studio Mono";
+  src: url("./fonts/IoskeleyMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* ─── Seeds ─── */
+  --bg: #ffffff;
+  --fg: #18181b;
+  --acc: #0169cc;
+  --con: 0.3;
+
+  /* Surfaces, offset from --bg by step × --con: primary lifts (cards, raised
+     controls), base sinks (the frame around the inset card). */
+  --primary-bg: oklch(from var(--bg) calc(l + 0.05 * var(--con)) c h);
+  --secondary-bg: var(--bg);
+  --base-bg: oklch(from var(--bg) calc(l - 0.1 * var(--con)) c h);
+
+  /* Text keeps the ink's hue and stays opaque, shifting toward the background. */
+  --ink: var(--fg);
+  --ink-body: oklch(from var(--fg) calc(l + 0.16) c h);
+  --ink-secondary: oklch(from var(--fg) calc(l + 0.34) c h);
+  --ink-tertiary: oklch(from var(--fg) calc(l + 0.5) c h);
+  --wash: color-mix(in oklab, var(--fg) 5%, transparent);
+  --hairline: color-mix(in oklab, var(--fg) 8%, transparent);
+
+  /* Raised controls are lit from above: a face a touch lighter than the
+     surface, a top highlight and a crisp ring. */
+  --raised-bg: var(--primary-bg);
+  --raised-selected-bg: var(--raised-bg);
+  --raised-spread: 0.004;
+  --raised-hover-shift: -0.012;
+  --elevation-raised:
+    inset 0 1px 0 rgb(255 255 255), 0 0 0 1px rgb(0 0 0 / 0.075), 0 1px 2px rgb(0 0 0 / 0.07),
+    0 2px 6px -2px rgb(0 0 0 / 0.05);
+  --elevation-card: 0 0 0 1px rgb(0 0 0 / 0.075), 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 8px -2px rgb(0 0 0 / 0.05);
+
+  /* The Launch mark's tile (launch-mark.tsx): its light version on a white
+     tile with the tables' card ring. */
+  --launch-tile-bg: var(--primary-bg);
+  --launch-tile-shadow: var(--elevation-card);
+  --launch-mark-ink: #000000;
+  --launch-mark-lines: 0.14;
+
+  --radius: 8px;
+  --sans: "Studio Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Studio Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #18181b;
+    --fg: #f4f4f5;
+    --acc: #4c9bea;
+
+    --primary-bg: oklch(from var(--bg) max(calc(0.09 + 0.106 * var(--con)), calc(l + 0.1 * var(--con))) c h);
+    --base-bg: oklch(from var(--bg) max(0, calc(l - 0.075 * var(--con))) c h);
+
+    --ink-body: oklch(from var(--fg) calc(l - 0.1) c h);
+    --ink-secondary: oklch(from var(--fg) calc(l - 0.26) c h);
+    --ink-tertiary: oklch(from var(--fg) calc(l - 0.42) c h);
+
+    /* Dark rings stay light: a near-black ring reads as a cut-out. */
+    --raised-bg: oklch(from var(--bg) calc(l + 0.29 * var(--con)) c h);
+    --raised-selected-bg: oklch(from var(--bg) calc(l + 0.21 * var(--con)) c h);
+    --raised-spread: 0.014;
+    --raised-hover-shift: 0.02;
+    --elevation-raised:
+      inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.16),
+      0 1px 2px rgb(0 0 0 / 0.1);
+    --elevation-card:
+      inset 0 1px 0 rgb(255 255 255 / 0.05), inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.16),
+      0 1px 2px rgb(0 0 0 / 0.1);
+
+    /* The mark's dark version on the code frames' dark tile. */
+    --launch-tile-bg: #18181b;
+    --launch-tile-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 1px rgb(0 0 0 / 0.16),
+      0 1px 2px rgb(0 0 0 / 0.12);
+    --launch-mark-ink: #ffffff;
+    --launch-mark-lines: 0.26;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--base-bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 450;
+  font-synthesis: none;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: inherit;
+}
+
+/* ─── What scenes inherit ───
+   The render page has no chrome, and the studio's frame holds the same stage.
+   Both keep the defaults videos were made against: never theme these. The dark
+   colour scheme also decides how Snapshot iframes composite. */
+html[data-mode="render"],
+.frame {
+  color-scheme: dark;
+}
+html[data-mode="render"] body,
+.frame {
+  font-family: ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  font-feature-settings: normal;
+  color: #fafafa;
+}
+html[data-mode="render"] body {
+  background: transparent;
+  overflow: hidden;
+}
+
+/* ─── Shared pieces ─── */
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-decoration: none;
+}
+a.label:hover {
+  color: var(--ink);
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--ink-secondary);
+}
+.small {
+  font-size: 12px;
+}
+
+/* Raised: the default control, lit from above. */
+.transport button,
+.board .rebuild,
+.notes form button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  --face: var(--raised-bg);
+  background-color: var(--face);
+  background-image: linear-gradient(
+    180deg,
+    oklch(from var(--face) calc(l + var(--raised-spread)) c h),
+    oklch(from var(--face) calc(l - var(--raised-spread)) c h)
+  );
+  box-shadow: var(--elevation-raised);
+  border: 0;
+  border-radius: 999px;
+  height: 28px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    scale 0.15s;
+}
+.transport button:hover,
+.board .rebuild:hover:not(:disabled),
+.notes form button:hover:not(:disabled) {
+  --face: oklch(from var(--raised-bg) calc(l + var(--raised-hover-shift)) c h);
+}
+.transport button:active,
+.board .rebuild:active,
+.notes form button:active {
+  scale: 0.98;
+}
+:is(button, a, textarea):focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--acc) 60%, transparent);
+  outline-offset: 2px;
+}
+
+/* Tabs: a segmented control, the current page rising like a button. */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--wash);
+}
+.tabs a {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ink-secondary);
+  transition: color 0.15s;
+}
+.tabs a:hover {
+  color: var(--ink);
+}
+.tabs a[aria-current="page"] {
+  color: var(--ink);
+  background-color: var(--raised-selected-bg);
+  box-shadow: var(--elevation-raised);
+}
+
+/* The Launch mark on its tile (launch-mark.tsx) links home. */
+.home {
+  display: flex;
+  border-radius: 7px;
+}
+
+/* ─── Video list ─── */
+.list .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.list .brand .label {
+  font-size: 13px;
+}
+.list {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 64px 20px;
+}
+.list h1 {
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+  margin: 20px 0 28px;
+}
+.list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.list li a {
+  display: block;
+  padding: 14px 18px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--primary-bg);
+  box-shadow: var(--elevation-card);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+.list li a:hover {
+  background: oklch(from var(--primary-bg) calc(l + var(--raised-hover-shift)) c h);
+}
+
+/* ─── Timeline ───
+   The stage sits in an inset card; the shot panel and the transport sit on the
+   frame around it, like the docs' sidebar around their page. */
+.studio {
+  height: 100%;
+  display: grid;
+  grid-template: "head head" auto "view info" 1fr "foot foot" auto / 1fr 300px;
+  padding: 0 8px 8px;
+}
+.studio header {
+  grid-area: head;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  height: 52px;
+  padding: 0 8px;
+}
+.studio .title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.viewport {
+  grid-area: view;
+  display: grid;
+  place-items: center;
+  /* A border, not padding: the studio fits the frame to clientWidth, which
+     counts padding but not borders. The card's background fills under it. */
+  border: 24px solid transparent;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--secondary-bg);
+  box-shadow: var(--elevation-card);
+}
+.frame {
+  overflow: hidden;
+  border-radius: 6px;
+  box-shadow: var(--elevation-card);
+}
+.shot-info {
+  grid-area: info;
+  padding: 8px 12px 16px 20px;
+  overflow: auto;
+}
+.shot-info h2 {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  margin: 6px 0 10px;
+}
+.shot-info p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-body);
+}
+.shot-info p.label,
+.shot-info p.muted {
+  color: var(--ink-secondary);
+}
+.studio footer {
+  grid-area: foot;
+  padding: 12px 8px 4px;
+}
+.transport {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.transport button {
+  min-width: 68px;
+}
+.keys {
+  margin-left: auto;
+}
+.keys + .keys {
+  margin-left: 0;
+}
+.track {
+  position: relative;
+  height: 72px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.shots {
+  position: absolute;
+  inset: 0 0 32px;
+}
+.shot {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+  background: var(--wash);
+  box-shadow: inset 1px 0 0 var(--hairline);
+  overflow: hidden;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink-secondary);
+}
+.shot.active {
+  background: color-mix(in oklab, var(--acc) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 30%, transparent);
+  color: var(--ink);
+}
+.wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  width: 100%;
+}
+.wave path {
+  stroke: var(--ink-tertiary);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.beats {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32px;
+  pointer-events: none;
+}
+.beats i {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 6px;
+  background: color-mix(in oklab, var(--fg) 15%, transparent);
+}
+.beats i.bar {
+  height: 12px;
+  background: color-mix(in oklab, var(--fg) 35%, transparent);
+}
+.playhead {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--acc);
+  pointer-events: none;
+}
+
+/* ─── Board ───
+   The whole board is one inset card on the frame; its header stays put while
+   the shots scroll under it. */
+.board {
+  min-height: calc(100% - 16px);
+  margin: 8px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--secondary-bg);
+  box-shadow: var(--elevation-card);
+}
+.board header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: calc(var(--radius) + 4px) calc(var(--radius) + 4px) 0 0;
+  background: color-mix(in oklab, var(--secondary-bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+}
+.board .title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.board .rebuild {
+  margin-left: auto;
+}
+.board .rebuild:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.board main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 16px 32px 96px;
+  display: grid;
+  gap: 40px;
+}
+.board .logline {
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--ink-body);
+  margin: 0;
+  max-width: 60ch;
+}
+.board .animatic {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--radius) + 4px);
+  background: #000;
+  box-shadow: var(--elevation-card);
+}
+.board-shot {
+  display: grid;
+  gap: 16px;
+  scroll-margin-top: 64px;
+}
+/* Every shot opens on a hairline rule, like the docs' sections. */
+.shot-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: baseline;
+  border-top: 1px solid color-mix(in oklab, var(--fg) 6%, transparent);
+  padding-top: 24px;
+}
+.shot-head h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+.shot-head .num {
+  color: var(--acc);
+  font-weight: 500;
+}
+.shot-head a {
+  margin-left: auto;
+  color: var(--acc);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--acc) 30%, transparent);
+  text-underline-offset: 4px;
+}
+.shot-head a:hover {
+  text-decoration-color: var(--acc);
+}
+.shot-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .shot-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.panels {
+  display: grid;
+  gap: 12px;
+}
+.stills {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.text-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ink-body);
+}
+.text-checks li {
+  position: relative;
+  padding-left: 14px;
+}
+/* Fixed hues: a warning and an error read the same in both themes. */
+.text-checks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(0.72 0.15 75);
+}
+.text-checks li.error::before {
+  background: oklch(0.63 0.2 25);
+}
+.text-checks q {
+  color: var(--ink-secondary);
+}
+.panels.n2 {
+  grid-template-columns: 1fr 1fr;
+}
+.panels.n3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.panels figure {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.panels button {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--elevation-card);
+  aspect-ratio: 16 / 9;
+}
+.panels button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--acc) 60%, transparent);
+  outline-offset: 2px;
+}
+.panels img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.panels .empty {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--base-bg);
+}
+.direction {
+  display: grid;
+  gap: 14px;
+}
+.direction .says {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--ink-body);
+  margin: 0;
+}
+/* On-screen copy: the docs' two-tone tray, a lighter panel inside a sunk frame. */
+.direction .copy {
+  padding: 5px;
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--base-bg);
+  box-shadow: var(--elevation-card);
+  display: grid;
+}
+.direction .copy p {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  background: var(--primary-bg);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.direction .copy p:first-child {
+  border-radius: 6px 6px 0 0;
+}
+.direction .copy p:last-child {
+  border-radius: 0 0 6px 6px;
+}
+.direction .copy p:only-child {
+  border-radius: 6px;
+}
+.direction dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px 12px;
+}
+.direction dt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  padding-top: 2px;
+}
+.direction dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-body);
+}
+.notes {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 14px;
+}
+.note {
+  padding: 10px 12px;
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--primary-bg);
+  box-shadow: var(--elevation-card);
+}
+.note.resolved {
+  opacity: 0.55;
+}
+.note p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+.note .reply {
+  color: var(--acc);
+}
+.note-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.note-head button {
+  margin-left: auto;
+  font: inherit;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: var(--ink-secondary);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  height: 22px;
+  padding: 0 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.note-head button:hover {
+  background: var(--wash);
+  color: var(--ink);
+}
+.notes form {
+  display: grid;
+  gap: 8px;
+}
+.notes textarea {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--primary-bg);
+  border: 0;
+  box-shadow: var(--elevation-card);
+  border-radius: calc(var(--radius) + 2px);
+  padding: 9px 12px;
+  resize: vertical;
+}
+.notes textarea::placeholder {
+  color: var(--ink-tertiary);
+}
+.notes textarea:focus {
+  outline: 2px solid color-mix(in oklab, var(--acc) 60%, transparent);
+  outline-offset: 0;
+}
+.notes form button {
+  justify-self: start;
+}
+.notes form button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

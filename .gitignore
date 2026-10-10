@@ -1,0 +1,27 @@
+node_modules/
+out/
+# Captures are regenerated from each video's capture scripts.
+videos/*/captures/*/
+# Frames extracted from a video's media clips (see the video's shots for the command).
+videos/*/media/*/
+.DS_Store
+*.log
+# Scratch videos for experiments.
+videos/_*/
+# Images and video are not committed: renders, stills and clips are regenerated
+# or shared outside git. (SVG logos in the brand package are source.)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.m4v
+# Local secrets (ElevenLabs API key for sound effects).
+.env
+# Compiled packages, built on pack.
+dist/

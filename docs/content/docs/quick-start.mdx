@@ -1,0 +1,61 @@
+---
+title: Quick start
+description: Add a launch folder to a product repo and ask Claude for a video.
+source: packages/core/cli/scaffold.ts
+---
+
+## Install
+
+The packages are not published yet, so install them from a checkout of this
+repo. You need Node 22 or later, pnpm and ffmpeg. uv is only needed for beat
+detection.
+
+```sh
+brew install ffmpeg uv
+git clone git@github.com:Intentface/intentface-launch.git ~/Work/intentface-launch
+(cd ~/Work/intentface-launch && pnpm install)
+```
+
+## Set up a product repo
+
+Run these from the product repo's root:
+
+```sh
+node ~/Work/intentface-launch/packages/core/bin/launch.mjs init
+pnpm launch setup
+pnpm launch dev
+```
+
+- `init` creates `launch/` with a config, a `videos/` folder and a `CLAUDE.md`
+  for Claude, adds a `launch` script to `package.json`, and installs the skills
+  into `.claude/skills/`.
+- `setup` downloads the browser that renders use, once per machine.
+- `dev` opens the studio at `http://localhost:4400`.
+
+Add-ons install the same way when a video needs them:
+
+```sh
+pnpm launch add three              # 3D
+pnpm launch add @intentface/brand  # only for videos in the Intentface brand
+```
+
+## Ask for a video
+
+Open Claude Code in the product repo and describe the video, for example:
+
+> Make a 30 second launch video for this product.
+
+The product-launch-video skill takes it from there. Claude asks what sets the
+product apart, writes a brief and a script with you, and shows a storyboard
+before it builds anything heavy. See [How it works](/how-it-works).
+
+Intentface Launch does not make music, but it cuts the video to a track, so the
+track comes before the storyboard. If you have music for the product, have the
+file ready. If not, Claude writes a brief from the script for you to generate
+one with a music generator such as Suno or ElevenLabs Music.
+
+## Keep it up to date
+
+The product repo links the packages from your checkout, so pulling this repo
+updates every product that uses them. Run `pnpm launch update` in the product
+repo to refresh the skills and guides.

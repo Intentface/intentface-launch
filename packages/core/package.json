@@ -1,0 +1,96 @@
+{
+  "name": "@intentface-launch/core",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Product launch videos as code: frame-exact React scenes rendered in headless Chromium, with a studio, storyboards and an agent workflow.",
+  "type": "module",
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp studio/studio.css dist/studio/ && cp -R studio/fonts dist/studio/",
+    "prepack": "pnpm run build"
+  },
+  "bin": {
+    "intentface-launch": "./bin/launch.mjs"
+  },
+  "exports": {
+    ".": "./engine/index.ts",
+    "./kit": "./kit/index.ts",
+    "./timeline": "./engine/timeline.tsx",
+    "./capture": "./cli/capture-api.ts",
+    "./config": "./cli/config.ts",
+    "./client": {
+      "types": "./client.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/engine/index.d.ts",
+        "default": "./dist/engine/index.js"
+      },
+      "./kit": {
+        "types": "./dist/kit/index.d.ts",
+        "default": "./dist/kit/index.js"
+      },
+      "./timeline": {
+        "types": "./dist/engine/timeline.d.ts",
+        "default": "./dist/engine/timeline.js"
+      },
+      "./capture": {
+        "types": "./dist/cli/capture-api.d.ts",
+        "default": "./dist/cli/capture-api.js"
+      },
+      "./config": {
+        "types": "./dist/cli/config.d.ts",
+        "default": "./dist/cli/config.js"
+      },
+      "./client": {
+        "types": "./client.d.ts"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "skills",
+    "sfx",
+    "tools/beats.py",
+    "index.html",
+    "client.d.ts",
+    "LAUNCH.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "playwright": "1.63.0",
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.15",
+    "vite": "^8.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "intentface-launch": {
+    "optimizeDeps": [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime"
+    ]
+  }
+}

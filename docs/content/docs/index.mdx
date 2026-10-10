@@ -1,0 +1,38 @@
+---
+title: Introduction
+description: Product launch videos written as code, made together with an agent.
+---
+
+Intentface Launch turns a product launch video into code. Each video is a React
+component made of shots. A renderer plays it frame by frame in headless Chromium
+and encodes the frames with ffmpeg into a 1080p60 (or 4K) mp4.
+
+The video shows the product working: its real UI, captured from the running
+app, close up and in its own look. You make it with Claude Code. You describe
+the video, Claude captures the product, sketches a storyboard you comment on,
+then builds and renders the final cut.
+
+## Why code
+
+- **Every frame is exact.** A frame is a pure function of its number, so any
+  frame renders alone, in any order, in parallel, and the same every time.
+- **The real product, not a mockup.** Videos import the product's own
+  components and data, and captures record the running app.
+- **An agent can do the work.** Shots, timing and copy are text that Claude
+  reads, writes and checks against stills it renders for itself.
+
+## Packages
+
+| Package | What it is |
+| --- | --- |
+| `@intentface-launch/core` | Engine, kit, CLI, studio and the skills Claude uses. Brand-neutral. |
+| `@intentface-launch/three` | 3D add-on: live UI on panels in space, real lens depth of field, soft light. |
+| `@intentface/brand` | The Intentface brand (published from intentface-com-v3): fonts, logos, gradient, and design, motion and copy rules. Any team's brand package plugs in the same way. |
+
+## Next steps
+
+- [Quick start](/quick-start): set up a product repo and make a first video
+- [How it works](/how-it-works): the workflow from brief to render, and what runs underneath
+- [Commands](/commands): every `pnpm launch` command
+- [Engine](/engine), [Kit](/kit) and [3D](/three): the tools scenes import
+- [Skills](/skills): the method Claude follows
