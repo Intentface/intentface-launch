@@ -1,6 +1,6 @@
 # 3D (@intentface-launch/three)
 
-`import { Stage3D, Panel, Overlay3D, Phone, Laptop, Floor, rig, project, surfaces, sweep, threePoint, fan, mixPose, … } from "@intentface-launch/three"`
+`import { Stage3D, Panel, Overlay3D, Phone, Laptop, Floor, rig, project, surfaces, sweep, threePoint, fan, mixPose, PostFX, usePostEffect, … } from "@intentface-launch/three"`
 
 For UI reveals in space: parts of the product's UI landing in place on panels, glass and soft light across them, a real camera with shallow depth of field. Use 3D for transitions and moments of awe; go flat when the viewer has to read.
 
@@ -108,3 +108,25 @@ function Streams() {
 - `post={{ bloom, vignette, aberration, grade, lut }}`: bloom on highlights above `threshold`, a lens vignette, corner colour fringing, a grade (`neutral`, `warm`, `cool`, `premium` or your own) and a `.cube` LUT. All off by default, so the UI's colours stay exact.
 - Lens effects from the frame's own light, instead of faking them with waves: `halation` (a warm, tight glow that bright light bleeds into, as on film; 0.3 subtle, 0.6 a look; `{ strength, threshold, radius, color }`) and `ghosts` (reflections between lens elements: tinted discs mirrored through the centre of frame from wherever bright light is, and a thin ring; they move as the light moves; `{ strength, threshold, count, ring, ringRadius, dispersion }`). Keep ghosts faint (0.2 to 0.4): every bright source makes its own set, and on a light-only shot that adds up fast.
 - **UI textures need Chrome's HTML-in-Canvas.** The CLI's browser has it; in the studio, enable chrome://flags/#canvas-draw-element or panels show untextured.
+
+## Post effects (postprocessing)
+
+pmndrs' postprocessing library (`import { BloomEffect, GlitchEffect, … } from "postprocessing"`, installed with this add-on) on the video's clock, on a stage or on any flat DOM.
+
+```tsx
+const glitch = usePostEffect(() => new GlitchEffect());
+const noise = usePostEffect(() => new NoiseEffect({ blendFunction: BlendFunction.OVERLAY }));
+glitch.mode = frame >= 60 && frame < 80 ? GlitchMode.CONSTANT_WILD : GlitchMode.DISABLED;
+noise.blendMode.opacity.value = interpolate(frame, [0, 120], [0.1, 0.4]);
+
+<PostFX effects={[glitch, noise]}>{/* any DOM: a Snapshot, type, a whole shot */}</PostFX>
+<Stage3D post={{ effects: [glitch, noise], vignette: 0.3 }} …>
+```
+
+- **`usePostEffect(() => new XEffect(…))`** builds an effect once per mount, with `Math.random` seeded, and disposes it with the shot. Set its values in the render from the frame, as above: never from its own timers.
+- **`<PostFX effects>`** draws its children into a texture through HTML-in-Canvas, runs the effects and shows the result; with no effects it matches the DOM to within one level. In the studio without the flag it shows the children without effects.
+- **`post.effects` on a `Stage3D`** runs on the averaged samples, before the stage's own finishing (bloom, grade, LUT, grain).
+- **Time is set, not accumulated.** Every pass renders at the frame's time with a delta of 0, and each effect's updates draw from a random stream seeded by the frame, so any frame renders alone, in any order, the same every time (tested with glitch, bloom, noise, aberration, pixelation, vignette). Effects that keep their own clock need it driven from the frame: `GlitchEffect`'s `SPORADIC` mode never fires, so switch `mode` between `DISABLED` and `CONSTANT_MILD` or `CONSTANT_WILD` by frame.
+- **Effects that need depth are refused**: `DepthOfFieldEffect`, `BokehEffect`, `RealisticBokehEffect`, `SSAOEffect`, `DepthEffect`, `GodRaysEffect`, `SelectiveBloomEffect`, `SMAAEffect`. A finished frame has no depth; the stage's lens already gives real depth of field and its samples anti-alias. Effects placed in the world (`ShockWaveEffect`, `OutlineEffect`) need a camera and scene these layers do not expose.
+- The effects merge into as few passes as postprocessing allows, in the order given. Each `PostFX` is a WebGL context: keep a few per shot.
+

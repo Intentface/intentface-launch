@@ -3,6 +3,7 @@
   "pages": [
     "---Get started---",
     "index",
+    "requirements",
     "quick-start",
     "how-it-works",
     "---Reference---",
@@ -10,6 +11,7 @@
     "engine",
     "kit",
     "three",
+    "shaders",
     "skills"
   ]
 }

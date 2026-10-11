@@ -11,6 +11,7 @@ export {
   Tablet,
   type TabletProps,
 } from "./devices.js";
+export { EffectChain, PostFX, type PostFXProps, seededRandom, usePostEffect } from "./effects.js";
 export type { Environment, EnvironmentPreset } from "./environment.js";
 export { Floor } from "./floor.js";
 export { exploded, fan, grid, mixPose, offsetPose, stack } from "./layouts.js";

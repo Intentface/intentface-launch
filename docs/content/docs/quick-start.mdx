@@ -1,6 +1,6 @@
 ---
 title: Quick start
-description: Add a launch folder to a product repo and ask Claude for a video.
+description: Add a launch folder to a product repo, or work from a checkout of this repo, and ask Claude for a video.
 source: packages/core/cli/scaffold.ts
 ---
 
@@ -8,13 +8,33 @@ source: packages/core/cli/scaffold.ts
 
 The packages are not published yet, so install them from a checkout of this
 repo. You need Node 22 or later, pnpm and ffmpeg. uv is only needed for beat
-detection.
+detection. [Requirements](/requirements) has the full list and what it has
+been tested on.
 
 ```sh
 brew install ffmpeg uv
 git clone https://github.com/Intentface/intentface-launch.git
 cd intentface-launch && pnpm install
 ```
+
+To change the skills or the engine for your team, fork the repo and clone your
+fork instead.
+
+## Ways to work
+
+The way we work: the product runs locally (its dev server, in its demo or
+seeded mode), and its source repo is on the same machine. Claude reads the
+source, looks at the running product with `pnpm launch look <url>`, records it
+with capture scripts against the local dev server, and saves snapshots of the
+real UI. Every shot is built from those, in the product's own components,
+data and look.
+
+The videos can live in either of two places:
+
+| Setup | Where the videos live | Good for |
+| --- | --- | --- |
+| In the product repo | `launch/` in the product, with the packages as a dev dependency. | Recurring videos (each release, each feature): they are versioned with the product and import its components and data directly. |
+| In a checkout of this repo | `videos/` in your clone or fork, with the product linked in `launch.config.ts`. | One-off videos, and several products from one place. |
 
 ## Set up a product repo
 
@@ -32,6 +52,11 @@ pnpm launch dev
 - `setup` downloads the browser that renders use, once per machine.
 - `dev` opens the studio at `http://localhost:4400`.
 
+Run from a checkout, `init` and `add` install the packages as `link:`
+dependencies on that checkout, so the product repo uses its skills and engine,
+including changes not yet released. `LAUNCH_SOURCE=/path/to/checkout` picks
+the checkout explicitly.
+
 Add-ons install the same way when a video needs them:
 
 ```sh
@@ -39,9 +64,42 @@ pnpm launch add three              # 3D
 pnpm launch add <package>          # a brand package, for videos in that brand
 ```
 
+## Work from a checkout
+
+This repo is a launch folder itself: `launch.config.ts` at its root and its
+videos in `videos/`. To make videos for a product from here, link the product
+in `launch.config.ts`. Paths are relative to the checkout:
+
+```ts
+import { defineConfig } from "@intentface-launch/core/config";
+
+export default defineConfig({
+  product: { path: "../my-app", public: "public" },
+  products: { site: { path: "../my-site" } },
+});
+```
+
+- `product` is the main product. Its tsconfig paths (`@/…`) resolve in videos,
+  so its components and data import as they do in the app.
+- `products` links other repos, imported as `@product/<name>/…`.
+- `public`, on either, is the repo's static folder, served so its code finds
+  its assets at the usual URLs.
+
+Then, from the checkout's root:
+
+```sh
+pnpm launch setup
+pnpm launch new demo --title "Demo"
+pnpm dev
+```
+
+The skills are already in `.claude/skills/`, so open Claude Code in the
+checkout and ask for a video as below.
+
 ## Ask for a video
 
-Open Claude Code in the product repo and describe the video, for example:
+Start the product's dev server first, then open Claude Code where the videos
+live and describe the video, for example:
 
 > Make a 30 second launch video for this product.
 
@@ -58,4 +116,5 @@ one with a music generator such as Suno or ElevenLabs Music.
 
 The product repo links the packages from your checkout, so pulling this repo
 updates every product that uses them. Run `pnpm launch update` in the product
-repo to refresh the skills and guides.
+repo to refresh the skills and guides. In a fork, merge from this repo when
+you want its changes.

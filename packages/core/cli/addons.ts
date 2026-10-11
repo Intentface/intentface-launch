@@ -15,6 +15,11 @@ export const ADDONS: Record<string, { package: string; about: string }> = {
     package: "@intentface-launch/three",
     about: "3D stage: live UI on panels in space, real lens depth of field, soft light, in-camera motion blur.",
   },
+  shaders: {
+    package: "@intentface-launch/shaders",
+    about:
+      "200 WebGPU effects from the Shaders library (shaders.com): gradients, light, glass, distortions, particles.",
+  },
 };
 const MANAGED = ".intentface-launch";
 const ADDON_MARK = "<!-- add-ons: managed by `intentface-launch add`, one import per installed package -->";

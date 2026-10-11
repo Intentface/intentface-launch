@@ -10,7 +10,7 @@ It is built to be driven by [Claude Code](https://claude.com/claude-code). You d
 - **Cut to music.** Beats, sections and quiet stretches are detected from the track, and shots are timed in beats.
 - **3D when it earns it.** An add-on puts live UI on panels in space, shot through a real lens with depth of field and motion blur.
 
-> **Status:** early (0.x). The packages are not on npm yet, so you install them from a clone of this repo. Developed on macOS.
+> **Status:** early (0.x) and experimental; see [Use at your own risk](#use-at-your-own-risk). The packages are not on npm yet, so you install them from a clone of this repo. Developed and tested on an Apple M2 Pro Mac with Claude Opus 5.5 at High effort in Claude Code; other machines, operating systems and models are not guaranteed to work. See [requirements](docs/content/docs/requirements.mdx).
 
 ## Quick start
 
@@ -22,7 +22,11 @@ git clone https://github.com/Intentface/intentface-launch.git
 cd intentface-launch && pnpm install
 ```
 
-Then, from the root of your product's repo:
+Fork it first if your team wants to change the skills or the engine for itself.
+
+Start your product locally (its dev server, in demo or seeded mode) with its source on the same machine: Claude reads the source, looks at the running app and captures its real UI from it. The videos can live in the product repo (below; best for recurring videos, versioned with the product) or in your checkout of this repo, which is a launch folder itself: link the product in `launch.config.ts` with `product: { path: "../my-app" }` (best for one-off videos, or several products from one place). The [quick start](docs/content/docs/quick-start.mdx) covers both.
+
+To set up a product repo, run from its root:
 
 ```sh
 node /path/to/intentface-launch/packages/core/bin/launch.mjs init
@@ -87,12 +91,13 @@ The headline slams in on the first beat and the line springs in on the second. `
 | --- | --- |
 | `@intentface-launch/core` | Engine, kit (camera, cursor, captures, kinetic type, transitions), CLI, studio, and the skills Claude uses. |
 | `@intentface-launch/three` | The 3D add-on: `pnpm launch add three`. |
+| `@intentface-launch/shaders` | 200 WebGPU effects from the [Shaders library](https://github.com/shader-effects-inc/shaders), on the video's clock: `pnpm launch add shaders`. |
 
 A brand is an add-on too: a package with your fonts, logos and design, motion and copy rules, which `pnpm launch add <package>` installs and links into Claude's guide. Core itself is brand-neutral, so a video takes its look from your product.
 
 ## Documentation
 
-The docs are in [`docs/content/docs/`](docs/content/docs/): [quick start](docs/content/docs/quick-start.mdx), [how it works](docs/content/docs/how-it-works.mdx), [commands](docs/content/docs/commands.mdx), [engine](docs/content/docs/engine.mdx), [kit](docs/content/docs/kit.mdx), [3D](docs/content/docs/three.mdx) and [skills](docs/content/docs/skills.mdx). `pnpm docs` serves them at <http://localhost:4410>.
+The docs are in [`docs/content/docs/`](docs/content/docs/): [requirements](docs/content/docs/requirements.mdx), [quick start](docs/content/docs/quick-start.mdx), [how it works](docs/content/docs/how-it-works.mdx), [commands](docs/content/docs/commands.mdx), [engine](docs/content/docs/engine.mdx), [kit](docs/content/docs/kit.mdx), [3D](docs/content/docs/three.mdx), [shader effects](docs/content/docs/shaders.mdx) and [skills](docs/content/docs/skills.mdx). `pnpm docs` serves them at <http://localhost:4410>.
 
 ## Contributing
 
@@ -105,6 +110,10 @@ pnpm check        # types, lint and video checks
 
 [CLAUDE.md](CLAUDE.md) explains how the packages fit together. The `videos/test-*` folders are the tests: each says at its top what it exercises, the command to run and what a correct result is. Ideas for tools are issues labelled [`wishlist`](https://github.com/Intentface/intentface-launch/issues?q=is%3Aissue+is%3Aopen+label%3Awishlist).
 
+## Use at your own risk
+
+Intentface Launch is experimental software under active development, provided as is, without warranty of any kind (see [LICENSE](LICENSE)). Making a video means an agent runs commands, starts your product, drives a browser through it and writes files in your repos. Review what it does, work in version control, and keep secrets out of what gets rendered: use a demo account or seeded data.
+
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT for the software. The Intentface and Intentface Launch names and logos, including the Launch mark, are trademarks of Intentface and not covered by it. See [LICENSE](LICENSE).

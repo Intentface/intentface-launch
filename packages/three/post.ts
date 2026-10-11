@@ -1,3 +1,4 @@
+import type { Effect } from "postprocessing";
 import {
   AddEquation,
   Color,
@@ -23,6 +24,12 @@ import {
  * All of it is off by default: the output is the UI's exact colours.
  */
 export type Post = {
+  /**
+   * postprocessing effects (from `usePostEffect`), applied in order to the
+   * averaged frame before the finishing below: glitch, noise, pixelation,
+   * shock waves. Effects that need depth are refused (the lens gives depth of field).
+   */
+  effects?: Effect[];
   /** Glow around highlights above `threshold` (linear, 1 = white). A number is the strength. */
   bloom?: number | { strength: number; threshold?: number; radius?: number };
   /** Darkening towards the corners, 0 to 1. 0.25 is a lens; 0.5 is a look. */

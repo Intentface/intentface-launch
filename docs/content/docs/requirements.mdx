@@ -1,0 +1,53 @@
+---
+title: Requirements
+description: What Intentface Launch needs, what it has been tested on, and what to know before an agent works in your repos.
+---
+
+## What you need
+
+- **Node 22 or later and pnpm.** `init` also works in product repos that use
+  npm, yarn or bun.
+- **ffmpeg**, which encodes the frames and mixes the audio
+  (`brew install ffmpeg`).
+- **uv**, only for beat detection (`pnpm launch beats`).
+- **Chromium for renders and captures**, which `pnpm launch setup` downloads
+  once per machine (Playwright's build). The CLI starts it with the GPU on and
+  with HTML-in-Canvas, which the 3D add-on's panels need. It also has WebGPU,
+  which the shader effects add-on needs.
+- **Claude Code**, to make videos with the skills. You can also write videos by
+  hand.
+- **The product, running locally**, with its source repo on the same machine.
+  See [Ways to work](/quick-start#ways-to-work).
+
+The commands to install them are in the [Quick start](/quick-start#install).
+
+## What it has been tested on
+
+Intentface Launch is developed and tested on an Apple M2 Pro Mac, with Claude
+Opus 5.5 at High effort in Claude Code. Other machines, operating systems and
+models are not guaranteed to work.
+
+- The renderer draws with the GPU, through ANGLE on Metal on macOS. Other
+  platforms and GPUs are untested. Without a GPU, headless Chromium falls back
+  to software rendering, which is much slower.
+- The timings in the guides (seconds for a still, about 46 captured frames per
+  second for a final render, about 0.65 frames per second for 3D stages at 96
+  samples) were measured on that machine.
+- The skills were written and tuned with Opus at High effort. A smaller model,
+  or a lower effort, may skip steps the method depends on, such as looking at
+  its own stills before calling a shot done.
+
+## Use at your own risk
+
+Intentface Launch is experimental software under active development, provided
+as is, without warranty of any kind, under the [MIT licence](https://github.com/Intentface/intentface-launch/blob/main/LICENSE).
+APIs, commands and skills change between versions.
+
+Making a video means an agent works on your machine: it runs commands, starts
+your product, drives a browser through it and writes files in your repos.
+
+- Review what Claude does, and the permissions you give it.
+- Work in version control, so every change can be seen and undone.
+- Keep secrets out of what gets rendered. `secret(name)` keeps API keys and
+  demo logins out of snapshots and manifests, but frames show whatever the page
+  puts on screen, so use a demo account or seeded data.

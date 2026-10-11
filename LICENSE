@@ -19,3 +19,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Trademarks
+
+The MIT License above covers the software only. It grants no rights to the
+Intentface or Intentface Launch names, logos or logomarks, including the
+Launch mark (packages/core/studio/launch-mark.tsx, docs/app/icon.svg and the
+icon in packages/core/index.html). These are trademarks of Intentface, and
+using them in your own material requires Intentface's formal written approval.
+If you distribute a modified version, remove them or replace them with your own.

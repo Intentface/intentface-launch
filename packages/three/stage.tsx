@@ -40,6 +40,8 @@ import {
 } from "three";
 import { RectAreaLightUniformsLib } from "three/examples/jsm/lights/RectAreaLightUniformsLib.js";
 import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader.js";
+import { htmlInCanvas, uploadElement } from "./dom-texture.js";
+import { EffectChain } from "./effects.js";
 import { type Environment, Environments } from "./environment.js";
 import { aimThroughLens, diskSample, type Lens, pixelJitter, shutterSlot } from "./lens.js";
 import { keyLight, type SoftBox } from "./lights.js";
@@ -132,38 +134,14 @@ export type StageContextValue = {
   overlay: HTMLElement | null;
 };
 
+export { htmlInCanvas, uploadElement };
+
 export const StageContext = createContext<StageContextValue | null>(null);
 
 type PaintCanvas = HTMLCanvasElement & {
   requestPaint?: () => void;
   onpaint: ((e: Event & { changedElements?: Element[] }) => void) | null;
 };
-
-/** True when this browser can draw DOM into WebGL (Chrome with CanvasDrawElement). */
-export const htmlInCanvas = () =>
-  typeof WebGL2RenderingContext !== "undefined" && "texElementImage2D" in WebGL2RenderingContext.prototype;
-
-/** Upload a canvas child's paint into `texture` (sRGB, mipmapped, anisotropic). */
-export function uploadElement(gl: WebGL2RenderingContext, texture: WebGLTexture, el: Element, mipmaps = true) {
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-  (gl as unknown as { texElementImage2D(t: number, f: number, e: Element): void }).texElementImage2D(
-    gl.TEXTURE_2D,
-    gl.SRGB8_ALPHA8,
-    el,
-  );
-  if (mipmaps) {
-    // Mipmaps and anisotropy keep tilted text readable instead of shimmering.
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    const aniso = gl.getExtension("EXT_texture_filter_anisotropic");
-    if (aniso) gl.texParameterf(gl.TEXTURE_2D, aniso.TEXTURE_MAX_ANISOTROPY_EXT, 16);
-  } else gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-}
 
 const ADD_FRAGMENT = /* glsl */ `
 uniform sampler2D map;
@@ -280,6 +258,8 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
     quadCamera,
     environments: new Environments(renderer),
     bloom: null as Bloom | null,
+    /** Made on the first frame with `post.effects`. */
+    effects: null as EffectChain | null,
     /** Made on the first debug frame: a display-sized target and the material that encodes into it. */
     debug: null as { target: WebGLRenderTarget; material: ShaderMaterial; pixels: Uint8Array } | null,
     luts: new Map<string, { texture: Texture; size: number }>(),
@@ -290,6 +270,7 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
       add.dispose();
       output.dispose();
       this.bloom?.dispose();
+      this.effects?.dispose();
       disposeLensLight(renderer);
       this.debug?.target.dispose();
       this.debug?.material.dispose();
@@ -347,7 +328,7 @@ export function Stage3D({
   style,
 }: Stage3DProps) {
   const frame = useFrame();
-  const { width, height } = useVideoInfo();
+  const { width, height, fps } = useVideoInfo();
   const canvas = useRef<HTMLCanvasElement>(null);
   const backdropEl = useRef<HTMLDivElement>(null);
   const overlayParent = useRef<HTMLDivElement>(null);
@@ -357,6 +338,7 @@ export function Stage3D({
   const settled = useRef<(() => void)[]>([]);
   const props = {
     frame,
+    fps,
     lens,
     light,
     lights,
@@ -727,15 +709,22 @@ export function Stage3D({
       renderer.render(g.quadScene, g.quadCamera);
     }
 
-    // Finishing: bloom from the averaged image, then grade, vignette, LUT, grain.
+    // postprocessing's effects on the averaged image, then the finishing: bloom
+    // from it, then grade, vignette, LUT, grain.
+    let image: Texture = g.sum.texture;
+    if (p.post?.effects?.length) {
+      g.effects ??= new EffectChain(renderer, g.size.w, g.size.h, camera);
+      image = g.effects.render(g.sum.texture, p.post.effects, p.frame / p.fps);
+    }
     const u = g.output.uniforms as ReturnType<typeof outputUniforms>;
+    u.map.value = image;
     const bloom = bloomOptions(p.post?.bloom);
     if (bloom) {
       g.bloom ??= new Bloom(g.size.w, g.size.h);
-      u.bloom.value = g.bloom.render(renderer, g.sum.texture, [g.size.w, g.size.h], bloom.threshold, bloom.radius);
+      u.bloom.value = g.bloom.render(renderer, image, [g.size.w, g.size.h], bloom.threshold, bloom.radius);
       u.bloomStrength.value = bloom.strength;
     } else u.bloomStrength.value = 0;
-    renderLensLight(renderer, u, p.post, g.sum.texture, [g.size.w, g.size.h]);
+    renderLensLight(renderer, u, p.post, image, [g.size.w, g.size.h]);
     applyPost(u, p.post, g.size.h / 1080);
     const lut = p.post?.lut ? g.luts.get(p.post.lut) : undefined;
     u.lut.value = (lut?.texture as never) ?? null;

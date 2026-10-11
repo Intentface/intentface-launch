@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@intentface-launch/core": "workspace:*",
+    "@intentface-launch/shaders": "workspace:*",
     "@intentface-launch/three": "workspace:*",
+    "postprocessing": "6.39.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "three": "^0.186.1"

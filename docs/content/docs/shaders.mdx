@@ -1,0 +1,42 @@
+---
+title: Shader effects
+description: The 200 WebGPU components of the Shaders library on the video's clock, from the @intentface-launch/shaders add-on.
+source: packages/shaders
+---
+
+`pnpm launch add shaders`, then `import { Shaders } from "@intentface-launch/shaders"`.
+Gradients, noise, light, glass, metal, distortions, blurs, wipes, particles and fluids from the [Shaders library](https://github.com/shader-effects-inc/shaders) (MIT), for backdrops, transitions and texture around the product. Read their code too when writing your own `Shader` from the kit.
+
+## The layer
+
+```tsx
+<Shaders
+  components={(f) => [
+    { type: "SolidColor", props: { color: "#05060f" } },
+    { type: "Aurora", props: { colorA: "#3df5b0", colorB: "#4f6bff", colorC: "#c04bff" } },
+    { type: "Glass", props: { shape: { type: "circleSDF", radius: 0.3 }, center: { x: 0.3 + 0.4 * (f / 180), y: 0.5 } } },
+  ]}
+/>
+```
+
+| Prop | What it does |
+| --- | --- |
+| `components` | The layer tree as the library's vanilla API takes it: `{ type, props, children, id }`, first at the bottom. A function of the frame animates props. |
+| `width`, `height` | The layer's size in CSS pixels. Default: the video's. |
+| `resolution` | Drawing-buffer pixels per CSS pixel. 0.5 for soft fields. |
+
+The catalogue and every prop are in the library's own skill (`skills/shaders/components.md` in its repo) and at `https://shaders.com/docs/components/<Name>`. Its JSX maps one to one: `<Aurora colorA="#…" />` is `{ type: "Aurora", props: { colorA: "#…" } }`.
+
+## On the video's clock
+
+The library's own components run on the wall clock. `Shaders` drives its renderer frame by frame instead, so any frame renders alone, in any order, the same every time. That was measured over the whole catalogue by rendering each component's frame both directly and after the frames before it.
+
+| Kind | How it renders |
+| --- | --- |
+| Most components | At the frame's exact time, fractional frames and motion blur included. |
+| Simulations: Boids, DataMosh, FloatingParticles, InkFlow, KeyFrames, Liquify, MagneticFilings, ParticleField, ParticleFlow, Particles, PixelSort, ReactionDiffusion, Smoke, SmokeFill, SmokeFlow, Surface3D, TimeTrail | One whole frame at a time from the start of the shot. A late frame replays the ones before it, so keep these shots short. No motion blur. |
+| `ImageTexture` | Waits for its image before the frame is let go. Not under a simulation. |
+| `auto-animate`, `mouse`, `mouse-position` drivers | Refused: animate with a function of the frame. |
+| CursorTrail, CursorRipples, WebcamTexture, ObjectTracker, VideoTexture, Text, HTMLInCanvas, DOMTexture, Fog | Refused, with what to use instead. Fog renders differently on every run, so render chunks would not join. |
+
+Rendering needs WebGPU, which the renderer's Chromium has. In the studio, use a browser with WebGPU.

@@ -56,6 +56,20 @@ Use 3D for transitions and moments of awe; go flat when the viewer has to read.
 | `threePoint`, `keyLight`, `rimLight` | Soft boxes around a target. |
 | `sweep` | A strip light that runs over glossy faces and edges. |
 | `environment` (prop) | Reflections from a preset or an `.hdr`/`.exr`, animatable. |
-| `post` (prop) | Bloom, vignette, aberration, a grade and a LUT. Off by default. |
+| `post` (prop) | Bloom, vignette, aberration, a grade and a LUT, and `effects` from postprocessing. Off by default. |
 | `grades` | Grade presets: `neutral`, `warm`, `cool`, `premium`. |
 | `htmlInCanvas` | Whether the browser can draw DOM into WebGL (needed for panel textures). |
+
+## Post effects
+
+pmndrs' [postprocessing](https://github.com/pmndrs/postprocessing) (bloom, glitch, noise, chromatic aberration, pixelation and the rest) on the video's clock: every pass renders at the frame's time and each effect draws from a random stream seeded by the frame, so any frame renders alone, in any order, the same every time.
+
+| Tool | What it does |
+| --- | --- |
+| `usePostEffect` | Builds a postprocessing effect once per mount, seeded, and disposes it with the shot. Set its values in the render from the frame. |
+| `PostFX` | Applies effects to any DOM (a snapshot, type, a whole shot), drawn in through HTML-in-Canvas. With no effects it matches the DOM. |
+| `post.effects` (prop) | Applies effects to a `Stage3D`'s averaged samples, before its own finishing. |
+| `EffectChain` | The pass runner both use, for a texture of your own. |
+
+Effects that need depth (depth of field, SSAO, god rays, selective bloom, SMAA) are refused: the stage's lens and samples already do that. `GlitchEffect`'s sporadic mode keeps its own clock: switch `mode` by frame instead.
+
