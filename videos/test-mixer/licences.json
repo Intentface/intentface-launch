@@ -1,0 +1,7 @@
+{
+  "audio/**": {
+    "licence": "MIT, as this repo",
+    "author": "generated",
+    "notes": "Synthetic, made with ffmpeg by audio/make.sh"
+  }
+}

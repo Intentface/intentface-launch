@@ -103,7 +103,7 @@ pnpm dev          # this repo is a launch folder too, for its own videos in vide
 pnpm check        # types, lint and video checks
 ```
 
-[CLAUDE.md](CLAUDE.md) explains how the packages fit together. Ideas for tools are issues labelled [`wishlist`](https://github.com/Intentface/intentface-launch/issues?q=is%3Aissue+is%3Aopen+label%3Awishlist).
+[CLAUDE.md](CLAUDE.md) explains how the packages fit together. The `videos/test-*` folders are the tests: each says at its top what it exercises, the command to run and what a correct result is. Ideas for tools are issues labelled [`wishlist`](https://github.com/Intentface/intentface-launch/issues?q=is%3Aissue+is%3Aopen+label%3Awishlist).
 
 ## License
 
