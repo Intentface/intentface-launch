@@ -69,6 +69,49 @@ function runs<T extends { frame: number }>(list: T[], step: number): T[][] {
 
 const span = (run: { frame: number }[], step: number) => run[run.length - 1].frame - run[0].frame + step;
 
+/**
+ * Text that drifts: readable, and moving or resizing by more than nothing but less than a pixel a
+ * frame for half a second or more (a slow push on a held line). Chrome snaps glyphs to whole
+ * pixels, so it visibly steps. Entrances and exits move faster; held text does not move at all.
+ */
+function creeping(readable: Sample[], step: number, fps: number) {
+  const union = (b: Box[]) => {
+    const x = Math.min(...b.map((r) => r.x));
+    const y = Math.min(...b.map((r) => r.y));
+    return { x, y, r: Math.max(...b.map((r) => r.x + r.width)), b: Math.max(...b.map((r) => r.y + r.height)) };
+  };
+  let best: { frame: number; frames: number; rate: number } | null = null;
+  for (const run of runs(readable, step)) {
+    let start = -1;
+    let total = 0;
+    for (let i = 1; i <= run.length; i++) {
+      const rate = (() => {
+        if (i === run.length) return 0;
+        const a = union(run[i - 1].boxes);
+        const b = union(run[i].boxes);
+        const d = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y), Math.abs(b.r - a.r), Math.abs(b.b - a.b));
+        return d / (run[i].frame - run[i - 1].frame);
+      })();
+      if (rate > 0.02 && rate < 1) {
+        if (start < 0) {
+          start = i - 1;
+          total = 0;
+        }
+        total += rate * (run[i].frame - run[i - 1].frame);
+        continue;
+      }
+      // The stretch ends here: keep the longest one.
+      if (start >= 0) {
+        const frames = run[i - 1].frame - run[start].frame;
+        if (frames >= fps * 0.5 && (!best || frames > best.frames))
+          best = { frame: run[start].frame, frames, rate: total / frames };
+      }
+      start = -1;
+    }
+  }
+  return best;
+}
+
 /** WCAG relative luminance of an sRGB pixel. */
 function luminance(r: number, g: number, b: number) {
   const c = (v: number) => {
@@ -188,14 +231,16 @@ function loudness(info: Info, rules: Rules, problems: Problem[], mixed: Mix | nu
 }
 
 /**
- * Picture locks declared on shots (`hits`) against the audio as heard: each
- * named sound is found by `sound`'s analysis, nearest the lock, and must be
- * within the hit's tolerance (2 frames).
+ * Picture locks declared on shots (`hits`) against the audio: each named sound
+ * is found by `sound`'s analysis, nearest the lock, and must be within the
+ * hit's tolerance (2 frames). The sounds are found in the music and voice
+ * without the sound effects: an effect placed on a hit (a click on a riser's
+ * peak) would otherwise move the event it is meant to land on.
  */
 async function hitsCheck(videoId: string, info: Info, problems: Problem[]) {
   const declared = info.shots.flatMap((shot) => (shot.hits ?? []).map((hit) => ({ shot, hit })));
   if (!declared.length) return [];
-  const heard = await heardAudio(videoId, info);
+  const heard = await heardAudio(videoId, info, { music: true });
   if (!heard) {
     problems.push({ check: "hits", severity: "error", message: "shots declare hits, but the video has no audio" });
     return [];
@@ -360,6 +405,16 @@ export function textChecks(items: Map<number, Item>, info: Info, rules: Rules, s
       contrastNeeded: large ? rules.contrastLarge : rules.contrast,
     };
     report.push(entry);
+
+    const creep = creeping(readable, step, fps);
+    if (creep)
+      problems.push({
+        ...at,
+        frame: creep.frame,
+        check: "creep",
+        severity: "warn",
+        message: `moves about ${creep.rate.toFixed(2)} px a frame for ${sec(creep.frames, fps)}: DOM text slower than a pixel a frame steps a pixel at a time (glyphs snap to whole pixels). Hold it still, or move it faster`,
+      });
 
     if (held + step < needs && words(item.text).length > 0) {
       problems.push({
@@ -826,7 +881,7 @@ export async function inspect(
         severity: "warn",
         shot: shot?.id,
         frame: start,
-        message: `nothing moves for ${sec(length, fps)} (f${start} to f${start + length}): add a drift`,
+        message: `nothing moves for ${sec(length, fps)} (f${start} to f${start + length}): give it something that happens, or move the picture (not the text: a slow drift on type steps a pixel at a time)`,
       });
     }
   }

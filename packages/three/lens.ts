@@ -224,3 +224,12 @@ export function project(lens: Lens, point: Vec3, size: [number, number] = [1920,
 export function pixelsPerUnit(lens: Lens, height = 1080, depth = lens.focus ?? distanceTo(lens)) {
   return height / (2 * depth * Math.tan(((lens.fov ?? 30) * Math.PI) / 360));
 }
+
+/**
+ * Samples a `Stage3D` needs for blur of `px` (the largest bokeh disk on screen at 1080p) to read
+ * smooth: about (px / 5)², clamped. 80 px needs 256; 40 px, 64; sharp frames the minimum, which
+ * still anti-aliases. Measured on a film: 96 samples for 120 px left grain and streaks.
+ */
+export function samplesForBlur(px: number, { min = 24, max = 256 }: { min?: number; max?: number } = {}) {
+  return Math.round(Math.min(max, Math.max(min, (px / 5) ** 2)));
+}

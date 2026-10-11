@@ -128,7 +128,9 @@ export function viteConfig(project: Project, port = 0): InlineConfig {
     },
     optimizeDeps: {
       // Crawl everything up front: a mid-session re-optimise reloads the page under the renderer.
-      entries: [STUDIO, "videos/*/video.tsx"],
+      // Scratch videos (`videos/_*`) are left out: one importing a package that is not installed
+      // fails the whole scan, and then dependencies are found mid-render and the page reloads.
+      entries: [STUDIO, "videos/*/video.tsx", "!videos/_*/**"],
       // Shipped as TypeScript source; Vite transforms them like the project's own files.
       exclude: launchPackages(project.root).map((p) => p.name),
       include: packageDeps(project.root),

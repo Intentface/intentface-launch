@@ -31,6 +31,13 @@ export type RenderOptions = {
   quick?: boolean;
   /** Keep the chunks a failed or stopped render finished, and render only the rest. */
   resume?: boolean;
+  /** Samples for every 3D stage (8 for a quick review cut); default: each stage's own. */
+  samples?: number;
+  /**
+   * Render only these shots again (ids) and reuse every other chunk from the last render with the
+   * same settings: after a change to one shot, minutes instead of the whole film.
+   */
+  shots?: string[];
 };
 
 /** New browsers to try a stalled frame in before giving up. */
@@ -43,6 +50,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   const { scale = 1, blur = 1, angle = 180, audio = true, crf = 16, master = false, quick = false } = options;
   const elapsed = timer();
   const phase = options.phase ?? -angle / 2;
+  const stageSamples = options.samples;
   const { url } = await startServer();
   const probeBrowser = await launchBrowser();
   const probe = await openRenderer(probeBrowser, url, videoId, scale);
@@ -60,7 +68,8 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   for (let f = from; f < to; f += step) frames.push(f);
 
   const out = outDir(videoId);
-  const work = join(out, `.chunks${formatSuffix(info)}`);
+  // Previews keep their own chunks, so a review cut never throws away the final's.
+  const work = join(out, `.chunks${quick ? "-preview" : ""}${formatSuffix(info)}`);
   // Chunks from another render (other size, blur or fps) cannot be reused.
   const settings = JSON.stringify({
     scale,
@@ -69,12 +78,14 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     phase,
     fps,
     quick,
+    samples: stageSamples ?? null,
     format: info.format,
     variant: info.variant,
   });
   const settingsFile = join(work, "settings.json");
-  const reusable = options.resume && existsSync(settingsFile) && readFileSync(settingsFile, "utf8") === settings;
-  if (options.resume && !reusable) console.warn("  No chunks from a render with these settings; starting over.");
+  const keep = options.resume || !!options.shots?.length;
+  const reusable = keep && existsSync(settingsFile) && readFileSync(settingsFile, "utf8") === settings;
+  if (keep && !reusable) console.warn("  No chunks from a render with these settings; rendering everything.");
   if (!reusable) rmSync(work, { recursive: true, force: true });
   mkdirSync(work, { recursive: true });
   writeFileSync(settingsFile, settings);
@@ -83,6 +94,25 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     const mine = frames.slice(i * CHUNK, (i + 1) * CHUNK);
     return { frames: mine, file: join(work, `frames-${String(mine[0]).padStart(6, "0")}.mkv`) };
   });
+  if (reusable && options.shots?.length) {
+    // The named shots' frames, with the transition that leads into each, are drawn again.
+    const ranges = options.shots.map((id) => {
+      const shot = info.shots.find((s) => s.id === id);
+      if (!shot) throw new Error(`No shot "${id}" in ${videoId} (shots: ${info.shots.map((s) => s.id).join(", ")})`);
+      return [shot.from - (shot.transition?.frames ?? 0), shot.from + shot.duration] as const;
+    });
+    let dropped = 0;
+    for (const c of all) {
+      if (!c.frames.some((f) => ranges.some(([a, b]) => f >= a && f < b))) continue;
+      if (existsSync(c.file)) {
+        rmSync(c.file);
+        dropped++;
+      }
+    }
+    console.log(
+      `  Drawing ${options.shots.join(", ")} again (${dropped} chunk${dropped === 1 ? "" : "s"}); the rest comes from the last render.`,
+    );
+  }
   const todo = all.filter((c) => !existsSync(c.file));
   if (todo.length < all.length) console.log(`  Reusing ${all.length - todo.length} of ${all.length} chunks.`);
 
@@ -112,13 +142,13 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     Array.from({ length: workers }, async () => {
       // One browser per worker: pages in a shared browser queue on one GPU process.
       let browser = await launchBrowser();
-      let renderer = await openRenderer(browser, url, videoId, scale);
+      let renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
       const fresh = async () => {
         // The stall is in the browser's GPU process, shared by all its pages,
         // and closing a wedged browser can hang too: abandon it for a new one.
         within(browser.close(), 10_000).catch(() => {});
         browser = await launchBrowser();
-        renderer = await openRenderer(browser, url, videoId, scale);
+        renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
       };
       const options = { samples: blur, angle, phase, step, noBlur: quick, format: quick ? "jpeg" : "png" } as const;
       for (let chunk = queue.shift(); chunk; chunk = queue.shift()) {
@@ -250,7 +280,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
       join(out, `${name}-master.mov`),
     ]);
   }
-  rmSync(work, { recursive: true, force: true });
+  // The chunks stay: they are what `--shots` and `--resume` reuse. A render with other settings replaces them.
   const mb = (statSync(target).size / 1e6).toFixed(1);
   console.log(`  ${target} · ${width}×${height} · ${fps} fps · ${mb} MB · ${elapsed()}`);
   // Sidecar captions under the mp4's name, so players pick them up, and the licence manifest.

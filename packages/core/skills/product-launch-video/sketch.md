@@ -134,13 +134,13 @@ The sketch shows where every heavy moment goes and how long it lasts, at a fract
 
 | In the build | In the sketch |
 |---|---|
-| UI parts assembling in 3D, a light sweep, depth of field | The same snapshot, flat, the camera making the same move; `notes` says what it becomes |
+| UI parts assembling in 3D, a light sweep, depth of field | The same snapshot in CSS perspective (a tilt, layers at different `translateZ`), the camera making the same move; `notes` says what it becomes |
 | A cross-cut morph or a match cut | Hard cut on the same frame, both shots framed on the same rect |
 | The product's own motion (a map flight, streamed text) | The end-state snapshot, or a few seconds of `Capture` at `scale: 1` |
 | A logo animation | The product's logo, static, in its place on the end card |
 | Sound effects | The track playing, shots timed to its beats; `sound` on each shot says the cue |
 
-Keep the sketch flat: no `Stage3D`, no `MotionBlur`. Then `pnpm launch board <id>` stays around a minute and every revision is cheap.
+Keep the sketch cheap: no `Stage3D`. But not plain: a board of flat, straight-on UI reads as dull and gets judged as the finished look (one launch film's first board was rejected as "not cool, no motion blur, no fade, no perspective"). Show the planned look with cheap means: CSS perspective on the UI, `<Focus>` fading the UI into the background around what matters, and `MotionBlur` on the few frames of a fast move. Then `pnpm launch board <id>` stays around a minute and every revision is cheap.
 
 ## 4. Before showing it
 

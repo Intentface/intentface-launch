@@ -47,7 +47,9 @@ source: packages/core/cli/launch.ts
 
 | Command | What it does |
 | --- | --- |
-| `pnpm launch render <id> --preview` | 960×540 at 30 fps, in seconds. |
+| `pnpm launch render <id> --preview` | A review cut: 960×540 at 30 fps, 3D stages at 8 samples, no motion blur. Minutes where a final takes many. |
+| `pnpm launch render <id> --samples N` | 3D stages at N samples per frame instead of each stage's own. |
+| `pnpm launch render <id> --shots a,b` | Draws only these shots again and reuses every other chunk of the last render with the same settings. |
 | `pnpm launch render <id>` | The final 1080p60 mp4. |
 | `pnpm launch render <id> --scale 2` | 4K. |
 | `pnpm launch render <id> --master` | Also writes a ProRes 422 HQ `.mov`. |

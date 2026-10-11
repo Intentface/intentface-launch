@@ -41,7 +41,9 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --html                   also write a standalone page to share outside the repo
       --no-reading             skip the text pass (it renders every 0.1 s: slow on 3D stages)
   render <id>                  final mp4 (1080p60; motion blur comes from <MotionBlur> layers)
-      --preview                960×540, 30 fps, jpeg frames: fast check
+      --preview                960×540, 30 fps, jpeg frames, 3D at 8 samples, no motion blur: a fast review cut
+      --samples N              3D stages at N samples per frame (default: each stage's own)
+      --shots a,b              draw only these shots again; every other chunk comes from the last render
       --scale 2                4K
       --blur N                 extra global supersampling, N× per changing frame (default off)
       --angle 180 --phase -90  shutter angle and phase, in degrees
@@ -214,6 +216,13 @@ async function main() {
           quick: preview,
           name: args.str("name"),
           resume: args.flags.resume === true,
+          // A preview is a review cut: 3D stages as a quick draft unless asked otherwise.
+          samples: args.num("samples") ?? (preview ? 8 : undefined),
+          shots: args
+            .str("shots")
+            ?.split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
         });
         if (args.flags.check === true) {
           const { check } = await import("./check.js");

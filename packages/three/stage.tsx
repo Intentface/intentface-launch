@@ -69,8 +69,12 @@ export type Stage3DProps = {
   lights?: (frame: number) => SoftBox[];
   /** What glossy surfaces reflect: a strength, or a preset or HDRI file, optionally animated. */
   environment?: number | Environment | ((frame: number) => Environment);
-  /** Lens and time samples averaged per frame in renders. More = smoother bokeh and blur. */
-  samples?: number;
+  /**
+   * Lens and time samples averaged per frame in renders. More = smoother bokeh and blur, and the
+   * frame's cost grows with them (about 2 ms a sample past 32 at 1080p). A function of the frame
+   * spends them where the blur is: `(f) => (f < 300 ? 256 : 32)` once the lens has stopped down.
+   */
+  samples?: number | ((frame: number) => number);
   /** Samples per frame in the studio. */
   preview?: number;
   /**
@@ -579,7 +583,8 @@ export function Stage3D({
     const { renderer } = g;
     const { scene, content, camera, items, floor, backdrop } = world;
     // A draft (`still --samples 8`, `check`) overrides the stage's own count in renders.
-    const n = Math.max(1, Math.round(isRenderMode() ? (renderQuality().samples ?? p.samples) : p.preview));
+    const own = typeof p.samples === "function" ? p.samples(p.frame) : p.samples;
+    const n = Math.max(1, Math.round(isRenderMode() ? (renderQuality().samples ?? own) : p.preview));
     const s = p.shutter;
     const moving = !!s && (!s.when || s.when.some(([a, b]) => p.frame >= a - 1 && p.frame < b + 1));
     const angle = s?.angle ?? 180;

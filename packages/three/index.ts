@@ -25,6 +25,7 @@ export {
   type Projected,
   pixelsPerUnit,
   project,
+  samplesForBlur,
   type Vec3,
 } from "./lens.js";
 export {

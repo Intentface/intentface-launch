@@ -1,6 +1,7 @@
 // Test: calibrates check's stillness. A gradient drifting behind a frozen layout still counts as
 // still; a 3% drift of the layout does not. Run: pnpm launch check test-stillness
-// Expect: one "still" warning, on "frozen" (about 3 s), none on "drift"; no errors.
+// Expect: one "still" warning, on "frozen" (about 3 s), none on "drift"; one "creep" warning, on
+// "drift" (its line moves well under a pixel a frame, so it steps); no errors.
 // Audio is synthetic (audio/make.sh).
 
 import { defineVideo, ease, interpolate, useFrame } from "@intentface-launch/core";

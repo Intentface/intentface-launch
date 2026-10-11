@@ -42,7 +42,7 @@ Write the script in two columns (picture | words) before any shot. Pick the spin
 | Pure demo | the product at once, escalating uses, "and it can also…", end card | the output itself is the wow |
 
 - **Hook in the first 3 seconds:** a provocation, an understatement, or a hard number from the product's data.
-- On-screen lines of 3 to 6 words, one idea per beat, verbs over adjectives. Delete any words the picture already says.
+- On-screen lines of 1 to 4 words, a single line, one idea per beat, verbs over adjectives. A longer thought is split over several cuts, a phrase each. Delete any words the picture already says.
 - Sound off is the default in a feed: the picture must carry the story alone, the product visibly doing each thing. Words name what was just shown, a few at a time, held long enough to read (`readingTimeOnBeats`); they never replace the showing.
 - Order of introduction: the world or tension, then the one most magical interaction in full at readable speed, then 2 or 3 quick variations proving breadth, then logo, claim and call to action. Hold the name and logo until the viewer wants them.
 
@@ -86,6 +86,7 @@ Cuts land on the beat, so the viewer can predict them; the hero reveal lands whe
 ## 7. Showing software
 
 - **Rebuild, do not record.** Reduce the UI to the hero path, enlarge what matters, clean the data (short, believable, on-brand, from the product's seed or demo mode), remove notifications and overlays. A `Snapshot` with `hide` and `isolate` is the tool.
+- **Every effect shows something.** A 3D burst, a rotation or a sweep earns its place by revealing structure, a change or the next idea; one that only moves the UI around is decoration. After a line that claims something, the next picture pays it off.
 - **One camera move per shot**, plus at most one supporting move to reveal the new state. No constant rotation or deep perspective while the viewer reads: 3D between features, flat for reading.
 - **Focus the eye, one way at a time:** push in, blur everything but the active component, dim and spotlight, lift the component onto its own plane, or a short label landing beside the change.
 - **The cursor is a character with intent:** large enough to see (about 50 px on screen at 1080p), arcs, deceleration into targets, the camera settled before it arrives, a beat before the click, an accent on the click, never wandering. Often the most premium choice is no cursor at all, with the UI answering on the beat.
@@ -93,6 +94,8 @@ Cuts land on the beat, so the viewer can predict them; the hero reveal lands whe
 - **Abundance by acceleration.** To show something happening a lot and easily (rows labelled, files sorted, messages answered), show the first few at reading speed, then let the speed rise linearly, under motion blur, until the speed itself is the transition: at its fastest, cut to the next shot already moving the same way, which decelerates into its framing. The viewer reads three, believes thousands, and never sees a "now faster" cut. `accelerate()` and `brake()` in the kit do the maths; the ui-motion skill has the build.
 - Patterns that recur: the hero loop (one interaction in full, replayed faster at the end), a grid burst of 3 to 9 tiles of the UI in action on consecutive beats after the hero (each tile a moving moment, not a feature name), a speed proof (counter, side by side), keyboard-shortcut chips for keyboard-first tools.
 - **AI products:** show the outcomes and progress the AI creates. Never make orbs, neural nets or sparkles the hero.
+- **The product as an object, once.** Give the hero UI one moment as a physical thing (the window as a slab in 3D, a real lens, light running across its edge), then land it flat for reading. It tells the viewer this is a made thing, worth looking at; more than one or two such moments turns it into decoration.
+- **Reach is shown where it lands.** A claim about platforms, formats or audiences is shown as the same output in the places people meet it (a video site, a photo feed, a short-video app, each recognisable by layout), not as a row of aspect-ratio frames or a list of logos.
 
 ## 8. Rhythm and energy
 

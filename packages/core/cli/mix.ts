@@ -279,7 +279,7 @@ function existing(videoId: string, src: string, what: string) {
  * "as-delivered". Written to out/mix.wav and reused until an input or the
  * target changes. Null when there is nothing to mix: the music plays as it is.
  */
-export async function mixAudio(videoId: string, info: Info): Promise<Mix | null> {
+export async function mixAudio(videoId: string, info: Info, name = "mix"): Promise<Mix | null> {
   if (!needsMix(info)) return null;
   const rules = await loadRules();
   const a = info.audio;
@@ -314,8 +314,8 @@ export async function mixAudio(videoId: string, info: Info): Promise<Mix | null>
     )
     .digest("hex");
   const dir = outDir(videoId);
-  const file = join(dir, "mix.wav");
-  const meta = join(dir, "mix.json");
+  const file = join(dir, `${name}.wav`);
+  const meta = join(dir, `${name}.json`);
   if (existsSync(file) && existsSync(meta)) {
     const known = JSON.parse(readFileSync(meta, "utf8"));
     if (known.key === key) return { file, ...known.result };

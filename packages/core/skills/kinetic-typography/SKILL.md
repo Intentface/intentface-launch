@@ -14,7 +14,7 @@ The sources behind each number are in [research.md](research.md). Values are in 
 ## 1. Every word has three phases: enter, read, exit
 
 - **The read is the hold after the text has landed.** A 4 s title that takes 1 s to arrive and 1 s to leave is still for only 2 s, and those 2 s are what get read. `readingTimeOnBeats(text, t)` gives the hold from the moment it lands, in whole beats; place the exit after it, never inside it.
-- **Hold for reading it twice.** The engine's floor is 14 characters per second with a 1 s minimum, a ceiling of 17 cps (subtitles go to 17 to 20 cps; type that moves needs more time than subtitles). Numbers, product names and code: `audience: "technical"` (1.25×). Text over busy motion: `competingMotion: "high"` (1.2×).
+- **Hold for reading it, then move.** The hold is a floor, not a target: a short line (one to four words) reads in about a bar, and every frame past that is dead time. The engine's floor is 14 characters per second with a 1 s minimum, a ceiling of 17 cps (subtitles go to 17 to 20 cps; type that moves needs more time than subtitles). Numbers, product names and code: `audience: "technical"` (1.25×). Text over busy motion: `competingMotion: "high"` (1.2×).
 - **Still while read.** The text settles completely, then at most a secondary drift: under 2% scale or a few pixels over the hold, or the camera's own slow move. No wobble, rotation or glow cycling during the read.
 - **Exits are shorter than entrances,** because the word has already been read: 12 to 18 frames on `ease.in`, a quiet fade and lift (`exit` on `Slam` and `Reveal`), or a cut on the beat. Never play the entrance backwards to exit.
 - **Let the text time its own hold:** `<Reveal exit="read">` leaves once its last unit has landed and the reading time has passed (`reading` takes the same options as `readingTime`). `revealTimes(text, fps, timing)` gives the same starts and landing frame, to size a shot around its text.
@@ -74,12 +74,14 @@ Choose one primary level for the piece and mix at most two. Never animate letter
 
 - **Borrow the video's motif for its title.** A name or headline that arrives the way the product's own content arrives (sliced into rows that sweep in like table cells being filled, typed like a query, condensing out of blur like streamed text) ties the type to the story. Build it from the same timing and easing as the UI motif; the hold still follows the rules above.
 
-- **Rise out of a baseline mask** for a clean, editorial entrance: `<Reveal mask>` (by word or line) rises each unit 110% of its height on `ease.out` inside a `clip-path` padded 0.15 em for descenders (`mask={0.2}` for more), with fade and blur off unless `blur` is set. Not `overflow: hidden`: an inline-block with overflow hidden sits on its bottom edge and lifts every word off the baseline. Use line height 1.2 to 1.4 on multi-line text so masks do not cut neighbouring lines. `scale` adds a scale settle from a start size.
+- **Fade up out of a blur, by default.** Words come in from nothing: `<Reveal rise={0.25} blur={0.08}>` (no `mask`), each rising a quarter of an em, sharpening out of a slight blur and fading up from 0. A masked rise (`<Reveal mask>`, words wiped up through a clip) reads as a crop when used on every line (a reviewer: "you use too much of the cropped"); keep it for one deliberate moment, if any. Under a mask, `clip-path` padded 0.15 em for descenders, never `overflow: hidden` on an inline-block.
 - **Carry the eye from one text state to the next** rather than fading to an empty frame:
   - the camera pushes through a word (or the counter of a letter) into the next shot;
   - the last word stays as the next line hangs off its baseline;
+  - in a run of short lines across cuts ("Install it." / "Or fork it."), each line lifts out over its last 12 frames (rising 0.3 em, blurring to 8 px, fading, `ease.in`) and the next fades up out of a blur on the cut, so the eye travels up through the run instead of through an empty frame;
   - a word becomes the next scene's UI, or the text typed into the product lifts out of its field and becomes the headline (product-launch-video skill);
   - the same word shrinks into its place in the next layout (springTo on size and position).
+- **A word changing in a fixed line** ("Create [word] video."): a handful of options, one per change on the beats (a bar for the first, then every two beats, then every beat), landing on the last. Each change is a swap, as `Swap` does it: the old word rises away, blurring and fading out in 6 frames; the new one arrives 4 frames later, rising from a little below out of 0 opacity and a slight blur; they never share the space at half opacity. `MotionBlur` on the frames of each change, and a tick on each. The rest of the line glides on a spring of the word's width (`{ duration: 12, bounce: 0 }`): it grows at once for a longer word and shrinks for a shorter one only once the old word has gone, so nothing touches. Round every position to whole pixels. Do not follow the options with a fast scroller of more words; a reviewer found that weird. Land the last option with at least its reading time before the cut (a word needs about 1 s): `check` times every word it can see, so mark the passing options `data-launch-check="off"` (the line around them is what is read) and keep the line and the landing word checked.
 - Leave room in the composition for words to move into and out of. Negative space is part of the motion.
 
 ## 9. Type for motion
@@ -108,7 +110,7 @@ Choose one primary level for the piece and mix at most two. Never animate letter
 | Everything moving at once | Stagger in reading order; one hero element per beat |
 | Text leaves before it is read | `readingTimeOnBeats` hold after it lands; `board` and `check` flag short holds |
 | Every word rotating, wiggling, glowing | Two motifs at most; big moves only on stressed words |
-| Moving during the read | Settle fully, then at most a 2% drift |
+| Moving during the read | Settle fully and hold still. No slow drift on DOM text: glyphs snap to whole pixels and a slow push steps a pixel at a time. Let the picture behind move instead |
 | Hits that feel random | Land on beats and stressed syllables, 2 to 6 frames early |
 | Thin or decorative face breaking up | Heavier weight, more tracking, more contrast |
 | Fast moves strobing, or slow ones smeared | `MotionBlur` only on the fast frames |

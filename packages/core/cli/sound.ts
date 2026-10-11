@@ -1003,9 +1003,13 @@ export async function soundPng(report: SoundReport & { spectral: Spectral }, tit
 // ----------------------------------------------------------------------------
 // The command
 
-/** The video's audio as heard: the mix when it has one, else the music at its offset and volume. */
-export async function heardAudio(videoId: string, info: Info) {
-  const mixed = await mixAudio(videoId, info);
+/**
+ * The video's audio as heard: the mix when it has one, else the music at its offset and volume.
+ * `music`: the same without the sound effects (out/mix-music.wav), for finding the track's own
+ * events, which an effect placed on them would otherwise move.
+ */
+export async function heardAudio(videoId: string, info: Info, { music = false }: { music?: boolean } = {}) {
+  const mixed = music ? await mixAudio(videoId, { ...info, sfx: [] }, "mix-music") : await mixAudio(videoId, info);
   if (mixed)
     return {
       file: mixed.file,
