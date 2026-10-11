@@ -12,8 +12,8 @@ detection.
 
 ```sh
 brew install ffmpeg uv
-git clone git@github.com:Intentface/intentface-launch.git ~/Work/intentface-launch
-(cd ~/Work/intentface-launch && pnpm install)
+git clone https://github.com/Intentface/intentface-launch.git
+cd intentface-launch && pnpm install
 ```
 
 ## Set up a product repo
@@ -21,7 +21,7 @@ git clone git@github.com:Intentface/intentface-launch.git ~/Work/intentface-laun
 Run these from the product repo's root:
 
 ```sh
-node ~/Work/intentface-launch/packages/core/bin/launch.mjs init
+node /path/to/intentface-launch/packages/core/bin/launch.mjs init
 pnpm launch setup
 pnpm launch dev
 ```
@@ -36,7 +36,7 @@ Add-ons install the same way when a video needs them:
 
 ```sh
 pnpm launch add three              # 3D
-pnpm launch add @intentface/brand  # only for videos in the Intentface brand
+pnpm launch add <package>          # a brand package, for videos in that brand
 ```
 
 ## Ask for a video
