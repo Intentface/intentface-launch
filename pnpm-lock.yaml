@@ -191,6 +191,12 @@ importers:
         specifier: ^0.186.1
         version: 0.186.1
 
+  videos/intentface-launch:
+    devDependencies:
+      '@intentface/brand':
+        specifier: 0.1.0
+        version: 0.1.0(@intentface-launch/core@packages+core)(react@19.3.0)
+
 packages:
 
   '@alloc/quick-lru@5.3.0':
@@ -580,6 +586,15 @@ packages:
     engines: {node: '>=20.9.0'}
     cpu: [x64]
     os: [win32]
+
+  '@intentface/brand@0.1.0':
+    resolution: {integrity: sha512-Edur7sIBvOw1Razqj1pm/y615V5yNvgoHBHyO/sP3zjs+MWmg3PjfftWkhXnCdkLLhXXPXOwJMdgZ+Aj9SSpkA==}
+    peerDependencies:
+      '@intentface-launch/core': '*'
+      react: '>=19'
+    peerDependenciesMeta:
+      '@intentface-launch/core':
+        optional: true
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2403,6 +2418,12 @@ snapshots:
 
   '@img/sharp-win32-x64@0.35.4':
     optional: true
+
+  '@intentface/brand@0.1.0(@intentface-launch/core@packages+core)(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
+    optionalDependencies:
+      '@intentface-launch/core': link:packages/core
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

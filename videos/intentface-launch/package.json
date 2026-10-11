@@ -1,0 +1,9 @@
+{
+  "name": "@intentface-launch/video-intentface-launch",
+  "private": true,
+  "description": "This repo's launch film. Its own package so the Intentface brand (fonts, logo, check rules) applies to this video only, not to the test videos.",
+  "type": "module",
+  "devDependencies": {
+    "@intentface/brand": "0.1.0"
+  }
+}

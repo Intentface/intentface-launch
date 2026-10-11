@@ -1,0 +1,54 @@
+[
+  {
+    "id": "5oohdqsx",
+    "shot": "hook",
+    "author": "Joni Juup",
+    "text": "Does this look like claude terminal?",
+    "at": "2026-10-11T14:54:03.121Z",
+    "reply": "Not really, it was a plain rebuild. The terminal is gone: the film now opens on a sample product's own Ship button.",
+    "resolved": true
+  },
+  {
+    "id": "uut4f3ef",
+    "shot": "hero",
+    "author": "Joni Juup",
+    "text": "we need a real ui here",
+    "at": "2026-10-11T14:54:14.373Z",
+    "reply": "Done: Orbit, a sample release tracker built for the film (sample-app.tsx), clicked and answering, the camera pulling back over it.",
+    "resolved": true
+  },
+  {
+    "id": "o3lpvas7",
+    "shot": "review",
+    "author": "Joni Juup",
+    "text": "remove these",
+    "at": "2026-10-11T14:54:21.012Z",
+    "reply": "Removed, with the studio and Claude Code.",
+    "resolved": true
+  },
+  {
+    "id": "pwgbcla5",
+    "shot": "style-2d",
+    "author": "Joni Juup",
+    "text": "Any style doubled looks  horrible, just remove the UI from behind",
+    "at": "2026-10-11T14:54:36.128Z",
+    "reply": "Done: nothing behind \"Any style.\" in any cut.",
+    "resolved": true
+  },
+  {
+    "id": "db2a4dcw",
+    "shot": "style-3d",
+    "author": "Joni Juup",
+    "text": "We should style the \"Any style\" -text in multiple different ways to convey the idea, only a few seconds for each style",
+    "at": "2026-10-11T14:55:10.125Z",
+    "reply": "Done: 12 styles (3D, hand drawn, serif, neon, print, CRT, wide and condensed posters, echo, sliced, dot matrix), 2 beats each, then 1, then half beats in the last bar.",
+    "resolved": true
+  },
+  {
+    "id": "zd6a9bfe",
+    "shot": "style-light",
+    "author": "Joni Juup",
+    "text": "This better be bette rlooking in the final video",
+    "at": "2026-10-11T14:55:39.407Z"
+  }
+]

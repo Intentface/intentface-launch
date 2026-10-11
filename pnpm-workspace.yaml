@@ -1,6 +1,8 @@
 packages:
   - packages/*
   - docs
+  # The launch film is in the Intentface brand; its own package keeps the brand out of the other videos.
+  - videos/intentface-launch
 onlyBuiltDependencies:
   - esbuild
   - sharp
