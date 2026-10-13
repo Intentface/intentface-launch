@@ -1,0 +1,29 @@
+{
+  "name": "intentface-launch",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Runs the intentface-launch CLI from @intentface-launch/core: product launch videos written as code.",
+  "homepage": "https://launch.intentface.com",
+  "bugs": "https://github.com/Intentface/intentface-launch/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Intentface/intentface-launch.git",
+    "directory": "scripts/npx-alias"
+  },
+  "author": "Intentface",
+  "type": "module",
+  "bin": {
+    "intentface-launch": "./bin/launch.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@intentface-launch/core": "^0.1.0"
+  }
+}
