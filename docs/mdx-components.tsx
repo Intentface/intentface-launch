@@ -1,6 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, isValidElement, type ReactNode } from "react";
 import { CodeBlock } from "@/components/code-block";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,33 @@ const slug = (children: ReactNode): string | undefined => {
     .replace(/[^\da-z]+/g, "-")
     .replace(/^-|-$/g, "");
 };
+
+const youtubeId = (href: unknown): string | undefined => {
+  if (typeof href !== "string") return undefined;
+  return (
+    href.match(/^https:\/\/(?:www\.)?youtube\.com\/watch\?v=([\w-]{11})/)?.[1] ??
+    href.match(/^https:\/\/youtu\.be\/([\w-]{11})/)?.[1]
+  );
+};
+
+// A paragraph that is only a YouTube link plays the video in place, captioned
+// with the link's text. The markdown agents read keeps the plain link.
+const Video = ({ id, title }: { id: string; title: ReactNode }) => (
+  <figure className="my-6">
+    <div className="aspect-video overflow-hidden rounded-xl bg-black shadow-card">
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${id}?rel=0`}
+        title={typeof title === "string" ? title : "Video"}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+        loading="lazy"
+        className="size-full"
+      />
+    </div>
+    <figcaption className="mt-2.5 text-ink-secondary text-sm">{title}</figcaption>
+  </figure>
+);
 
 const heading =
   (Tag: "h2" | "h3" | "h4", className: string) =>
@@ -33,7 +60,17 @@ const proseComponents: MDXComponents = {
   ),
   h3: heading("h3", "mt-8 mb-2 font-semibold text-ink-primary text-xl tracking-[-0.01em]"),
   h4: heading("h4", "mt-6 mb-2 font-semibold text-ink-primary text-lg"),
-  p: (props) => <p className="my-4 text-ink-body text-lg leading-6" {...props} />,
+  p: ({ children, ...props }: ComponentProps<"p">) => {
+    if (isValidElement<{ href?: string; children?: ReactNode }>(children)) {
+      const id = youtubeId(children.props.href);
+      if (id) return <Video id={id} title={children.props.children} />;
+    }
+    return (
+      <p className="my-4 text-ink-body text-lg leading-6" {...props}>
+        {children}
+      </p>
+    );
+  },
   ul: (props) => (
     <ul
       className="my-4 ml-5 flex list-disc flex-col gap-1.5 text-ink-body text-lg marker:text-ink-tertiary"

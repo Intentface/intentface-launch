@@ -8,6 +8,7 @@ const SUMMARY = [
   "> Product launch videos written as code: React scenes rendered frame by frame in headless Chromium and encoded with ffmpeg, made together with an agent.",
   "",
   "Every page below is markdown: append `.md` to any docs URL for the same content. `/llms-full.txt` is every page in one file.",
+  "The skills Claude follows are listed in `/.well-known/agent-skills/index.json`.",
   "In a product repo, `launch/CLAUDE.md` and the skills in `.claude/skills/` are the working guide; these docs explain the system around them.",
 ].join("\n");
 
