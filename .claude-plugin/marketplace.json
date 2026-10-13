@@ -1,0 +1,19 @@
+{
+  "name": "intentface-launch",
+  "owner": { "name": "Intentface", "url": "https://github.com/Intentface" },
+  "metadata": {
+    "description": "Product launch videos written as code: the method and motion skills behind Intentface Launch."
+  },
+  "plugins": [
+    {
+      "name": "intentface-launch",
+      "source": "./packages/core",
+      "description": "Skills for making product launch videos from a product's real UI: the method, creative direction, kinetic type, UI motion, easing, logo animation, review, music and sound.",
+      "homepage": "https://github.com/Intentface/intentface-launch#readme",
+      "repository": "https://github.com/Intentface/intentface-launch",
+      "license": "MIT",
+      "keywords": ["video", "launch video", "motion design", "animation", "kinetic typography"],
+      "category": "design"
+    }
+  ]
+}

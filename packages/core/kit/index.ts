@@ -6,6 +6,7 @@ export {
   type BrakeOptions,
   brake,
 } from "./accelerate.js";
+export { useBaseline } from "./baseline.js";
 export { Camera, type CameraKey, cameraAt, fit, frameRect, type Rect, useCameraView, type View } from "./camera.js";
 export { Captions } from "./captions.js";
 export {

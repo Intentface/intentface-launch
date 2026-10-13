@@ -1,24 +1,23 @@
 ---
 title: Quick start
-description: Add a launch folder to a product repo, or work from a checkout of this repo, and ask Claude for a video.
+description: Install the package in a product repo, or work from a checkout of this repo, and ask Claude for a video.
 source: packages/core/cli/scaffold.ts
 ---
 
 ## Install
 
-The packages are not published yet, so install them from a checkout of this
-repo. You need Node 22 or later, pnpm and ffmpeg. uv is only needed for beat
-detection. [Requirements](/requirements) has the full list and what it has
-been tested on.
+You need Node 22 or later and ffmpeg. uv is only needed for beat detection.
+[Requirements](/requirements) has the full list and what it has been tested
+on.
 
 ```sh
 brew install ffmpeg uv
-git clone https://github.com/Intentface/intentface-launch.git
-cd intentface-launch && pnpm install
 ```
 
-To change the skills or the engine for your team, fork the repo and clone your
-fork instead.
+The packages are on npm, so a product repo installs them like any dev
+dependency (next section). To change the skills or the engine for your team,
+fork this repo and work from your fork instead (see
+[Work from a checkout](#work-from-a-checkout)).
 
 ## Ways to work
 
@@ -41,26 +40,28 @@ The videos can live in either of two places:
 Run these from the product repo's root:
 
 ```sh
-node /path/to/intentface-launch/packages/core/bin/launch.mjs init
+npx @intentface-launch/core init
 pnpm launch setup
 pnpm launch dev
 ```
 
-- `init` creates `launch/` with a config, a `videos/` folder and a `CLAUDE.md`
-  for Claude, adds a `launch` script to `package.json`, and installs the skills
-  into `.claude/skills/`.
+- `init` adds `@intentface-launch/core` as a dev dependency, creates `launch/`
+  with a config, a `videos/` folder and a `CLAUDE.md` for Claude, adds a
+  `launch` script to `package.json`, and installs the skills into
+  `.claude/skills/`. In a pnpm repo, `pnpm dlx @intentface-launch/core init`
+  does the same.
 - `setup` downloads the browser that renders use, once per machine.
 - `dev` opens the studio at `http://localhost:4400`.
 
-Run from a checkout, `init` and `add` install the packages as `link:`
-dependencies on that checkout, so the product repo uses its skills and engine,
-including changes not yet released. `LAUNCH_SOURCE=/path/to/checkout` picks
-the checkout explicitly.
+The commands here are written for pnpm. In an npm repo, run them as
+`npx intentface-launch setup`, in yarn as `yarn launch setup`, in bun as
+`bun run launch setup`.
 
 Add-ons install the same way when a video needs them:
 
 ```sh
 pnpm launch add three              # 3D
+pnpm launch add shaders            # WebGPU shader effects
 pnpm launch add <package>          # a brand package, for videos in that brand
 ```
 
@@ -85,6 +86,13 @@ export default defineConfig({
 - `public`, on either, is the repo's static folder, served so its code finds
   its assets at the usual URLs.
 
+Clone the repo (or your fork) and install it first:
+
+```sh
+git clone https://github.com/Intentface/intentface-launch.git
+cd intentface-launch && pnpm install
+```
+
 Then, from the checkout's root:
 
 ```sh
@@ -96,12 +104,19 @@ pnpm dev
 The skills are already in `.claude/skills/`, so open Claude Code in the
 checkout and ask for a video as below.
 
+A product repo can also use a checkout's packages, including changes not yet
+released: run `node /path/to/intentface-launch/packages/core/bin/launch.mjs init`
+there instead of `npx`. `init` and `add` then install the packages as `link:`
+dependencies on the checkout. `LAUNCH_SOURCE=/path/to/checkout` picks the
+checkout explicitly.
+
 ## Ask for a video
 
 Start the product's dev server first, then open Claude Code where the videos
 live and describe the video, for example:
 
-> Make a 30 second launch video for this product.
+> Look at my app and make a feature release video about our scheduling
+> feature, 30 seconds.
 
 The product-launch-video skill takes it from there. Claude asks what sets the
 product apart, writes a brief and a script with you, and shows a storyboard
@@ -112,9 +127,14 @@ track comes before the storyboard. If you have music for the product, have the
 file ready. If not, Claude writes a brief from the script for you to generate
 one with a music generator such as Suno or ElevenLabs Music.
 
+[Recipes](/recipes) has other ways to start: screenshots of what to
+highlight, your own images and clips, sound with ElevenLabs, and ideas such as
+a weekly update scripted once.
+
 ## Keep it up to date
 
-The product repo links the packages from your checkout, so pulling this repo
-updates every product that uses them. Run `pnpm launch update` in the product
-repo to refresh the skills and guides. In a fork, merge from this repo when
-you want its changes.
+Update the package like any other dev dependency
+(`pnpm update @intentface-launch/core`, and the add-ons you use), then run
+`pnpm launch update` to refresh the skills and guides. A product repo linked to
+a checkout updates when you pull the checkout. In a fork, merge from this repo
+when you want its changes.

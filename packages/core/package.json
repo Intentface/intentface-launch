@@ -3,6 +3,25 @@
   "version": "0.1.0",
   "license": "MIT",
   "description": "Product launch videos as code: frame-exact React scenes rendered in headless Chromium, with a studio, storyboards and an agent workflow.",
+  "keywords": [
+    "video",
+    "launch-video",
+    "product-video",
+    "motion-design",
+    "react",
+    "renderer",
+    "ffmpeg",
+    "claude-code",
+    "agent-skills"
+  ],
+  "homepage": "https://github.com/Intentface/intentface-launch#readme",
+  "bugs": "https://github.com/Intentface/intentface-launch/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Intentface/intentface-launch.git",
+    "directory": "packages/core"
+  },
+  "author": "Intentface",
   "type": "module",
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json && cp studio/studio.css dist/studio/ && cp -R studio/fonts dist/studio/",

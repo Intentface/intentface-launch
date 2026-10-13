@@ -3,7 +3,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, write
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { parseJsonc } from "./jsonc.js";
-import { CORE, CORE_PACKAGE, findRoot, launchPackages } from "./project.js";
+import { CORE, CORE_PACKAGE, findRoot, launchCommand, launchPackages, packageManager } from "./project.js";
 
 /**
  * Add-ons `intentface-launch add` knows by a short name. Any other package
@@ -51,13 +51,6 @@ function hostRoot(from: string) {
     if (existsSync(join(dir, "package.json"))) return dir;
     if (dirname(dir) === dir) throw new Error("No package.json here or above: run this in your product repo.");
   }
-}
-
-function packageManager(host: string) {
-  if (existsSync(join(host, "pnpm-lock.yaml")) || existsSync(join(host, "pnpm-workspace.yaml"))) return "pnpm";
-  if (existsSync(join(host, "yarn.lock"))) return "yarn";
-  if (existsSync(join(host, "bun.lock")) || existsSync(join(host, "bun.lockb"))) return "bun";
-  return "npm";
 }
 
 function install(host: string, packages: string[]) {
@@ -155,18 +148,26 @@ export default defineConfig({
 });
 `;
 
-const CLAUDE = `# Launch videos
+const CLAUDE = (cmd: string) => `# Launch videos
 
 Product launch videos for this repo, written as code with @intentface-launch.
-Run commands from the repo root as \`pnpm launch <command>\` (\`pnpm launch\` lists them).
+Run commands from the repo root as \`${cmd} <command>\` (\`${cmd}\` lists them).${
+  cmd === "pnpm launch"
+    ? ""
+    : `
+The guides and skills write commands as \`pnpm launch <command>\`: in this repo, run them as \`${cmd} <command>\`.`
+}
 Videos live in \`launch/videos/<id>/\`; paths below are relative to \`launch/\`.
 
-Install more capabilities with \`pnpm launch add <name>\` (\`pnpm launch addons\` lists them);
+Install more capabilities with \`${cmd} add <name>\` (\`${cmd} addons\` lists them);
 each one adds its guide below.
 
-The skills in \`.claude/skills/\` come from the packages, and \`pnpm launch update\` replaces them,
+The skills in \`.claude/skills/\` come from the packages, and \`${cmd} update\` replaces them,
 so do not edit them here. When a video shows a skill is wrong or missing something, tell the person
 what you learned and which skill it belongs in, so it can be revised in @intentface-launch.
+
+How this team makes its videos (a fixed structure, a length, music or sound to use, steps to always
+or never take) can be written here, above the add-ons list: \`${cmd} update\` keeps it.
 
 `;
 
@@ -236,10 +237,10 @@ export function init(cwd: string, folder = "launch") {
   writeFileSync(join(launch, "launch.config.ts"), CONFIG(existsSync(join(host, "public"))));
   writeFileSync(
     join(launch, ".gitignore"),
-    "# Regenerated: renders, stills, boards, and capture frames.\nout/\nvideos/*/captures/*/\n",
+    "# Regenerated: renders, stills, boards, and capture frames.\nout/\nvideos/*/captures/*/\n# Keys (ElevenLabs, the product's API).\n.env\n",
   );
   writeJson(join(launch, "tsconfig.json"), tsconfig(host));
-  writeFileSync(join(launch, "CLAUDE.md"), CLAUDE);
+  writeFileSync(join(launch, "CLAUDE.md"), CLAUDE(launchCommand(host)));
   excludeFromHost(host, folder);
 
   const fresh = readJson(join(host, "package.json"));
@@ -249,11 +250,13 @@ export function init(cwd: string, folder = "launch") {
     writeJson(join(host, "package.json"), fresh);
   }
   update(host);
+  const cmd = launchCommand(host);
+  const col = (s: string) => `${cmd} ${s}`.padEnd(cmd.length + 11);
   console.log(`
   ${folder}/ is ready.
-    pnpm launch setup              browser for rendering (once per machine; also needs ffmpeg)
-    pnpm launch addons             what else can be installed
-    pnpm launch new <id>           first video, then pnpm launch dev
+    ${col("setup")}browser for rendering (once per machine; also needs ffmpeg)
+    ${col("addons")}what else can be installed
+    ${col("new <id>")}first video, then ${cmd} dev
 `);
 }
 
@@ -305,13 +308,12 @@ function pruneSkills(host: string, keep: string[]) {
 export function listAddons(cwd: string) {
   const host = hostRoot(cwd);
   const present = launchPackages(host).filter((p) => p.name !== CORE_PACKAGE);
+  const cmd = launchCommand(host);
   for (const [name, a] of Object.entries(ADDONS)) {
-    const mark = present.some((p) => p.name === a.package) ? "installed" : `pnpm launch add ${name}`;
+    const mark = present.some((p) => p.name === a.package) ? "installed" : `${cmd} add ${name}`;
     console.log(`  ${name.padEnd(18)} ${a.about}\n  ${"".padEnd(18)} ${mark}\n`);
   }
   for (const p of present.filter((p) => !Object.values(ADDONS).some((a) => a.package === p.name)))
     console.log(`  ${p.name}\n  ${"".padEnd(18)} installed\n`);
-  console.log(
-    '  Any package with an "intentface-launch" field in its package.json is an add-on: pnpm launch add <name>',
-  );
+  console.log(`  Any package with an "intentface-launch" field in its package.json is an add-on: ${cmd} add <name>`);
 }

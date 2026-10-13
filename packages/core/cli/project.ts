@@ -66,6 +66,25 @@ export function project(): Project {
 
 export const CORE_PACKAGE = "@intentface-launch/core";
 
+/** The package manager a repo uses, from the lockfile at or above `from` (npm when there is none). */
+export function packageManager(from: string): "pnpm" | "yarn" | "bun" | "npm" {
+  for (let dir = resolve(from); ; dir = dirname(dir)) {
+    if (existsSync(join(dir, "pnpm-lock.yaml")) || existsSync(join(dir, "pnpm-workspace.yaml"))) return "pnpm";
+    if (existsSync(join(dir, "yarn.lock"))) return "yarn";
+    if (existsSync(join(dir, "bun.lock")) || existsSync(join(dir, "bun.lockb"))) return "bun";
+    if (existsSync(join(dir, "package-lock.json")) || dirname(dir) === dir) return "npm";
+  }
+}
+
+/**
+ * How to run the CLI there, for the hints it prints: the `launch` script under
+ * the repo's package manager, or npx, which passes flags on without `--`.
+ */
+export function launchCommand(from = process.cwd()) {
+  const pm = packageManager(from);
+  return { pnpm: "pnpm launch", yarn: "yarn launch", bun: "bun run launch", npm: "npx intentface-launch" }[pm];
+}
+
 export type LaunchPackage = { name: string; dir: string; meta: Record<string, unknown> };
 
 /** Dependencies declared in every package.json from `root` up to the repo's top. */

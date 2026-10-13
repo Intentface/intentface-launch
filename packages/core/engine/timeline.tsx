@@ -54,7 +54,8 @@ export function setActiveVariant(video: { variant: string | null; variantData: R
 }
 
 /**
- * The video's clock and frame. `format` is the shape on screen (`name`:
+ * The video's clock and frame. `duration` is the length in frames of the enclosing shot (or
+ * <Sequence>), for a move that spans the whole shot. `format` is the shape on screen (`name`:
  * "landscape", "vertical", "square", "portrait" or a key of the video's
  * `formats`); scenes reflow on it, as in `format.aspect < 1 ? column : row`.
  * `variant` is the variant on screen (a key of the video's `variants`), or

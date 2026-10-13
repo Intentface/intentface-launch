@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import { join, relative } from "node:path";
 import { formatSuffix } from "./browser.js";
 import type { Problem, Rules } from "./inspect.js";
+import { launchCommand } from "./project.js";
 import { loadRules } from "./rules.js";
 import { outDir, root } from "./util.js";
 
@@ -38,7 +39,7 @@ function checkSource(dir: string, rules: Rules): Problem[] {
       problems.push({
         check: "source",
         severity: "error",
-        message: `${rel}: frames missing, run pnpm launch capture ${video} ${name}`,
+        message: `${rel}: frames missing, run ${launchCommand(root())} capture ${video} ${name}`,
       });
     }
   }

@@ -45,7 +45,7 @@ To animate parts, the parts must be addressable. If the brand package exports th
 
 **Symbol, then wordmark.** The symbol performs; the wordmark resolves 9 to 24 frames after the symbol settles, with a simpler motion (fade, short slide or mask) so it does not compete.
 
-**Point of view, as built for the Intentface sting.** Put each stroke in the plane spanned by its 2D direction and the camera's final axis. From the side the strokes fan out in depth; from the front each one projects onto its stroke. A disk or hoop in a plane facing the camera's side view is a straight bar when seen edge-on. The build:
+**Point of view, as built for a sting of strokes from a hub, through a prism.** Put each stroke in the plane spanned by its 2D direction and the camera's final axis. From the side the strokes fan out in depth; from the front each one projects onto its stroke. A disk or hoop in a plane facing the camera's side view is a straight bar when seen edge-on. The build:
 
 - The light module in `@intentface-launch/three` (`Beam`, `Ring`, `Wave`, `Glow`, `Cone`, `Prism`, `Smear`, `useStageItem`, or the `<Light.*>` components for a handful of lights; see its LAUNCH.md) on a black stage.
 - When the concept is a prism, use the real thing: a `Cone` with a little `haze` for the incoming light through air, a `Prism` (or `spectrumBands`) for the split, so the angles and the order of colours are physical; `dispersion` 3 to 5 makes the fan wide enough to read. A soft `Ring` (`soft: 1`) is a glowing rim where the hard torus reads as a neon tube.
@@ -59,7 +59,7 @@ To animate parts, the parts must be addressable. If the brand package exports th
 
 **Handing off from 3D to the exact logo at the lock.** Seen straight on from `fillDistance(1080, fov) / zoom`, one world unit is `zoom` pixels. With world units set to logo pixels, an SVG layer at the same zoom and centre takes over pixel for pixel. Put the SVG above the stage, fade it in over the lock, and fade the stage out underneath it, so the bloom decays as a halo around the flat logo. Verify with `pnpm launch diff <id> --frame <shot>:<flash>-1 --against <shot>:<flash>`: both frames side by side with the difference in magenta, and where it is. Only brightness may differ, never position; a ring of magenta round every edge is an offset.
 
-**Black to black: giving the mark back to the light.** The audio-logo cut of the Intentface sting shows only the mark and starts and ends on black, so it can sit anywhere: before a talk, after a clip, under a social post. It is the same flight, impact and turn into the lock, then:
+**Black to black: giving the mark back to the light.** The audio-logo cut of that sting shows only the mark and starts and ends on black, so it can sit anywhere: before a talk, after a clip, under a social post. It is the same flight, impact and turn into the lock, then:
 
 - **Hold the exact mark through the tonal tail**, about 1 s. Let the bloom decay to a clean flat hold, then fade the stage back in under the SVG over about 10 frames before the release. The halo returning reads as the mark gathering itself. The stage popping in under an opaque SVG shows as a halo pop.
 - **Hand back the way you handed off.** One zoom function after the lock (`markZoom`), used by both the SVG and the 3D camera (`distance = fillDistance(1080, fov) / zoom`). It starts at zero speed on the lock and never stops: slow under the hold (1.15× by the release), fast into the light. The lock stays the stillest frame, and the push flows on into the release without a new start.
@@ -107,7 +107,7 @@ Everything before the lock is optional; the held frame is not. It must be the br
 - 2 to 6 notes, a rhythm from the name's syllables if possible, an interval resolving upward for optimism. **Timbre is identity**: one signature source is worth more than the melody.
 - Layers, in order: a riser under the anticipation, a transient (click, knock) on the lock, a short sub under it for weight, the tonal element people remember, shimmer or air carrying the hold, a tail that decays before the cut.
 - **Sync:** the transient lands on the lock or 1 to 2 frames before it, on a sharp frame, never during a blur. Parts assembling can each take a note, the last note on the last part.
-- **A delivered sonic logo has no beat grid** (`beats` reports low confidence on a 4 s sting). Time the picture to its events instead: `pnpm launch sound <id> --png` lists them with frames (on the Intentface sting: impact f20.5 in sub, low and mid; a pulse every 0.131 s; the riser to f144; cut to boom f143, the high band cut and a +10 dB low rise peaking at 2.48 s; the tail from f153.5). The boom at a riser's cut is a band-limited rise, not an onset, which is why `beats` misses it. Declare the lock: `hits: [{ at: 0, sound: "boom" }]` on the lock shot, and `check` fails if the picture drifts more than 2 frames from it.
+- **A delivered sonic logo has no beat grid** (`beats` reports low confidence on a 4 s sting). Time the picture to its events instead: `pnpm launch sound <id> --png` lists them with frames (on that sting: impact f20.5 in sub, low and mid; a pulse every 0.131 s; the riser to f144; cut to boom f143, the high band cut and a +10 dB low rise peaking at 2.48 s; the tail from f153.5). The boom at a riser's cut is a band-limited rise, not an onset, which is why `beats` misses it. Declare the lock: `hits: [{ at: 0, sound: "boom" }]` on the lock shot, and `check` fails if the picture drifts more than 2 frames from it.
 - In this pipeline the sound comes in the video's track: put the logo's lock time and its sound pattern in the music brief's hits (music-brief skill). Mix it for phone speakers: mono-safe, the sub supporting rather than essential. `pnpm launch check` measures -14 LUFS integrated and -1 dBTP by default (social); broadcast delivery of a sting wants EBU R128 s1: `audio.loudness: "sting"` (-23 LUFS, true peak -1 dBTP, and the loudest 3 s at most -18 LUFS). `mix` masters to it and `check` measures all three: a loud-for-its-length sting can pass integrated and still break the short-term cap.
 - It must read without sound, and the sound must read without the picture.
 
@@ -116,7 +116,7 @@ Everything before the lock is optional; the held frame is not. It must be the br
 Plan them before building, since each changes the framing:
 
 - short and long cuts (separate video ids sharing the logo component),
-- symbol only, black to black: the audio logo, usable before or after anything. The held frame is then a hold in the middle, not the last frame, and the rules of section 5 apply to the hold. Check the brand's rules for the standalone symbol (Intentface: `IntentfaceAsterisk` only where Intentface is named elsewhere in the same context),
+- symbol only, black to black: the audio logo, usable before or after anything. The held frame is then a hold in the middle, not the last frame, and the rules of section 5 apply to the hold. Check the brand's rules for the standalone symbol (some allow it only where the name appears elsewhere in the same context),
 - 16:9, 9:16 and 1:1 (`width`/`height` in `defineVideo`),
 - light and dark,
 - with and without sound,

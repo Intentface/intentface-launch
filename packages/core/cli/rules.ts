@@ -11,6 +11,7 @@ const DEFAULTS: Rules = {
   safe: 96,
   platforms: ["tiktok", "reels", "shorts"],
   minText: 28,
+  uiText: 20,
   contrast: 4.5,
   contrastLarge: 3,
   largeText: 32,

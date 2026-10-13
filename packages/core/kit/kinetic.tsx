@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { type Easing, ease, interpolate, lerp, progress, useFrame } from "../engine/index.js";
+import { useBaseline } from "./baseline.js";
 
 export type SlamProps = {
   children: ReactNode;
@@ -36,7 +37,8 @@ const variation = (axes: Record<string, [number, number]>, p: number) =>
 
 /**
  * One kinetic word or phrase: lands on a frame with scale, blur and a short
- * fade, and holds. The building block for type that cuts on the beat.
+ * fade, and holds. The building block for type that cuts on the beat. It
+ * scales about its baseline, so the line does not judder on the pixel grid.
  */
 export function Slam({
   children,
@@ -54,6 +56,7 @@ export function Slam({
   style,
 }: SlamProps) {
   const frame = useFrame();
+  const baseline = useBaseline();
   if (frame < at || (exit !== undefined && frame >= exit + exitDuration)) return null;
   const p = progress(frame, at, duration, easing);
   const fade = progress(frame, at, Math.min(6, duration), ease.soft);
@@ -74,15 +77,18 @@ export function Slam({
       data-launch-check={cutOff ? "off" : undefined}
       style={{
         display: "inline-block",
+        position: "relative",
         whiteSpace: "pre",
         opacity: fade * (1 - out),
         transform: `translate(${lerp(offset[0], 0, p)}em, ${lerp(offset[1], 0, p) - out * 0.15}em) scale(${lerp(from, 1, p)})`,
+        transformOrigin: baseline.origin(),
         filter: p < 0.999 ? `blur(${(1 - p) * blur}em)` : undefined,
         fontVariationSettings: axes && !letters ? variation(axes, p) : undefined,
         ...style,
       }}
     >
       {content}
+      {from !== 1 && baseline.probe}
     </span>
   );
 }

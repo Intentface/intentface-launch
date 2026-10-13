@@ -19,3 +19,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+Trademarks
+
+The MIT License above covers the software only. It grants no rights to the
+Intentface or Intentface Launch names, logos or logomarks, including the Launch
+mark (the studio's launch-mark module and the icon in index.html). These are
+trademarks of Intentface, and using them in your own material requires
+Intentface's formal written approval. If you distribute a modified version,
+remove them or replace them with your own.
+
+---
+
+Files under other terms
+
+The MIT License above does not cover these files, which keep their own terms:
+
+- The sound effects in sfx/ (the *.mp3 files). They were generated with
+  ElevenLabs for Intentface. You may use them in videos you make with these
+  packages, but not distribute them on their own, as a sound library or
+  otherwise. See sfx/README.md.
+- The fonts the studio bundles (Inter and Ioskeley Mono, in studio/fonts/),
+  under the SIL Open Font License 1.1, whose text is beside each font.

@@ -24,7 +24,7 @@ export function Swap({
   blur = 6,
   scale = 0.04,
   rise = 0,
-  easing = { enter: ease.out, exit: ease.in },
+  easing = { enter: ease.out, exit: ease.out },
   style,
 }: {
   items: SwapItem[];
@@ -41,10 +41,11 @@ export function Swap({
   /** Pixels the old content rises as it leaves and the new rises from as it arrives (4 for a text swap). */
   rise?: number;
   /**
-   * Curve of the entry and the exit, or one curve for both. The default
-   * (`ease.out` in, `ease.in` out) suits content inside a container that is
-   * changing shape. A swap in place, where nothing else moves, wants
-   * `ease.swap`; an exit the viewer just caused wants `ease.out`.
+   * Curve of the entry and the exit, or one curve for both. The default is
+   * `ease.out` for both: the old content is mostly gone within a few frames,
+   * before the new one arrives (on `ease.in` the old label is still nearly
+   * opaque when the new one starts, and the two read as one smudge). A swap in
+   * place, where nothing else moves, can take `ease.swap`.
    */
   easing?: Easing | { enter: Easing; exit: Easing };
   style?: CSSProperties;

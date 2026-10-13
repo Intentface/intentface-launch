@@ -31,6 +31,9 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --size W  --cols N       tile width (default 320) and columns (default 6)
       --beats [--offset N]     one tile per beat (N frames after it), labelled bar.beat
       --samples N              3D stages at N samples per frame
+  measure <id> --shot s        motion as numbers, every frame: when it lands and how long it holds,
+                               how fast the ink moves, and judder (px off a smooth path) → out/measure/
+      --from F --to F          range, same frame names as still   --crop x,y,w,h  one element
   diff <id> --frame F --against G   two frames side by side and their difference, with how
                                much differs and where (G: a frame name, or an image file)
       --against-video v        G is a frame of video v   --crop x,y,w,h [--zoom Z]  a region
@@ -49,6 +52,8 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --angle 180 --phase -90  shutter angle and phase, in degrees
       --from F --to F          frame range
       --master                 also write a ProRes 422 HQ .mov
+      --gif [W]                also a looping GIF under 8 MB, for READMEs and chat (at most W px wide)
+      --poster F               also frame F as a PNG, and a 1200×630 JPEG for link previews
       --workers N              browsers in parallel (default 8); fewer stall less on 3D
       --resume                 keep the chunks a failed render finished; render only the rest
       --check                  then run check on it
@@ -176,6 +181,21 @@ async function main() {
       console.log(`  ${file}`);
       break;
     }
+    case "measure": {
+      const { measure } = await import("./measure.js");
+      const crop = args.str("crop")?.split(",").map(Number);
+      if (crop && (crop.length !== 4 || crop.some((n) => !Number.isFinite(n))))
+        throw new Error("--crop x,y,width,height (video pixels)");
+      const out = await measure(need(), {
+        shot: args.str("shot"),
+        from: args.str("from") ?? (args.flags.from === undefined ? undefined : String(args.flags.from)),
+        to: args.str("to") ?? (args.flags.to === undefined ? undefined : String(args.flags.to)),
+        crop: crop && { x: crop[0], y: crop[1], width: crop[2], height: crop[3] },
+      });
+      for (const l of out.lines) console.log(`  ${l}`);
+      console.log(`  ${out.file}`);
+      break;
+    }
     case "diff": {
       const { diff } = await import("./diff.js");
       const frame = args.flags.frame ?? args.flags.at;
@@ -213,6 +233,8 @@ async function main() {
           workers: args.num("workers"),
           audio: args.flags.audio !== false,
           master: args.flags.master === true,
+          gif: args.flags.gif === true ? true : args.num("gif"),
+          poster: args.str("poster"),
           quick: preview,
           name: args.str("name"),
           resume: args.flags.resume === true,

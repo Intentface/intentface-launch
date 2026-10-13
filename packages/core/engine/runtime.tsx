@@ -3,7 +3,16 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { syncAnimations } from "./animations.js";
 import type { CaptionCue } from "./captions.js";
-import { hideText, type LayerBox, measureLayers, measureText, type TextSample, unclipLayer } from "./measure.js";
+import {
+  hideText,
+  type LayerBox,
+  measureLayers,
+  measureText,
+  measureUiText,
+  type TextSample,
+  type UiTextSample,
+  unclipLayer,
+} from "./measure.js";
 import { Stage } from "./stage.js";
 import {
   type BlurRequest,
@@ -70,6 +79,8 @@ export type LaunchBridge = {
   seek(frame: number): Promise<BlurRequest | null>;
   /** The text on screen at the current frame (see measure.ts). */
   inspect(): TextSample[];
+  /** The product's UI text on screen and its sizes (see measure.ts), for UI shown too far away. */
+  uiText(): UiTextSample;
   /** Hide or show all text, painted, for measuring what is behind it. */
   hideText(hidden: boolean): Promise<void>;
   /** Layers on screen whose own edge could cut their content (see measure.ts). */
@@ -212,6 +223,10 @@ export function mountRenderer(video: Video, element: HTMLElement) {
       // Re-render, so canvases that declare text can paint without it (isTextHidden).
       flushSync(() => setShown({ ...shownNow, tick: shownNow.tick + 1 }));
       await ready();
+    },
+    uiText() {
+      const stage = element.querySelector<HTMLElement>(".launch-stage");
+      return stage ? measureUiText(stage) : { chars: 0, sizes: [] };
     },
     layers() {
       const stage = element.querySelector<HTMLElement>(".launch-stage");

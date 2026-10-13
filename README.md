@@ -1,3 +1,5 @@
+<img src=".github/icon.svg" width="96" height="96" alt="Intentface Launch">
+
 # Intentface Launch
 
 Product launch videos written as code. A video is a React component made of shots; a renderer plays it frame by frame in headless Chromium and encodes it to a 1080p60 (or 4K) mp4.
@@ -10,35 +12,28 @@ It is built to be driven by [Claude Code](https://claude.com/claude-code). You d
 - **Cut to music.** Beats, sections and quiet stretches are detected from the track, and shots are timed in beats.
 - **3D when it earns it.** An add-on puts live UI on panels in space, shot through a real lens with depth of field and motion blur.
 
-> **Status:** early (0.x) and experimental; see [Use at your own risk](#use-at-your-own-risk). The packages are not on npm yet, so you install them from a clone of this repo. Developed and tested on an Apple M2 Pro Mac with Claude Opus 5.5 at High effort in Claude Code; other machines, operating systems and models are not guaranteed to work. See [requirements](docs/content/docs/requirements.mdx).
+> **Status:** early (0.x) and experimental; see [Use at your own risk](#use-at-your-own-risk). Developed and tested on an Apple M2 Pro Mac with Claude Opus 5.5 at High effort in Claude Code; other machines, operating systems and models are not guaranteed to work. See [requirements](docs/content/docs/requirements.mdx).
 
 ## Quick start
 
-You need Node 22 or later, pnpm, ffmpeg and Claude Code. [uv](https://docs.astral.sh/uv/) is only needed for beat detection.
+You need Node 22 or later, ffmpeg and Claude Code. [uv](https://docs.astral.sh/uv/) is only needed for beat detection.
+
+Start your product locally (its dev server, in demo or seeded mode) with its source on the same machine: Claude reads the source, looks at the running app and captures its real UI from it. Then, from the product repo's root:
 
 ```sh
 brew install ffmpeg uv
-git clone https://github.com/Intentface/intentface-launch.git
-cd intentface-launch && pnpm install
+npx @intentface-launch/core init    # or: pnpm dlx @intentface-launch/core init
+pnpm launch setup                   # downloads the browser renders use, once per machine
+pnpm launch dev                     # the studio, at http://localhost:4400
 ```
 
-Fork it first if your team wants to change the skills or the engine for itself.
+`init` adds the package as a dev dependency, a `launch/` folder (a config, `videos/`, and a `CLAUDE.md` for Claude), a `launch` script in your `package.json`, and the skills in `.claude/skills/`. It works with pnpm, npm, yarn and bun; in an npm repo, run the CLI as `npx intentface-launch <command>`.
 
-Start your product locally (its dev server, in demo or seeded mode) with its source on the same machine: Claude reads the source, looks at the running app and captures its real UI from it. The videos can live in the product repo (below; best for recurring videos, versioned with the product) or in your checkout of this repo, which is a launch folder itself: link the product in `launch.config.ts` with `product: { path: "../my-app" }` (best for one-off videos, or several products from one place). The [quick start](docs/content/docs/quick-start.mdx) covers both.
-
-To set up a product repo, run from its root:
-
-```sh
-node /path/to/intentface-launch/packages/core/bin/launch.mjs init
-pnpm launch setup     # downloads the browser renders use, once per machine
-pnpm launch dev       # the studio, at http://localhost:4400
-```
-
-`init` adds a `launch/` folder (a config, `videos/`, and a `CLAUDE.md` for Claude), a `launch` script in your `package.json`, and the skills in `.claude/skills/`. It works with pnpm, npm, yarn and bun.
+To change the skills or the engine for your team, fork this repo: a checkout is a launch folder itself (link the product in `launch.config.ts` with `product: { path: "../my-app" }`), and a product repo can install from it. The [quick start](docs/content/docs/quick-start.mdx) covers both.
 
 Now open Claude Code in your repo and ask for a video:
 
-> Make a 30 second launch video for this product.
+> Look at my app and make a feature release video about our scheduling feature, 30 seconds.
 
 The `product-launch-video` skill takes it from there, and each step is agreed with you before the next one starts:
 
@@ -49,7 +44,9 @@ The `product-launch-video` skill takes it from there, and each step is agreed wi
 5. **Build.** Shots are finished one at a time, and Claude checks each in stills and contact sheets.
 6. **Check and render.** `pnpm launch check`, then `pnpm launch render` for the mp4.
 
-To update later, `git pull` in your clone (your repo links the packages from it), then `pnpm launch update` in your repo to refresh the skills.
+You can also start from screenshots of what to highlight, your own clips and music, or a recipe your team writes down once, such as a weekly update. See [recipes](docs/content/docs/recipes.mdx).
+
+To update later, update `@intentface-launch/core` (and any add-ons) like other dev dependencies, then run `pnpm launch update` to refresh the skills.
 
 ## A video in code
 

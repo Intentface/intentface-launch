@@ -1,0 +1,77 @@
+---
+title: Examples
+description: A library of animation patterns that recur in launch videos, each built once in the engine with its numbers, to copy from.
+source: videos
+---
+
+Some moves come up in video after video: a prompt typed close up, an answer
+streaming in, a status that changes, a number that proves a claim. The
+examples library builds each one once, checks it with `measure` and `check`,
+and writes down its numbers, so a shot that needs one starts from a working
+version.
+
+Each example video holds one family. Each shot is one pattern, written as a
+small component that takes its copy and cue frames as props, with a comment
+saying when to use it and why its numbers are what they are. They are drawn
+on a neutral made-up app. In a product video the same moves run on the
+product's own UI and in its look.
+
+Claude finds them through the product-launch-video skill's `patterns.md`,
+which lists every pattern with its numbers. The code is in this repo's
+`videos/` folder.
+
+## Look at one
+
+From a checkout of this repo:
+
+```sh
+pnpm launch sheet example-ai --shot cut-in --every 3
+pnpm launch still example-states --at status:+60,status:end --grid
+pnpm launch measure example-type --shot build-centred
+```
+
+Or open the studio (`pnpm launch dev`) and pick the video.
+
+## AI products: `example-ai`
+
+| Shot | Pattern | Use it for |
+| --- | --- | --- |
+| `cut-in` | Cut in on the caret | A prompt typed close up: a hard cut to about 2× closer on the caret while the typing carries on, so it reads as getting closer, not a new scene. |
+| `stream` | Streaming answer | The answer after send: words land in the accent and cool to ink, and the camera pulls back as the answer grows. |
+| `select` | Select a passage | Acting on part of a text: a selection band drags across a span word by word, then an action chip appears beside it. |
+| `agent-steps` | Agent steps | An agent working: a log writes itself a line at a time, each step spinning while it runs and checked when it is done. |
+
+## UI changing state: `example-states`
+
+| Shot | Pattern | Use it for |
+| --- | --- | --- |
+| `status` | Status pill that cycles | A state the product reports, in a sentence: the label rolls, the pill's width and colour follow, the line stays centred. |
+| `spread` | State spreading through a list | One action that changes many things: a click, then a wave down the rows. |
+| `progress-toast` | A task finishing | An export or deploy: a toast counts to 100%, becomes "Exported" with a check, and a headline rises from behind the window. |
+| `thread` | A conversation filling in | Chat or comments: typing dots, then the message, the list gliding up. |
+
+## Kinetic type: `example-type`
+
+| Shot | Pattern | Use it for |
+| --- | --- | --- |
+| `build-centred` | A line that stays centred as it builds | A claim told word by word on the beats. |
+| `slot` | A word on a reel | One product, many uses: the last word of a sentence rolls through options and brakes onto one. |
+| `wordmark-cut`, `wordmark-close` | Wordmark, then its last letters | An end card that feels final: the wordmark settles, then a hard cut to a close-up on its full stop. |
+| `punch` | Statement cards | A short manifesto: lines flicked in, hard cuts on the beat. |
+
+## Camera and composition: `example-camera`
+
+| Shot | Pattern | Use it for |
+| --- | --- | --- |
+| `wide-field` | A field wider than the frame | A long query typed close up: the camera pages across before the caret reaches the edge. |
+| `flick` | Cards flicked along a rail | Browsing templates or a gallery: a quick throw and a long glide that stops exactly on a card. |
+| `count-grid` | Proof by multiplication | A number that matters: a few cards, then the grid fills and the count runs up. |
+| `wall` | A wall of integrations | "Works with everything": tiles flow out around a still headline while the camera pulls back. |
+
+## Add a pattern
+
+A new pattern goes in the example video of its family (or a new
+`videos/example-<family>`), in the shared look the others use, as a component
+with props and a comment giving its numbers and their reasons. Check it with
+`still`, `sheet`, `measure` and `check` like any shot, then add it to
+`patterns.md` and to this page.

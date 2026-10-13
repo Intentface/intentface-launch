@@ -4,11 +4,16 @@ description: Every pnpm launch command, run from the product repo's root.
 source: packages/core/cli/launch.ts
 ---
 
+Commands are written as `pnpm launch <command>`. In an npm repo run them as
+`npx intentface-launch <command>`, in yarn as `yarn launch`, in bun as
+`bun run launch`. The CLI prints its hints in the repo's own form, and
+`launch/CLAUDE.md` tells Claude which one to use.
+
 ## Setup
 
 | Command | What it does |
 | --- | --- |
-| `node <checkout>/packages/core/bin/launch.mjs init` | Adds `launch/` to a product repo, a `launch` script and the skills. |
+| `npx @intentface-launch/core init` | Adds `@intentface-launch/core` as a dev dependency, `launch/`, a `launch` script and the skills. From a checkout, `node <checkout>/packages/core/bin/launch.mjs init` links the checkout instead. |
 | `pnpm launch setup` | Downloads the browser renders use. Once per machine. |
 | `pnpm launch addons` | Lists the add-ons. |
 | `pnpm launch add <name>` | Installs an add-on and links its guide into `launch/CLAUDE.md`. |
@@ -40,8 +45,9 @@ source: packages/core/cli/launch.ts
 | `pnpm launch sheet <id> --beats` | One tile per beat, to see whether something happens on each. |
 | `pnpm launch still <id> --at hero:+30 --samples 8` | A draft of a 3D frame: every `Stage3D` at 8 samples instead of its own (96), for composition. `sheet` takes `--samples` too. |
 | `pnpm launch still <id> --at hero:+30 --stage-debug` | The 3D stage's passes beside the frame, one image per frame: one sample without post, what glass sees, the floor's reflection, alpha, the backdrop. |
+| `pnpm launch measure <id> --shot <shot>` | Motion as numbers, from every frame of the shot (or `--from`/`--to`, `--crop x,y,w,h` for one element): the frame it lands (the last visible change before a quiet run) and how long it then holds, how fast the ink moves, and judder, how far it strays from a smooth path in pixels. Over 0.1 px on slow motion shows as shaking. Writes the series to `out/measure/`. |
 | `pnpm launch diff <id> --frame cut:end --against next` | Two frames side by side with a difference picture, and how much differs and where. `--against` also takes an image file, or a frame of another video with `--against-video <id>`; `--crop x,y,w,h` magnifies a region. |
-| `pnpm launch check [id]` | Source checks; with an id, also checks the rendered video: text, motion, cuts, loudness (with presets such as `"sting"` for EBU R128 s1), declared `hits` against the audio, layers that cut their own content, and frames that must match a reference (`matches` on a shot). 3D stages are drawn at 8 samples while checking (`--samples N` to change). |
+| `pnpm launch check [id]` | Source checks; with an id, also checks the rendered video: text, the product's UI shown too far away to read (its text mostly under 20 px), motion, cuts, loudness (with presets such as `"sting"` for EBU R128 s1), declared `hits` against the audio, layers that cut their own content, and frames that must match a reference (`matches` on a shot). 3D stages are drawn at 8 samples while checking (`--samples N` to change). |
 
 ## Rendering
 
@@ -53,6 +59,8 @@ source: packages/core/cli/launch.ts
 | `pnpm launch render <id>` | The final 1080p60 mp4. |
 | `pnpm launch render <id> --scale 2` | 4K. |
 | `pnpm launch render <id> --master` | Also writes a ProRes 422 HQ `.mov`. |
+| `pnpm launch render <id> --gif` | Also a looping GIF for READMEs, issues and chat, as large and smooth as fits 8 MB (`--gif 640` caps the width). Render a short `--from`/`--to` range for a clip. |
+| `pnpm launch render <id> --poster <frame>` | Also that frame (named as `still` names frames) as a PNG and, for a landscape video, a 1200×630 JPEG for link previews. |
 | `pnpm launch render <id> --resume` | Renders only the chunks a failed or stopped render left. |
 | `pnpm launch render <id> --format vertical` | Another shape the video declares in `formats`, as `<id>-vertical.mp4`. `still`, `sheet` and `check` take `--format` too. |
 | `pnpm launch render <id> --variant ep02` | One of the video's `variants`, as `<id>-ep02.mp4`. `--variant all` renders the video and every variant; every command takes `--variant`, and `check` takes `all` too. |

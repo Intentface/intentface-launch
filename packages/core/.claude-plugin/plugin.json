@@ -1,0 +1,9 @@
+{
+  "name": "intentface-launch",
+  "description": "Skills for making product launch videos from a product's real UI with Intentface Launch: the method, creative direction, kinetic type, UI motion, easing, logo animation, review, music and sound.",
+  "author": { "name": "Intentface", "url": "https://github.com/Intentface" },
+  "homepage": "https://github.com/Intentface/intentface-launch#readme",
+  "repository": "https://github.com/Intentface/intentface-launch",
+  "license": "MIT",
+  "keywords": ["video", "launch video", "motion design", "animation"]
+}

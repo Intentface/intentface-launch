@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import { launchCommand } from "./project.js";
 import { root } from "./util.js";
 
 const VIDEO = (id: string, title: string) => `import { defineVideo, tempo } from "@intentface-launch/core";
@@ -108,5 +109,5 @@ export function scaffold(id: string, title = id.replace(/-/g, " ")) {
   writeFileSync(join(dir, "brief.md"), BRIEF(title));
   writeFileSync(join(dir, "captures", "main.capture.ts"), CAPTURE);
   writeFileSync(join(dir, "audio", ".gitkeep"), "");
-  console.log(`  ${relative(root(), dir)}/ · open http://localhost:4400/?v=${id} after pnpm launch dev`);
+  console.log(`  ${relative(root(), dir)}/ · open http://localhost:4400/?v=${id} after ${launchCommand(root())} dev`);
 }

@@ -46,7 +46,7 @@ Distance goes down with frequency and up with ceremony. Anything travelling more
 
 Blur softens a swap or a slide and settles to 0: 1 px for streaming words, 2 px for text, icon, panel and skeleton swaps, 3 px for page slides and text reveals, 8 to 10 px for a success check's arrival. Never blur a plain fade or a colour change.
 
-Curves are named in each recipe; the micro-animations skill says how to choose one for a moment no recipe covers. In short: `ease.out` for surfaces (open, close, slide, resize, position), `ease.swap` for exchanges in place, `ease.soft` for opacity and colour, `ease.linear` for shimmer and spinners, `springTo` for anything physical, `overshootEase(amount)` for the few entrances that pop. The product's own motion and a requested brand's bounce limit win over any value here: in an Intentface-brand video, overshoot is 0.05 at most.
+Curves are named in each recipe; the micro-animations skill says how to choose one for a moment no recipe covers. In short: `ease.out` for surfaces (open, close, slide, resize, position), `ease.swap` for exchanges in place, `ease.soft` for opacity and colour, `ease.linear` for shimmer and spinners, `springTo` for anything physical, `overshootEase(amount)` for the few entrances that pop. The product's own motion and a requested brand's bounce limit win over any value here.
 
 ## Opens and closes
 
@@ -76,7 +76,7 @@ Web timings assume the person caused the change and is looking at it. A viewer i
 
 ## Recipes
 
-Frames are relative to the triggering event (usually the cursor's click frame, `c`).
+Frames are relative to the triggering event (usually the cursor's click frame, `c`). Whole patterns built from these (a status pill, state spreading through a list, a task finishing, a chat filling in, a streaming answer) are in the product-launch-video skill's [patterns.md](../product-launch-video/patterns.md), with their code.
 
 | Moment | Build it with |
 |---|---|

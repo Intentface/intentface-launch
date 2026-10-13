@@ -26,6 +26,13 @@ export type CameraKey = {
    * camera rounds the corner instead of stopping there.
    */
   travel?: number;
+  /**
+   * Jump to this view on frame `at` instead of moving there: a cut inside the shot, closer or
+   * wider, while what is on screen carries on (typing that does not pause reads as getting closer,
+   * not as a new scene). Keep the cut's frame out of a `MotionBlur` range, or its samples average
+   * the two views.
+   */
+  cut?: boolean;
   /** Extra space around a rect target, as a fraction of the frame (0.1 = 10%). */
   padding?: number;
 };
@@ -75,9 +82,10 @@ export function cameraAt(
   let rotate = views[0].rotate ?? 0;
   for (let i = 1; i < keys.length; i++) {
     const key = keys[i];
+    if (key.cut && frame < key.at) continue;
     const start = key.travel !== undefined ? key.at - key.travel : keys[i - 1].at;
-    if (frame <= start) continue;
-    const t = (key.easing ?? ease.inOut)(Math.min(1, (frame - start) / (key.at - start || 1)));
+    if (!key.cut && frame <= start) continue;
+    const t = key.cut ? 1 : (key.easing ?? ease.inOut)(Math.min(1, (frame - start) / (key.at - start || 1)));
     const a = views[i - 1];
     const b = views[i];
     x += (b.x - a.x) * t;

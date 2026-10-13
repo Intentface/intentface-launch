@@ -10,6 +10,7 @@ import {
   useFrame,
   useVideoInfo,
 } from "../engine/index.js";
+import { useBaseline } from "./baseline.js";
 
 export type TextUnit = {
   text: string;
@@ -90,7 +91,7 @@ export type RevealProps = RevealTiming & {
   rise?: number;
   /** Start blur, in em. */
   blur?: number;
-  /** Scale each unit settles from (0.9 grows into place, 1.2 settles down onto the page). */
+  /** Scale each unit settles from (0.9 grows into place, 1.2 settles down onto the page), about its baseline. */
   scale?: number;
   /**
    * Masked rise: each unit rises out of its own clip, padded `mask` em (0.15
@@ -157,6 +158,9 @@ export function Reveal({
 }: RevealProps) {
   const frame = useFrame();
   const { fps } = useVideoInfo();
+  // Units share one font, so one probe in the first gives every unit its baseline.
+  const baseline = useBaseline();
+  const scaled = scale !== undefined && scale !== 1;
   const units = splitText(children, by);
   const { starts, length, landed } = revealTimes(children, fps, {
     at,
@@ -208,7 +212,7 @@ export function Reveal({
     const check = unit.index === last ? "off" : undefined;
     const transform = [
       lift ? (pad === undefined ? `translateY(${(1 - p) * lift}em)` : `translateY(${(1 - p) * lift * 100}%)`) : "",
-      scale !== undefined && scale !== 1 ? `scale(${lerp(scale, 1, p)})` : "",
+      scaled ? `scale(${lerp(scale, 1, p)})` : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -217,12 +221,14 @@ export function Reveal({
       whiteSpace: "pre",
       opacity: pad === undefined || soft > 0 ? p : 1,
       transform: transform || undefined,
+      ...(scaled && { position: "relative", transformOrigin: baseline.origin() }),
       filter: p < 1 && soft > 0 ? `blur(${(1 - p) * soft}em)` : undefined,
       fontVariationSettings: settings,
     };
     const node = (
       <span key={unit.index} style={inner} data-launch-check={pad === undefined ? check : undefined}>
         {content}
+        {scaled && unit.index === 0 && baseline.probe}
       </span>
     );
     if (pad === undefined) return node;

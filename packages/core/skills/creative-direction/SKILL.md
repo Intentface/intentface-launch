@@ -74,6 +74,7 @@ One hero reveal and 2 to 4 supporting ones, each named in the shot's `notes`:
 | Mask or wipe (through a shape, text counters, the last shot's geometry) | a `clip-path` or mask computed from the frame |
 | Light sweep, rim light | `Stage3D`'s `light` animated across `Panel`s |
 | Push-in, zoom-through (into a detail that opens the next scene) | `Camera` keys in log zoom, `transitions.zoom`, cut at the fastest frame inside `MotionBlur` |
+| Cut in on the action (closer, without a new scene) | a hard cut, in one frame, to 2 to 2.5× closer on where the action is (the caret, the cursor), while the action carries straight on: typing never pauses for the cut. One continuous action across the cut reads as getting closer; a pause turns it into a new shot. Cut back out the same way. Build it with a `Camera` key with `cut: true`, or two shots on one clock (`continues`) |
 | Pull-back (a detail becomes the system) | `Camera` from a mark's rect to `fit()` |
 | Match cut (shape, colour or movement carried across) | end shot A and start shot B on the same size and position; continue the momentum: cut a 12-frame move at frame 6, pick up on frame 7 |
 | Morph (A's geometry becomes B's) | one element on `springTo`, content in `Swap` (ui-motion skill) |

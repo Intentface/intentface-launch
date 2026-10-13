@@ -12,6 +12,7 @@ import { compareImages, describeDifference } from "./diff.js";
 import { grab } from "./frames.js";
 import { loudnessName, loudnessTarget, measureLoudness } from "./loudness.js";
 import { type Mix, mixAudio } from "./mix.js";
+import { launchCommand } from "./project.js";
 import { resolveFrame, tileImage } from "./review.js";
 import { analyseSound, findSound, heardAudio } from "./sound.js";
 import { assetPath, outDir, root } from "./util.js";
@@ -110,6 +111,51 @@ function creeping(readable: Sample[], step: number, fps: number) {
     }
   }
   return best;
+}
+
+/** UI text on screen at one sampled frame: characters at each on-screen size. */
+type UiSample = { frame: number; chars: number; sizes: [number, number][] };
+
+/** Characters of UI text a frame needs before its size is judged: a label or two is not "the UI". */
+const UI_CHARS = 40;
+
+/**
+ * The product's UI shown too far away: for a second or more, most of its text (by characters) is
+ * under `rules.uiText` on screen. Text in Snapshots and text marked `off` is never read by the
+ * reading checks, so this is the only check that sees it.
+ */
+export function uiChecks(samples: UiSample[], info: Info, rules: Rules, step: number): Problem[] {
+  const unit = Math.min(info.width, info.height) / 1080;
+  const limit = rules.uiText * unit;
+  const small: { frame: number; median: number }[] = [];
+  for (const s of samples) {
+    if (s.chars < UI_CHARS) continue;
+    const sorted = [...s.sizes].sort((a, b) => a[0] - b[0]);
+    let seen = 0;
+    let median = 0;
+    for (const [size, n] of sorted) {
+      seen += n;
+      median = size;
+      if (seen >= s.chars / 2) break;
+    }
+    if (median < limit) small.push({ frame: s.frame, median });
+  }
+  const problems: Problem[] = [];
+  for (const run of runs(small, step)) {
+    const length = span(run, step);
+    if (length < info.fps) continue;
+    const start = run[0].frame;
+    const shot = [...info.shots].reverse().find((s) => start >= s.from);
+    const median = Math.round(Math.max(...run.map((r) => r.median)) / unit);
+    problems.push({
+      check: "ui",
+      severity: "warn",
+      shot: shot?.id,
+      frame: start,
+      message: `the UI is shown far away for ${sec(length, info.fps)}: most of its text is ${median} px or less on screen (at 1080p; ${rules.uiText} wanted). Push in until the part the story is about reads at ${rules.minText} px or more, or keep a wide view under a second. Decoration that is not UI: data-launch-check="decor"`,
+    });
+  }
+  return problems;
 }
 
 /** WCAG relative luminance of an sRGB pixel. */
@@ -217,7 +263,7 @@ function loudness(info: Info, rules: Rules, problems: Problem[], mixed: Mix | nu
     problems.push({
       check: "loudness",
       severity: "error",
-      message: `short-term maximum ${shortTerm} LUFS, cap ${cap}${spec}: lower the loudest 3 s (\`pnpm launch sound\` shows where)`,
+      message: `short-term maximum ${shortTerm} LUFS, cap ${cap}${spec}: lower the loudest 3 s (\`${launchCommand(root())} sound\` shows where)`,
     });
   }
   if (Number.isFinite(peak) && peak > ceiling) {
@@ -259,7 +305,7 @@ async function hitsCheck(videoId: string, info: Info, problems: Problem[]) {
       problems.push({
         ...at,
         frame,
-        message: `hit on "${hit.sound}" at f${frame}: no ${hit.sound} in the audio (pnpm launch sound ${videoId} lists what is there)`,
+        message: `hit on "${hit.sound}" at f${frame}: no ${hit.sound} in the audio (${launchCommand(root())} sound ${videoId} lists what is there)`,
       });
       return { shot: shot.id, frame, sound: hit.sound, soundFrame: null, off: null };
     }
@@ -827,6 +873,7 @@ export async function inspect(
 
   // 1. Sample: text on screen, a thumbnail for motion, and (four times a second) layer edges.
   const items = new Map<number, Item>();
+  const ui: UiSample[] = [];
   const thumbs: { frame: number; pixels: Buffer }[] = [];
   const thumb = THUMB / width;
   const layerStep = Math.max(step, Math.round(fps / 4 / step) * step);
@@ -834,6 +881,7 @@ export async function inspect(
   for (let f = 0; f < info.durationInFrames; f += step) {
     await r.seek(f);
     await sampleText(r, f, items);
+    ui.push({ frame: f, ...(await r.page.evaluate(() => window.__launch?.uiText() ?? { chars: 0, sizes: [] })) });
     if (f % layerStep === 0) crops.push(...(await layerCuts(r, f)));
     const grey = await sharp(await r.shoot("jpeg", 80, thumb))
       .greyscale()
@@ -848,6 +896,7 @@ export async function inspect(
   // 2. Text: hold, size, safe area, platform UI, copy rules, lint.
   const text = textChecks(items, info, rules, step);
   problems.push(...text.problems);
+  problems.push(...uiChecks(ui, info, rules, step));
   // 3. Contrast, measured on the rendered pixels.
   problems.push(...(await contrastChecks(r, text.contrastAt)));
   // 4. Held frames against their references (`matches`), and layers cutting their content.

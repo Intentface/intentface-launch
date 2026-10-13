@@ -16,7 +16,7 @@ The curve carries the meaning; the duration only scales it. Decide what the moti
 | The motion | Curve | Why |
 |---|---|---|
 | Arrives, opens, grows, slides, resizes, lands, follows | `ease.out` | The workhorse. 40% of the way after a tenth of the time, 96% at half: it answers at once and spends the rest settling. Nearly every micro-animation is this curve. |
-| A large travel or a hero arrival that should glide in | `ease.expo` | The same shape with a longer tail; feels expensive. Too slow for small UI. |
+| A large travel or a hero arrival that should glide in | `ease.expo` | The same shape with a longer tail; feels expensive. Too slow for small UI. Its last third moves under half a pixel a frame, so it looks landed well before its duration: a 16-frame entrance at about frame 11 (`out` at 12). Put the next beat after where it lands (`pnpm launch measure`), not after the duration. |
 | An exchange in place, where nothing travels (icon or label cross-fade, skeleton to content, a pulse in a loop) | `ease.swap` (`<Swap easing={ease.swap}>`) | Symmetric and gentle. With no direction of arrival, neither end should be favoured. |
 | Opacity or colour alone | `ease.soft` | A fade reads evenly on it; on `ease.out` it snaps on and lingers. |
 | A pop: a small thing arriving with life (a dot, a knob, digits, a check settling) | `overshootEase(amount)` | Passes the target once and comes back, landing exactly at the end. Section 2. |
@@ -46,7 +46,7 @@ The tokens name these in one vocabulary, so a video's moves feel like one hand m
 - **Overshoot shrinks as size grows.** A 12 px dot can pass its target by a quarter; a panel cannot pass it by 2% without wobbling.
 - **Only toward the positive state.** Opening, turning on, succeeding. Closing, turning off and dismissing land flat.
 - **On the property that is physical:** position and scale. The fade beside it stays on `ease.soft`.
-- **A brand's limit wins** over this table (an Intentface-brand video overshoots 0.05 at most).
+- **A brand's limit wins** over this table (its MOTION.md sets the bounce budget).
 - `springEase(bounce)` overshoots far less than its number suggests: `bounce` 0.3 peaks at about 4%. Use `overshootEase` when you mean a visible pop, and a spring when you mean physics.
 
 ## 3. Every property gets its own clock

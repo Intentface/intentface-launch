@@ -1,0 +1,209 @@
+---
+title: Recipes
+description: Ways to start a video, what you can hand Claude, and ideas for videos to build your own approach on.
+---
+
+There is no one way to ask for a video. Claude follows the same method each
+time (discover, script, music, sketch, build, check), and how much you give it
+up front only changes how many questions it asks. Start small and add material
+as you go, or hand over everything at once. These recipes are starting points:
+mix them, change them, and write down the ones that work for your team.
+
+## Start from one sentence
+
+Point Claude at the product and say what the video is for:
+
+> Look at my app in ../scheduler and make a feature release video about our
+> scheduling feature, 30 seconds.
+
+Claude reads the code and docs, runs the app, and looks at it. Then it asks the
+few things only you know, each with suggested answers from what it found: the
+moment a new user says "oh", who will watch and where, the pace, the music.
+Anything your sentence already said ("calm", "for LinkedIn", "no music yet") it
+does not ask again.
+
+Run the app's dev server in its demo or seeded mode first, or tell Claude how
+to start it. Claude records the real UI from it, so the video uses your
+product's own type, colours and data.
+
+## Show what to highlight with screenshots
+
+When you know which screens matter, show them. Make the video first (or let
+Claude make it), then put screenshots in the video's `reference/` folder:
+
+```text
+launch/videos/scheduling/reference/
+  01-empty-week.png
+  02-drag-to-book.png
+  03-conflict-warning.png
+```
+
+> The screenshots in reference/ are the three moments I want: the empty week,
+> dragging a slot to book it, and the conflict warning. Build the video around
+> those, in that order.
+
+Claude reads each one, finds the same state in the running product and records
+it there. A recording of the live UI stays sharp when the camera pushes in; a
+screenshot does not. So screenshots in `reference/` guide the video and do not
+appear in it, unless you ask for that.
+
+If the product cannot run on your machine (a native app, a staging-only
+feature), say so. Claude can build shots from your screenshots or a screen
+recording instead, at the resolution they were taken, and tells you up front
+what that costs.
+
+## Bring your own images and clips
+
+Put files you want in the video in its `media/` folder, and say what each one
+is for:
+
+```text
+launch/videos/scheduling/media/
+  intro-sting.mp4      # our logo animation
+  team.jpg             # photo for the end card
+  calendar-sync.mov    # screen recording of the mobile app
+```
+
+> Open with media/intro-sting.mp4, cut to the app on the first downbeat. Put
+> media/team.jpg behind the end card, dimmed. Use calendar-sync.mov for the
+> mobile shot, full frame.
+
+Video files play frame exact (`Clip`), so a clip lands on the same frame in the
+studio, in stills and in the render. Another video's render can be used the
+same way: a logo sting made once opens every later video.
+
+Record where each file comes from, so `pnpm launch check` and
+`pnpm launch licences` know it is cleared: Claude writes a `licences.json` in
+the video's folder (`{ "media/team.jpg": { "licence": "Our own photo" } }`).
+Your own product and brand files only need a line saying they are yours.
+
+## Music and sound
+
+Intentface Launch cuts the video to a track; it does not make music. You have
+three ways to get one:
+
+- **Your own track.** A track you bought, licensed or had made goes in the
+  video's `audio/` folder. `pnpm launch beats` finds its beats and sections,
+  and the shots are timed to them.
+- **Generate one from Claude's brief.** Once the script is agreed, Claude
+  writes a brief with the exact length, tempo, sections and hits. You generate
+  the track (ElevenLabs Music, Suno and the like) and drop it in `audio/`.
+- **No music yet.** Claude picks a tempo and times everything in beats, so a
+  track can be briefed to the finished cut later.
+
+Sound effects (clicks, ticks, whooshes) come from a small starter library in
+the package. `pnpm launch sfx find whoosh` searches it. For effects it lacks,
+Claude can generate them with ElevenLabs:
+
+1. Install the ElevenLabs CLI: `npm install -g @elevenlabs/cli`.
+2. Put your API key in `launch/.env` (ignored by git):
+
+   ```sh
+   ELEVENLABS_API_KEY=sk_...
+   ```
+
+3. Ask for the sound pass once the cut is locked:
+
+   > The cut is locked. Add sound effects: a soft click on each booking, a
+   > swell under the end card.
+
+Claude never prints the key. Commercial use of generated sounds needs a paid
+ElevenLabs plan, and before generating anything for a sonic logo, turn off
+ElevenLabs' setting that shares outputs with other users.
+
+Your own sounds work too. Put sounds for one video in its `audio/sfx/`, and
+sounds for every video in the launch folder's `sfx/`, then run
+`pnpm launch sfx index` to measure them. A voice-over (recorded or generated)
+goes in `audio/voice/`, and the music ducks under it.
+
+## Write down how your team works
+
+Claude reads `launch/CLAUDE.md` whenever it works in the launch folder. Write
+your team's way of making videos there, above the add-ons list:
+`pnpm launch update` keeps it. For example:
+
+```md
+## How we make videos
+
+- Every video opens with the `sting` video's render and ends on our end card.
+- 30 seconds for a feature, 60 for a launch. 9:16 cut for every feature video.
+- Music: the tracks in launch/music/, licensed for all our videos.
+- Calm and precise: long holds, no slams.
+- Never show customer names; use the demo workspace.
+```
+
+Longer recipes can go in their own files, with a line in `CLAUDE.md`
+pointing to them (`Weekly updates: follow launch/recipes/weekly-update.md`).
+Claude follows what is written, and asks only what it leaves open.
+
+When a video shows that a skill is wrong or missing something, Claude says
+which skill and what it learned. Skills are revised in the packages, so a fix
+reaches every repo with `pnpm launch update`.
+
+## Ideas
+
+Ways to use it beyond the one-off launch video. Each is a request, and some
+are worth writing down as a recipe.
+
+### A weekly product update, scripted once
+
+The same structure every week, so each episode is quick to make and looks like
+the last one: the logo sting, three changes shown working in the product, and
+an end card with the date.
+
+Build it once:
+
+> Make a weekly-update video: open with the sting video, then three slots of
+> about 8 seconds, each showing one change in the product with a three-word
+> label, then an end card with the week's date. 30 seconds, our weekly track.
+> Make the three changes and the date the parts that change each week.
+
+Claude builds the first episode and shows the storyboard. After that, each
+week is a variant of the same video: the same shots, music and look, with that
+week's changes and copy.
+
+> This week's update: the changelog is in CHANGELOG.md under 2026-10-12. Show
+> recurring events, the new time-zone picker and faster search. Add it as
+> variant w42.
+
+Claude records the three changes, fills the slots, and renders
+`out/weekly-update-w42.mp4` with `pnpm launch render weekly-update --variant w42`.
+Write the structure in `launch/recipes/weekly-update.md` so the format stays
+the same whoever asks.
+
+### A video for every feature release
+
+One look for all of them, set in `launch/CLAUDE.md` (length, opening, music,
+pace), so each release video only needs the feature:
+
+> New release video for bulk rescheduling. Same format as our feature videos.
+
+### Every shape from one video
+
+A video can declare other shapes (`formats`, such as 9:16 and 1:1). The layout
+reflows for each; it is never a crop. Ask for a vertical cut for social posts
+and `pnpm launch render <id> --format vertical` renders it.
+
+### Languages and captions
+
+Captions are part of the video: `render` writes `.srt` and `.vtt` beside the
+mp4, and they can be burned into the frame for muted feeds. A language version
+is a variant with its own copy and voice-over:
+
+> Add a German variant: translate the on-screen copy and the captions.
+
+### A logo sting
+
+> Animate our logo as a 3 second sting, from logo.svg in media/, with a sonic
+> logo. We'll open every video with it.
+
+The logo-animation skill derives the motion from how the mark is built and
+makes sure the last frame is exactly the approved logo. Other videos then open
+with it.
+
+### A demo for a sales call or a talk
+
+Longer and calmer, at reading pace, with captions and no music:
+
+> A 2 minute walkthrough of the scheduling flow for sales calls. No music,
+> captions on, slow enough to talk over.

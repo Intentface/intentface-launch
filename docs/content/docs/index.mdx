@@ -9,8 +9,9 @@ and encodes the frames with ffmpeg into a 1080p60 (or 4K) mp4.
 
 The video shows the product working: its real UI, captured from the running
 app, close up and in its own look. You make it with Claude Code. You describe
-the video, Claude captures the product, sketches a storyboard you comment on,
-then builds and renders the final cut.
+the video, in one sentence or with screenshots, clips and music of your own;
+Claude captures the product, sketches a storyboard you comment on in a local
+studio, then builds and renders the final cut.
 
 ## Why code
 
@@ -27,6 +28,7 @@ then builds and renders the final cut.
 | --- | --- |
 | `@intentface-launch/core` | Engine, kit, CLI, studio and the skills Claude uses. Brand-neutral. |
 | `@intentface-launch/three` | 3D add-on: live UI on panels in space, real lens depth of field, soft light. |
+| `@intentface-launch/shaders` | Shader add-on: the Shaders library's WebGPU effects on the video's clock. |
 
 A brand is an add-on too: a package with a team's fonts, logos and design, motion
 and copy rules, which `pnpm launch add <package>` installs. Core is brand-neutral,
@@ -37,6 +39,7 @@ so a video takes its look from the product.
 - [Requirements](/requirements): what it needs, what it was tested on, and what to know first
 - [Quick start](/quick-start): set up a product repo or a checkout, and make a first video
 - [How it works](/how-it-works): the workflow from brief to render, and what runs underneath
+- [Recipes](/recipes): ways to start, what to hand Claude, and ideas to build your own approach on
 - [Commands](/commands): every `pnpm launch` command
 - [Engine](/engine), [Kit](/kit) and [3D](/three): the tools scenes import
 - [Skills](/skills): the method Claude follows

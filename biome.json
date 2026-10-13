@@ -4,6 +4,7 @@
     "includes": [
       "**",
       "!**/out",
+      "!**/dist",
       "!videos/_*",
       "!videos/*/captures/*.json",
       "!videos/*/captures/*",

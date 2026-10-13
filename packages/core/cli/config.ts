@@ -26,6 +26,12 @@ export type CheckRules = {
   platforms?: Platform[];
   /** Smallest on-screen text, in pixels at 1080p (default 28). */
   minText?: number;
+  /**
+   * Size most of the product's UI text must reach on screen, in pixels at 1080p (default 20): the
+   * UI in `Snapshot`s and text marked `data-launch-check="off"`. Under it for more than a second,
+   * the UI is shown too far away to read. A warning.
+   */
+  uiText?: number;
   /** WCAG contrast ratio text needs against what is behind it (default 4.5). Under two thirds of it is an error. */
   contrast?: number;
   /** The ratio large text needs (default 3, as WCAG): text from `largeText` px, or from three quarters of that at bold weight. */

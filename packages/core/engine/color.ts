@@ -115,10 +115,42 @@ function unwrapped(colors: string[]): Oklch[] {
   return list;
 }
 
-/** Between two colours in OKLCH, the short way round the hue: `mixColor("#4f46e5", "#f59e0b", 0.5)`. */
+/**
+ * Chroma at which a move between two colours goes fully round the hue wheel. Below it the move
+ * blends towards a straight line in OKLab: a warm UI neutral (chroma about 0.006) has a hue, but
+ * going round from it to a blue sweeps through orange and pink on the way.
+ */
+const VIVID = 0.06;
+
+/** How much a move between chromas `a` and `b` follows the hue (1) rather than a straight line in OKLab (0). */
+const hueWeight = (a: number, b: number) => Math.min(1, Math.min(a, b) / VIVID);
+
+const toLab = ([l, c, h, alpha]: Oklch): Oklch => [
+  l,
+  c * Math.cos((h * Math.PI) / 180),
+  c * Math.sin((h * Math.PI) / 180),
+  alpha,
+];
+
+/** A colour moved round the hue (`lch`) and one moved in a straight line (`lab`, as OKLab), weighted. */
+function blend(lch: Oklch, lab: Oklch, weight: number): Oklch {
+  if (weight >= 1) return lch;
+  const round = toLab(lch);
+  const mixed = round.map((v, i) => lab[i] + (v - lab[i]) * weight);
+  return labToLch(mixed[0], mixed[1], mixed[2], mixed[3]);
+}
+
+/**
+ * Between two colours in OKLCH, the short way round the hue: `mixColor("#4f46e5", "#f59e0b", 0.5)`.
+ * From or to a neutral or nearly neutral colour it goes straight in OKLab instead, so it never
+ * passes through other hues.
+ */
 export function mixColor(from: string, to: string, t: number): string {
   const [a, b] = unwrapped([from, to]);
-  return formatOklch(a.map((v, i) => v + (b[i] - v) * t) as Oklch);
+  const lch = a.map((v, i) => v + (b[i] - v) * t) as Oklch;
+  const [la, lb] = [a, b].map(toLab);
+  const lab = la.map((v, i) => v + (lb[i] - v) * t) as Oklch;
+  return formatOklch(blend(lch, lab, hueWeight(a[1], b[1])));
 }
 
 export type ColorTarget = {
@@ -133,7 +165,8 @@ export type ColorTarget = {
 /**
  * `springTo` for a colour: one spring per change, summed in OKLCH, so a
  * colour that changes again mid-flight carries on from where it was. Hue
- * takes the short way round, and greys take their neighbour's hue. A
+ * takes the short way round, greys take their neighbour's hue, and a change from or to a near
+ * neutral goes straight in OKLab. A
  * bouncy spring overshoots in lightness and chroma, so keep `bounce` low for
  * colour (0 to 0.1). Returns an `oklch()` CSS colour.
  *
@@ -142,11 +175,17 @@ export type ColorTarget = {
 export function springColor(frame: number, fps: number, targets: ColorTarget[], config: SpringConfig = {}): string {
   if (targets.length === 0) throw new Error("springColor: needs at least one target");
   const values = unwrapped(targets.map((t) => t.to));
-  const channels = springTo(
-    frame,
-    fps,
-    targets.map((t, i) => ({ at: t.at, to: values[i], spring: t.spring })),
-    config,
-  );
-  return formatOklch(channels as Oklch);
+  const springs = (list: Oklch[]) =>
+    springTo(
+      frame,
+      fps,
+      targets.map((t, i) => ({ at: t.at, to: list[i], spring: t.spring })),
+      config,
+    ) as Oklch;
+  // The change under way decides how much it follows the hue: from or to a near neutral, straight
+  // in OKLab. Both paths meet at each target, so switching between changes does not jump.
+  let k = 0;
+  while (k + 1 < targets.length && targets[k + 1].at <= frame) k++;
+  const weight = k === 0 ? 1 : hueWeight(values[k - 1][1], values[k][1]);
+  return formatOklch(weight >= 1 ? springs(values) : blend(springs(values), springs(values.map(toLab)), weight));
 }

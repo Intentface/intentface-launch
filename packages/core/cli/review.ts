@@ -47,7 +47,12 @@ export function resolveFrame(info: Info, token: string, shotId?: string): number
     rest = "0";
   }
   const shot = id ? findShot(info, id) : undefined;
-  const parts = rest.match(/^([A-Za-z_][\w-]*)?\s*([+-]?\s*\d+(?:\.\d+)?)?$/);
+  // A name, then an offset: `end-10`, `land-6`, `click+3`. The name is matched as short as it can
+  // be, so a trailing -6 is an offset; a moment whose whole name ends in digits (`step-2`) still wins.
+  const parts =
+    shot?.moments?.[rest] !== undefined
+      ? [rest, rest, undefined]
+      : rest.match(/^([A-Za-z_][\w-]*?)?\s*([+-]?\s*\d+(?:\.\d+)?)?$/);
   if (!parts || (!parts[1] && !parts[2])) throw new Error(`Cannot read the frame "${token}"`);
   const [, name, number] = parts;
   const offset = number ? Number(number.replace(/\s/g, "")) : 0;

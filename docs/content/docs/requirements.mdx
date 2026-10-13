@@ -5,11 +5,13 @@ description: What Intentface Launch needs, what it has been tested on, and what 
 
 ## What you need
 
-- **Node 22 or later and pnpm.** `init` also works in product repos that use
-  npm, yarn or bun.
+- **Node 22 or later**, with pnpm, npm, yarn or bun in the product repo.
 - **ffmpeg**, which encodes the frames and mixes the audio
   (`brew install ffmpeg`).
 - **uv**, only for beat detection (`pnpm launch beats`).
+- **An ElevenLabs account and its CLI** (`npm install -g @elevenlabs/cli`),
+  only for generating sound effects. The key goes in `launch/.env`. See
+  [Music and sound](/recipes#music-and-sound).
 - **Chromium for renders and captures**, which `pnpm launch setup` downloads
   once per machine (Playwright's build). The CLI starts it with the GPU on and
   with HTML-in-Canvas, which the 3D add-on's panels need. It also has WebGPU,

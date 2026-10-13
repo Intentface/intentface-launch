@@ -72,7 +72,8 @@ const REFERENCE = new RegExp(
 );
 
 /** Folders in a video that hold our own output or the product's own captured UI, not external files. */
-const SKIP = new Set(["out", "captures", "node_modules"]);
+// reference/ holds the person's screenshots of what to show: read by the agent, not put in frame.
+const SKIP = new Set(["out", "captures", "node_modules", "reference"]);
 
 function walk(dir: string, out: string[] = []) {
   if (!existsSync(dir)) return out;

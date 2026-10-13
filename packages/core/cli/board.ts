@@ -3,9 +3,10 @@ import { join } from "node:path";
 import { type Info, launchBrowser, openRenderer, startServer } from "./browser.js";
 import { encodeJpeg, grab } from "./frames.js";
 import { copyChecks, type Item, type Problem, sampleText, textChecks } from "./inspect.js";
+import { launchCommand } from "./project.js";
 import { render } from "./render.js";
 import { loadRules } from "./rules.js";
-import { outDir } from "./util.js";
+import { outDir, root } from "./util.js";
 
 type Panel = { frame: number; src: string };
 
@@ -300,7 +301,7 @@ footer{color:var(--faint);font-size:12px}
   }
   <nav class="strip" aria-label="Shots">${strip}</nav>
   <div class="shots">${rows}</div>
-  <footer>Panels are rendered from the shot code at the frames shown. Regenerate with pnpm launch board ${esc(info.id)}.</footer>
+  <footer>Panels are rendered from the shot code at the frames shown. Regenerate with ${esc(launchCommand(root()))} board ${esc(info.id)}.</footer>
 </main></div>
 <script>
 (() => {

@@ -22,7 +22,7 @@ source: packages/core/kit
 
 | Tool | What it does |
 | --- | --- |
-| `Camera` | Pans and pushes between keyframed views. Keys can name marks; `travel` rounds corners instead of stopping. |
+| `Camera` | Pans and pushes between keyframed views. Keys can name marks; `travel` rounds corners instead of stopping; `cut: true` jumps to a view on its frame, a cut inside the shot. |
 | `cameraAt`, `useCameraView`, `frameRect`, `fit` | The camera's view at a frame, and views that fit a rect or the whole content. |
 | `Cursor` | A synthetic pointer in content coordinates, constant size at any zoom. Clicks, drags, hovers. |
 | `cursorKeys` | Cursor keys that retrace a capture's pointer. |
@@ -46,8 +46,9 @@ source: packages/core/kit
 
 | Tool | What it does |
 | --- | --- |
-| `Slam` | A word or phrase that lands on a frame with scale, blur and a fade. Type on the beat. `axes` runs variable-font axes as it lands (letter by letter with `axesEvery`); `cutOff` marks a word the next cut interrupts, left out of the reading check. |
-| `Reveal` | Staggered reveal by line, word or character: rise, mask, blur-in or scale. |
+| `Slam` | A word or phrase that lands on a frame with scale, blur and a fade, scaling about its baseline. Type on the beat. `axes` runs variable-font axes as it lands (letter by letter with `axesEvery`); `cutOff` marks a word the next cut interrupts, left out of the reading check. |
+| `Reveal` | Staggered reveal by line, word or character: rise, mask, blur-in or scale (about the baseline). |
+| `useBaseline` | Where a line's baseline sits in its box, for scaling your own type about it: about its centre, a line climbs the pixel grid a pixel at a time and judders. |
 | `Typewriter` | Characters one by one, with an optional caret. |
 | `typingCadence`, `typingFrames` | Uneven, human typing times, and how long typing takes. |
 | `splitText`, `revealTimes` | Text split as `Reveal` splits it, and when each unit lands. |

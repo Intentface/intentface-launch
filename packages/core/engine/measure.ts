@@ -5,7 +5,10 @@
  * the video to check reading time, size, safe area and contrast.
  *
  * Text inside iframes (Snapshots) and canvases (3D panels) is product UI and
- * is not measured. Mark other UI, or decoration, with `data-launch-check="off"`.
+ * is not measured for reading. Mark other UI with `data-launch-check="off"`:
+ * it is not read either, but `measureUiText` still measures how large it is on
+ * screen, so a UI shown too far away is found. Decoration that is neither read
+ * nor UI (a field of tiles drifting behind a headline) is `"decor"`.
  * Text a scene draws itself, in a canvas or WebGL, is measured when the scene
  * declares it with `declareText`.
  */
@@ -66,7 +69,7 @@ export const isTextHidden = () => textHidden;
  * cut interrupts) are not counted.
  */
 function textOf(el: Element) {
-  const off = '[data-launch-check="off"]';
+  const off = '[data-launch-check="off"], [data-launch-check="decor"]';
   let text: string;
   if (el.querySelector(off)) {
     const copy = el.cloneNode(true) as Element;
@@ -126,6 +129,89 @@ function scaleOf(style: CSSStyleDeclaration) {
   return s;
 }
 
+/** Left out of the reading checks: UI (`"off"`) or decoration (`"decor"`). */
+const isOff = (el: Element) => {
+  const value = el.getAttribute("data-launch-check");
+  return value === "off" || value === "decor";
+};
+
+/** The product's UI text on screen at the current frame: how many characters, at what on-screen size. */
+export type UiTextSample = {
+  chars: number;
+  /** `[size in stage pixels, characters at that size]`, sizes rounded to whole pixels. */
+  sizes: [number, number][];
+};
+
+type UiState = { opacity: number; scale: number; skip: boolean; ui: boolean };
+
+/**
+ * How large the product's UI is on screen: the text in `Snapshot`s (same-origin iframes) and the
+ * text marked `data-launch-check="off"`, at least 70% opaque, with its centre in the frame, at its
+ * font size after every transform (the Camera's zoom included). What reading checks leave out,
+ * measured for one thing only: a UI shown so far away that its text cannot be read.
+ */
+export function measureUiText(stage: HTMLElement): UiTextSample {
+  const frame = stage.getBoundingClientRect();
+  const sizes = new Map<number, number>();
+  let chars = 0;
+
+  const walk = (doc: Document, root: Element, base: UiState, toStage: (r: DOMRect) => { x: number; y: number }) => {
+    const view = doc.defaultView;
+    if (!view) return () => base;
+    const cache = new Map<Element, UiState>();
+    const stateOf = (el: Element): UiState => {
+      const hit = cache.get(el);
+      if (hit) return hit;
+      if (el === root) return base;
+      const parent = el.parentElement ? stateOf(el.parentElement) : { ...base, skip: true };
+      const style = view.getComputedStyle(el);
+      const check = el.getAttribute("data-launch-check");
+      const state: UiState = {
+        opacity: parent.opacity * Number(style.opacity) * (style.visibility === "hidden" ? 0 : 1),
+        scale: parent.scale * scaleOf(style),
+        skip: parent.skip || check === "decor" || style.display === "none" || el.tagName === "CANVAS",
+        ui: parent.ui || check === "off",
+      };
+      cache.set(el, state);
+      return state;
+    };
+    const range = doc.createRange();
+    const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const n = (node.textContent ?? "").replace(/\s+/g, "").length;
+      const parent = node.parentElement;
+      if (!n || !parent) continue;
+      const state = stateOf(parent);
+      if (state.skip || !state.ui || state.opacity < 0.7) continue;
+      range.selectNodeContents(node);
+      const r = range.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      const c = toStage(r);
+      if (c.x < frame.left || c.x > frame.right || c.y < frame.top || c.y > frame.bottom) continue;
+      const size = Math.round(Number.parseFloat(view.getComputedStyle(parent).fontSize) * state.scale);
+      sizes.set(size, (sizes.get(size) ?? 0) + n);
+      chars += n;
+    }
+    return stateOf;
+  };
+
+  const top = { opacity: 1, scale: 1, skip: false, ui: false };
+  const stateOf = walk(document, stage, top, (r) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 }));
+  // A Snapshot is the product's page in an iframe: all of its text is UI, scaled by the iframe's transforms.
+  for (const iframe of stage.querySelectorAll("iframe")) {
+    const state = stateOf(iframe);
+    const doc = iframe.contentDocument;
+    if (state.skip || state.opacity < 0.7 || !doc?.body) continue;
+    const box = iframe.getBoundingClientRect();
+    const k = box.width / (iframe.clientWidth || box.width || 1);
+    walk(doc, doc.body, { ...state, ui: true }, (r) => ({
+      x: box.x + (iframe.clientLeft + r.x + r.width / 2) * k,
+      y: box.y + (iframe.clientTop + r.y + r.height / 2) * k,
+    }));
+  }
+  return { chars, sizes: [...sizes] };
+}
+
 export function measureText(stage: HTMLElement): TextSample[] {
   const origin = stage.getBoundingClientRect();
   const frame: Box = { x: origin.x, y: origin.y, width: origin.width, height: origin.height };
@@ -150,11 +236,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
       opacity: parent.opacity * Number(style.opacity) * (style.visibility === "hidden" ? 0 : 1),
       scale: parent.scale * scaleOf(style),
       clip,
-      off:
-        parent.off ||
-        el.getAttribute("data-launch-check") === "off" ||
-        el.tagName === "CANVAS" ||
-        style.display === "none",
+      off: parent.off || isOff(el) || el.tagName === "CANVAS" || style.display === "none",
     };
     states.set(el, state);
     return state;
@@ -246,7 +328,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
     if (!stage.contains(el) || !texts.length) continue;
     const parent = el.parentElement ? stateOf(el.parentElement) : null;
     const own = getComputedStyle(el);
-    if (!parent || parent.off || el.getAttribute("data-launch-check") === "off" || own.display === "none") continue;
+    if (!parent || parent.off || isOff(el) || own.display === "none") continue;
     const r = el.getBoundingClientRect();
     const layout = el instanceof HTMLElement ? { w: el.offsetWidth, h: el.offsetHeight } : { w: r.width, h: r.height };
     if (!r.width || !r.height || !layout.w || !layout.h) continue;
