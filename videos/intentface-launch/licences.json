@@ -1,0 +1,12 @@
+{
+  "/packages/core/studio/fonts/Inter-Variable.woff2": {
+    "licence": "SIL Open Font License 1.1",
+    "source": "https://github.com/rsms/inter",
+    "author": "The Inter Project Authors"
+  },
+  "/packages/core/studio/fonts/IoskeleyMono-*.woff2": {
+    "licence": "SIL Open Font License 1.1",
+    "source": "https://github.com/ahatem/IoskeleyMono",
+    "author": "Ahmed Hatem"
+  }
+}

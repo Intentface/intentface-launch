@@ -6,7 +6,9 @@ source: packages/core/LAUNCH.md
 
 ## A launch folder
 
-A product repo keeps its videos in `launch/`. Each video is a folder:
+A product repo keeps its videos in `launch/`. `launch/CLAUDE.md` tells Claude
+how to work there, including anything your team writes down about how it makes
+videos. Each video is a folder:
 
 | Path | What it holds |
 | --- | --- |
@@ -14,13 +16,19 @@ A product repo keeps its videos in `launch/`. Each video is a folder:
 | `videos/<id>/video.tsx` | The video: its shots, timing and copy. |
 | `videos/<id>/brief.md` | The claim, the features and where each one can be seen. |
 | `videos/<id>/captures/` | Scripts that record the running product, and their manifests. |
-| `videos/<id>/audio/` | The music track and its beats. |
+| `videos/<id>/audio/` | The music track and its beats, sound effects, a voice-over. |
+| `videos/<id>/media/` | Images and clips you bring for the video: a logo sting, a photo, a screen recording. |
+| `videos/<id>/reference/` | Your screenshots of what to show. Claude reads them; they do not appear in the video. |
+| `videos/<id>/licences.json` | Where each external file comes from, and its licence. |
 | `videos/<id>/comments.json` | Review notes left on the storyboard. |
 | `videos/<id>/out/` | Stills, boards and renders. Not committed. |
 
 ## The workflow
 
-Each step is agreed with you before the next one starts.
+Each step is agreed with you before the next one starts. What you hand over
+at the start (a sentence, screenshots, a track, a recipe your team wrote down)
+decides how much Claude asks; the steps stay the same. [Recipes](/recipes)
+has ways to start.
 
 1. **Discover.** Claude reads the product and runs it, then asks what only you
    know: what sets it apart and who it is for. The result is `brief.md`.
@@ -56,4 +64,4 @@ Each step is agreed with you before the next one starts.
   them. A stopped render resumes with `--resume`.
 - **Skills.** The method lives in skills that Claude loads: product-launch-video,
   creative-direction, kinetic-typography, ui-motion, micro-animations,
-  logo-animation, motion-review, music-brief and sound-design.
+  logo-animation, motion-review, music-brief, sound-design and social-formats.

@@ -3,10 +3,12 @@ import { cpus } from "node:os";
 import { join } from "node:path";
 import { formatSuffix, type Info, launchBrowser, openRenderer, StalledFrame, startServer, within } from "./browser.js";
 import { writeCaptions } from "./captions.js";
+import { writeGif, writePoster } from "./deliver.js";
 import { ffmpeg, finished, REC709_FILTER, REC709_TAGS, run, write } from "./ffmpeg.js";
 import { grab } from "./frames.js";
 import { writeLicences } from "./licences.js";
 import { mixAudio } from "./mix.js";
+import { resolveFrame } from "./review.js";
 import { assetPath, outDir, timer } from "./util.js";
 
 export type RenderOptions = {
@@ -38,6 +40,10 @@ export type RenderOptions = {
    * same settings: after a change to one shot, minutes instead of the whole film.
    */
   shots?: string[];
+  /** Also a looping GIF under 8 MB (`true`), or one at most this many pixels wide. */
+  gif?: boolean | number;
+  /** Also a poster: this frame (a frame name, as `still` takes) as a PNG, and a 1200×630 JPEG for link previews. */
+  poster?: string;
 };
 
 /** New browsers to try a stalled frame in before giving up. */
@@ -238,7 +244,9 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     list,
     ...(withAudio ? ["-ss", String(Math.max(0, offset)), "-i", audioFile] : []),
     "-vf",
-    REC709_FILTER,
+    // 4:2:0 needs even sides: a half-size preview of a 1080×1350 video is 540×675. Crops at most
+    // one pixel row or column, and only when a side is odd.
+    `crop=trunc(iw/2)*2:trunc(ih/2)*2,${REC709_FILTER}`,
     "-c:v",
     "libx264",
     "-preset",
@@ -283,6 +291,24 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   // The chunks stay: they are what `--shots` and `--resume` reuse. A render with other settings replaces them.
   const mb = (statSync(target).size / 1e6).toFixed(1);
   console.log(`  ${target} · ${width}×${height} · ${fps} fps · ${mb} MB · ${elapsed()}`);
+  if (options.gif) {
+    const gif = await writeGif(target, join(out, `${name}.gif`), {
+      width: typeof options.gif === "number" ? options.gif : undefined,
+    });
+    console.log(
+      `  ${gif.file} · ${gif.width} px wide · ${gif.fps} fps · ${(gif.bytes / 1e6).toFixed(1)} MB${
+        gif.fits ? "" : " (over 8 MB even at the smallest setting: render a shorter --from/--to range)"
+      }`,
+    );
+  }
+  if (options.poster !== undefined) {
+    const frame = resolveFrame(info, options.poster);
+    if (frame < from || frame >= to)
+      throw new Error(`--poster ${options.poster} (frame ${frame}) is outside the render`);
+    const index = Math.floor((frame - from) / step);
+    const files = await writePoster(target, index, join(out, `${name}-poster.png`), { width, height });
+    for (const f of files) console.log(`  ${f}`);
+  }
   // Sidecar captions under the mp4's name, so players pick them up, and the licence manifest.
   for (const f of writeCaptions(info, out, name)) console.log(`  ${f}`);
   const licences = writeLicences(videoId, info);

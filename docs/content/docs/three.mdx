@@ -11,7 +11,7 @@ Use 3D for transitions and moments of awe; go flat when the viewer has to read.
 
 | Tool | What it does |
 | --- | --- |
-| `Stage3D` | A 3D stage rendered like a film camera: real depth of field, shutter motion blur and anti-aliasing, summed in 32-bit float. |
+| `Stage3D` | A 3D stage rendered like a film camera: real depth of field, shutter motion blur and anti-aliasing, summed in 32-bit float. Each sample is smoothed by its depth before it is summed (`smoothBokeh`, on by default), so bokeh is a smooth disc, not separate copies. |
 | `rig` | A camera move from keyframed framings: target, distance, elevation, azimuth, fov, blur. |
 | `pushIn`, `pullBack`, `orbitMove`, `turntable`, `macroSlide`, `topDown`, `dollyThrough` | Named camera moves, two keys each. |
 | `sequence` | Chains lens functions, each taking over at its frame. |
@@ -71,6 +71,8 @@ pmndrs' [postprocessing](https://github.com/pmndrs/postprocessing) (bloom, glitc
 | `PostFX` | Applies effects to any DOM (a snapshot, type, a whole shot), drawn in through HTML-in-Canvas. With no effects it matches the DOM. |
 | `post.effects` (prop) | Applies effects to a `Stage3D`'s averaged samples, before its own finishing. |
 | `EffectChain` | The pass runner both use, for a texture of your own. |
+| `Crt` | Any DOM (a terminal, a code editor) on a subtle CRT with a soft glow: a slight bulge, colour fringing, scanlines on lit pixels only, a slow roll bar, flicker and a vignette; no grain by default, since it compresses badly. Every option can change per frame. |
+| `CrtEffect` | The same CRT pass as an effect, for `PostFX` or `post.effects`. |
 
 Effects that need depth (depth of field, SSAO, god rays, selective bloom, SMAA) are refused: the stage's lens and samples already do that. `GlitchEffect`'s sporadic mode keeps its own clock: switch `mode` by frame instead.
 

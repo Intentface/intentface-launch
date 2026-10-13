@@ -2,6 +2,7 @@
 // do not use it never load three.js.
 
 export { Cone, type ConePose } from "./cone.js";
+export { Crt, CrtEffect, type CrtOptions } from "./crt.js";
 export {
   Laptop,
   type LaptopProps,

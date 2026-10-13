@@ -48,9 +48,18 @@ pnpm launch sfx find --category impact --tags soft
 
 Use one by id: `{ src: "sfx:whoosh", at, align: "peak" }`. Sounds generated for reuse go in the launch folder's own `sfx/` (shared by every video), then `pnpm launch sfx index` measures them (duration, onset, `peakOffset`, loudness, true peak) and keeps the hand-written `category`, `tags`, `license`, `source` and `prompt`; fill those in. A project id overrides the pack's. A whoosh's `peakOffset` says how long before the fastest frame it starts. A sound made for one video only stays in its `audio/sfx/`.
 
+The pack's whooshes are bright. Under a large move (a window landing, a frame shrinking, a camera pulling back) they read as too high and too light (a reviewer, on this repo's launch film). Derive a heavier one rather than generating: pitched down about five semitones, a little low end, the top rolled off, into the launch folder's `sfx/`, with its derivation as its `source`:
+
+```sh
+ffmpeg -i packages/core/sfx/whoosh.mp3 -af "asetrate=48000*0.75,aresample=48000,lowshelf=f=140:g=4,lowpass=f=5500,loudnorm=I=-16:TP=-3" sfx/whoosh-deep.mp3
+pnpm launch sfx index
+```
+
+Keep the light ones for small UI and type.
+
 ## 3. Generate with ElevenLabs
 
-The key is `ELEVENLABS_API_KEY` in the launch folder's `.env` (gitignored). Load it inside the command (`export ELEVENLABS_API_KEY=$(grep -E '^ELEVENLABS_API_KEY=' .env | cut -d= -f2-)`) and never print it. A key without the `user_read` permission gets a 401 from `/v1/user` but still generates, so test a key with one short generation.
+The CLI is `@elevenlabs/cli` (`npm install -g @elevenlabs/cli`). The key is `ELEVENLABS_API_KEY` in the launch folder's `.env` (gitignored). Load it inside the command (`export ELEVENLABS_API_KEY=$(grep -E '^ELEVENLABS_API_KEY=' .env | cut -d= -f2-)`) and never print it. A key without the `user_read` permission gets a 401 from `/v1/user` but still generates, so test a key with one short generation.
 
 ```sh
 elevenlabs text-to-sound-effects convert -q -o audio/sfx/<name>.mp3 \
@@ -77,7 +86,15 @@ Prompts that worked on a product video, to adapt to the palette:
 | Click | A single soft, clean trackpad click, close and dry, subtle, quiet, no room sound | 0.5 | 0.7 |
 | Label landing | A single very soft, warm, rounded glass UI blip, short sine-like tone, gentle and quiet, clean, no reverb | 0.5 | 0.7 |
 
-More starting points (transient, sub, riser, reverse swell, room tone) are in research.md, section 8.
+Starting points for the other layers, not yet tried on a video:
+
+| Layer | Prompt | s |
+|---|---|---|
+| Transient | Very short sharp wooden knock, knuckle on hardwood table, close and bright, dry | 0.3 |
+| Sub | Clean sub bass drop, pure sine sweeping down, smooth, no distortion | 1 |
+| Riser | Rising filtered noise sweep with subtle tonal shimmer, builds steadily and ends abruptly, cinematic, no impact at the end | 3 |
+| Reverse swell | Reverse piano chord swell rising into silence, soft and warm, in the music's key | 1.5 |
+| Room tone | Quiet modern office room tone, soft air conditioning hum, distant muffled activity, no voices, seamless (loop on) | 20 to 30 |
 
 ## 4. Finish each sound (ffmpeg, not a DAW)
 

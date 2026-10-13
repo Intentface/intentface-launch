@@ -1,0 +1,308 @@
+/* The studio's board view as the film shows it: the studio's dark tokens and
+   board styles (packages/core/studio/studio.css), scoped under .lb so they
+   style only this scene, with its fonts under names of their own. */
+
+@font-face {
+  font-family: "Board Sans";
+  src: url("../../packages/core/studio/fonts/Inter-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+}
+@font-face {
+  font-family: "Board Mono";
+  src: url("../../packages/core/studio/fonts/IoskeleyMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Board Mono";
+  src: url("../../packages/core/studio/fonts/IoskeleyMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+}
+
+.lb {
+  --bg: #18181b;
+  --fg: #f4f4f5;
+  --acc: #4c9bea;
+  --con: 0.3;
+  --primary-bg: oklch(from var(--bg) max(calc(0.09 + 0.106 * var(--con)), calc(l + 0.1 * var(--con))) c h);
+  --secondary-bg: var(--bg);
+  --base-bg: oklch(from var(--bg) max(0, calc(l - 0.075 * var(--con))) c h);
+  --ink: var(--fg);
+  --ink-body: oklch(from var(--fg) calc(l - 0.1) c h);
+  --ink-secondary: oklch(from var(--fg) calc(l - 0.26) c h);
+  --ink-tertiary: oklch(from var(--fg) calc(l - 0.42) c h);
+  --wash: color-mix(in oklab, var(--fg) 5%, transparent);
+  --hairline: color-mix(in oklab, var(--fg) 8%, transparent);
+  --raised-bg: oklch(from var(--bg) calc(l + 0.29 * var(--con)) c h);
+  --raised-spread: 0.014;
+  --elevation-raised:
+    inset 0 1px 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.1);
+  --elevation-card:
+    inset 0 1px 0 rgb(255 255 255 / 0.05), inset 0 0 0 1px rgb(255 255 255 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.1);
+  --radius: 8px;
+  --sans: "Board Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Board Mono", ui-monospace, monospace;
+
+  position: absolute;
+  inset: 0;
+  background: var(--base-bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.lb * {
+  box-sizing: border-box;
+}
+.lb .mono {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.lb .muted {
+  color: var(--ink-secondary);
+}
+.lb .small {
+  font-size: 12px;
+}
+
+/* The browser around the page: a tab strip and the address. */
+.lb .chrome {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  background: #0f0f11;
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+}
+.lb .lights {
+  display: flex;
+  gap: 8px;
+}
+.lb .lights i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3a3a40;
+}
+.lb .address {
+  margin: 0 auto;
+  width: 560px;
+  height: 32px;
+  border-radius: 16px;
+  background: #1c1c20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-secondary);
+  font-size: 13px;
+}
+
+.lb .button {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  --face: var(--raised-bg);
+  background-color: var(--face);
+  background-image: linear-gradient(
+    180deg,
+    oklch(from var(--face) calc(l + var(--raised-spread)) c h),
+    oklch(from var(--face) calc(l - var(--raised-spread)) c h)
+  );
+  box-shadow: var(--elevation-raised);
+  border-radius: 999px;
+  height: 28px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lb .tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--wash);
+}
+.lb .tabs span {
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: var(--ink-secondary);
+}
+.lb .tabs span.on {
+  color: var(--ink);
+  background: var(--raised-bg);
+  box-shadow: var(--elevation-raised);
+}
+
+.lb .board {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 64px;
+  bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: var(--secondary-bg);
+  box-shadow: var(--elevation-card);
+  overflow: hidden;
+}
+.lb .board header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
+}
+.lb .board .title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.lb .board .rebuild {
+  margin-left: auto;
+}
+.lb .board main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 16px 32px 96px;
+  display: grid;
+  gap: 40px;
+}
+.lb .board-shot {
+  display: grid;
+  gap: 16px;
+}
+.lb .shot-head {
+  display: flex;
+  gap: 8px 14px;
+  align-items: baseline;
+  border-top: 1px solid color-mix(in oklab, var(--fg) 6%, transparent);
+  padding-top: 24px;
+}
+.lb .shot-head h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+.lb .shot-head .num {
+  color: var(--acc);
+  font-weight: 500;
+}
+.lb .shot-head .open {
+  margin-left: auto;
+  color: var(--acc);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--acc) 30%, transparent);
+  text-underline-offset: 4px;
+}
+.lb .shot-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.lb .panels {
+  display: grid;
+  gap: 12px;
+}
+.lb .panels.n2 {
+  grid-template-columns: 1fr 1fr;
+}
+.lb .panels.n3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.lb .panels figure {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.lb .still {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--elevation-card);
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.lb .direction {
+  display: grid;
+  gap: 14px;
+}
+.lb .direction .says {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--ink-body);
+  margin: 0;
+}
+.lb .direction dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px 12px;
+}
+.lb .direction dt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  padding-top: 2px;
+}
+.lb .direction dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-body);
+}
+.lb .notes {
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 14px;
+}
+.lb .note {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--primary-bg);
+  box-shadow: var(--elevation-card);
+}
+.lb .note p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.lb .note .reply {
+  color: var(--acc);
+}
+.lb .note-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.lb .note-head .resolve {
+  margin-left: auto;
+  color: var(--ink-secondary);
+  font-family: var(--sans);
+  font-weight: 500;
+  padding: 0 8px;
+}
+.lb .textarea {
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--primary-bg);
+  box-shadow: var(--elevation-card);
+  border-radius: 10px;
+  padding: 9px 12px;
+  height: 60px;
+  white-space: pre;
+}
+.lb .textarea .placeholder {
+  color: var(--ink-tertiary);
+}
+.lb .textarea.focus {
+  outline: 2px solid color-mix(in oklab, var(--acc) 60%, transparent);
+}
+.lb .notes .add {
+  justify-self: start;
+}

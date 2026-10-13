@@ -1,4 +1,4 @@
-import { ease, interpolate, useFrame } from "@intentface-launch/core";
+import { ease, interpolate, useFrame, useVideoInfo } from "@intentface-launch/core";
 import { Cursor } from "@intentface-launch/core/kit";
 import {
   fillDistance,
@@ -6,35 +6,60 @@ import {
   frame as lensFor,
   Panel,
   type RigKey,
-  rig,
   Stage3D,
   samplesForBlur,
   sweep,
   threePoint,
 } from "@intentface-launch/three";
 import type { ReactNode } from "react";
-import { AREAS, type Cues, ORBIT, Orbit } from "./sample-app";
 import { T } from "./timing";
+import { APP, AREAS, type Cues, PORTRAIT_AREAS, SHAPES, TodoAny } from "./todo-app";
 
-// The app in 3D: Orbit's window as a slab of dark glass with a lit edge, on black, through a real
-// lens. The camera starts low across the window on the Launch button with the rest falling into
-// bokeh, and ends straight on at one world unit per pixel, so the last frame is the flat window
-// that the code shot starts from.
+// The video Claude made, on the drop: the to-do app's window as a slab of dark
+// glass with a lit edge, on black, through a real lens. It opens on the
+// closeup the note asked for, low across the first task with its checkbox in
+// focus and the rest in bokeh; the task is checked on the downbeat; then one
+// continuous pull back, the week filling in, to straight on at one world unit
+// per pixel, so the last frame is the flat app the next shot starts from.
+// In the 4:5 cut the slab is the app's 4:5 layout. On the film's clock.
 
 export const FOV = 30;
-/** Straight on, one world unit per pixel at 1080p. */
-export const FLAT = fillDistance(1080, FOV);
-const W = AREAS.window;
 /** The slab's thickness; its face sits at z 0, on the plane the flat handoff is measured in. */
 const DEPTH = 30;
 
-/** A content point (CSS pixels of the 1920×1080 app) in world units: origin at the centre, y up. */
-export const world = (x: number, y: number, z = 0): [number, number, number] => [x - 960, 540 - y, z];
-
-const BUTTON = world(AREAS.button.x + AREAS.button.width / 2, AREAS.button.y + AREAS.button.height / 2);
+/**
+ * The scene for the frame's shape: in 16:9 the wide app, in 4:5 its 4:5 layout. Content is the
+ * frame's size, so straight on at `flat` one world unit is one pixel and the flat app lands exactly.
+ * In 4:5 the closeup aims nearer the checkbox and stands a little further back, for the narrower frame.
+ */
+function layout(narrow: boolean) {
+  const content = SHAPES[narrow ? "portrait" : "wide"];
+  const area = narrow ? PORTRAIT_AREAS : AREAS;
+  /** A content point in world units: origin at the content's centre, y up. */
+  const world = (x: number, y: number, z = 0): [number, number, number] => [
+    x - content.width / 2,
+    content.height / 2 - y,
+    z,
+  ];
+  const cb = area.checkbox;
+  const box = { x: cb.x + cb.width / 2, y: cb.y + cb.height / 2 };
+  return {
+    narrow,
+    content,
+    window: area.window,
+    world,
+    box,
+    aim: world(box.x + (narrow ? 185 : 170), box.y),
+    near: narrow ? 1.7 : 1,
+    flat: fillDistance(content.height, FOV),
+    cursorFrom: { x: box.x + (narrow ? 380 : 560), y: box.y + 40 },
+  };
+}
+type Layout = ReturnType<typeof layout>;
 
 /** The window as a slab: the region is the window itself, so its corners are the slab's. */
-export function OrbitSlab({ children, resolution = 2.5 }: { children: ReactNode; resolution?: number }) {
+export function AppSlab({ l, children, resolution = 3 }: { l: Layout; children: ReactNode; resolution?: number }) {
+  const W = l.window;
   return (
     <Panel
       region={W}
@@ -44,78 +69,78 @@ export function OrbitSlab({ children, resolution = 2.5 }: { children: ReactNode;
       resolution={resolution}
       lit={0}
       edge="#2a2a31"
-      surface={ORBIT.window}
-      pose={() => ({ position: world(W.x + W.width / 2, W.y + W.height / 2, -DEPTH / 2) })}
+      surface={APP.window}
+      pose={() => ({ position: l.world(W.x + W.width / 2, W.y + W.height / 2, -DEPTH / 2) })}
     >
-      <div style={{ position: "relative", width: 1920, height: 1080, background: ORBIT.window }}>{children}</div>
+      <div style={{ position: "relative", ...l.content, background: APP.window }}>{children}</div>
     </Panel>
   );
 }
 
-// After the click the app answers: the checklist ticks, sign-ups count, the chart draws and the team
-// arrives while the camera pulls back, so the reveal lands on a full app.
-const CLICK_CUES: Cues = {
-  click: T.click,
-  ticks: T.click + 46,
-  count: T.click + 64,
-  chart: T.click + 92,
-  team: T.click + 118,
+// After the click the app answers: the other tasks tick, the count climbs, the chart draws and the
+// team arrives while the camera pulls back, so the reveal lands on a full week.
+export const VIDEO_CUES: Cues = {
+  check: T.check,
+  ticks: T.check + 34,
+  count: T.check + 44,
+  chart: T.check + 64,
+  team: T.check + 96,
 };
-const CENTRE = { x: AREAS.button.x + AREAS.button.width / 2, y: AREAS.button.y + AREAS.button.height / 2 };
 
 const light = sweep({
   from: [-2600, 900, 700],
   to: [2600, 900, 700],
-  at: 0,
-  duration: T.code,
+  at: T.drop,
+  duration: T.file - T.drop,
   width: 260,
   intensity: 5,
 });
 
 /** The camera lands straight on here; the flat window dissolves in over the slab before the cut. */
-const LANDS = T.code - 16;
+const LANDS = T.file - 16;
 
-export function AppScene3D() {
+export function VideoScene3D() {
   const frame = useFrame();
-  const flat = interpolate(frame, [LANDS - 2, T.code - 3], [0, 1], { easing: ease.inOut });
-  // The film opens on light arriving out of black.
-  const dark = interpolate(frame, [0, 36], [1, 0], { easing: ease.out });
-  const pull = T.click + 70;
-  // The path: a slow dolly to the click, a drift while "Launched" lands, then one continuous pull
+  const l = layout(useVideoInfo().format.aspect < 1);
+  const AIM = l.aim;
+  const BOX = l.box;
+  const flat = interpolate(frame, [LANDS - 2, T.file - 3], [0, 1], { easing: ease.inOut });
+  const pull = T.check + 30;
+  // A slow dolly onto the checkbox to the click, a drift while it fills, then one continuous pull
   // back to straight on. No key in the middle of the pull: a key there stops the camera.
   const keys: RigKey[] = [
     {
-      at: 0,
-      target: [BUTTON[0] - 60, BUTTON[1] - 10, 0],
-      distance: fillDistance(600, FOV),
+      at: T.drop,
+      target: [AIM[0] - 40, AIM[1] - 4, 0],
+      distance: fillDistance(400 * l.near, FOV),
       elevation: 30,
-      azimuth: 190,
+      azimuth: 192,
       fov: FOV,
     },
     {
-      at: T.click,
-      target: [BUTTON[0] - 10, BUTTON[1] - 10, 0],
-      distance: fillDistance(440, FOV),
-      elevation: 40,
-      azimuth: 186,
+      at: T.check,
+      target: [AIM[0], AIM[1], 0],
+      distance: fillDistance(350 * l.near, FOV),
+      elevation: 36,
+      azimuth: 188,
       fov: FOV,
       easing: ease.inOut,
     },
     {
       at: pull,
-      target: [BUTTON[0] - 10, BUTTON[1] - 10, 0],
-      distance: fillDistance(425, FOV),
-      elevation: 42,
-      azimuth: 185.5,
+      target: [AIM[0] + 6, AIM[1], 0],
+      distance: fillDistance(340 * l.near, FOV),
+      elevation: 37,
+      azimuth: 187.5,
       fov: FOV,
       easing: ease.linear,
     },
-    { at: LANDS, target: [0, 0, 0], distance: FLAT, elevation: 90, azimuth: 180, fov: FOV, easing: ease.inOut },
+    { at: LANDS, target: [0, 0, 0], distance: l.flat, elevation: 90, azimuth: 180, fov: FOV, easing: ease.inOut },
   ];
-  // Focus on its own curve: shallow on the button, then the lens stops down in the first half of
-  // the pull, so "Launched" stays sharp as it leaves and the whole app is sharp when it arrives.
-  const blurAt = (f: number) => interpolate(f, [pull, pull + (LANDS - pull) * 0.5], [80, 0], { easing: ease.out });
-  const lens = (f: number) => lensFor({ ...framingAt(keys, f), blur: { px: blurAt(f), depth: 260 } });
+  // Focus on its own curve: shallow on the checkbox, then the lens stops down in the first half of
+  // the pull, so the task stays sharp as it leaves and the whole app is sharp when it arrives.
+  const blurAt = (f: number) => interpolate(f, [pull, pull + (LANDS - pull) * 0.5], [50, 0], { easing: ease.out });
+  const lens = (f: number) => lensFor({ ...framingAt(keys, f), blur: { px: blurAt(f), depth: 240 } });
   return (
     <>
       <Stage3D
@@ -125,92 +150,24 @@ export function AppScene3D() {
         lights={(f) => [...threePoint([0, 0, 0], { distance: 2600, key: 1.6, fill: 0.3, rim: 3 }), light(f)]}
         samples={(f) => samplesForBlur(blurAt(f))}
       >
-        <OrbitSlab resolution={3}>
-          <Orbit cues={CLICK_CUES} />
+        <AppSlab l={l}>
+          <TodoAny shape={l.narrow ? "portrait" : "wide"} cues={VIDEO_CUES} />
           <Cursor
+            size={22}
             keys={[
-              // In from the right edge along the button's row: on the focus plane, so it is sharp, not a disc.
-              { at: 40, to: { x: 1960, y: 150 } },
-              { at: T.click, to: CENTRE, click: true, hover: 16 },
+              // In along the task's own row, on the focus plane, so it is sharp, not a disc.
+              { at: T.drop, to: l.cursorFrom },
+              { at: T.check, to: BOX, click: true, hover: 12 },
             ]}
-            hidden={[[T.click + 40, T.code + 1]]}
+            hidden={[[T.check + 26, T.file + 1]]}
           />
-        </OrbitSlab>
+        </AppSlab>
       </Stage3D>
-      {dark > 0 && <div style={{ position: "absolute", inset: 0, background: "#000", opacity: dark }} />}
       {flat > 0 && (
         <div style={{ position: "absolute", inset: 0, opacity: flat, background: "#000" }}>
-          <Orbit cues={CLICK_CUES} />
+          <TodoAny shape={l.narrow ? "portrait" : "wide"} cues={VIDEO_CUES} />
         </div>
       )}
     </>
   );
 }
-
-// The reel: the launch video that the code makes, on the drop. The camera glides low across the
-// slab and whips to the next part every two beats with the shutter open, each part moving as it
-// arrives, then pulls back to the whole window, straight on.
-type Stop = { at: number; centre: [number, number]; height: number; elevation: number; azimuth: number };
-
-export function Reel3D() {
-  const stops = T.reel.map((r) => r - T.drop);
-  const cues: Cues = { click: -100, ticks: stops[1] + 6, count: stops[2] + 4, chart: stops[3] + 2, team: stops[4] + 4 };
-  const whip = 14;
-  const parts: Stop[] = [
-    { at: 0, centre: [640, 250], height: 400, elevation: 40, azimuth: 189 },
-    { at: stops[1], centre: [700, 700], height: 560, elevation: 50, azimuth: 172 },
-    { at: stops[2], centre: [1510, 310], height: 300, elevation: 50, azimuth: 190 },
-    { at: stops[3], centre: [1585, 400], height: 440, elevation: 52, azimuth: 173 },
-    { at: stops[4], centre: [1560, 820], height: 400, elevation: 44, azimuth: 189 },
-  ];
-  const framing = (p: Stop, drift: number) => ({
-    target: world(p.centre[0] + drift * 40, p.centre[1]),
-    distance: fillDistance(p.height * (1 - drift * 0.08), FOV),
-    elevation: p.elevation + drift * 4,
-    azimuth: p.azimuth + drift * (p.azimuth > 180 ? -3 : 3),
-    fov: FOV,
-    blur: { px: 70, depth: 220 },
-  });
-  const keys: RigKey[] = [];
-  parts.forEach((p, i) => {
-    // A whip lands on each part; then the camera drifts on it until the next whip sets off.
-    keys.push({ at: p.at, ...framing(p, 0), easing: i === 0 ? ease.linear : ease.inOut });
-    const next = parts[i + 1]?.at ?? stops[5];
-    keys.push({ at: next - (i + 1 < parts.length ? whip : 0), ...framing(p, 1), easing: ease.linear });
-  });
-  keys.push({
-    at: stops[5] + 44,
-    target: [0, 0, 0],
-    distance: FLAT,
-    elevation: 90,
-    azimuth: 180,
-    fov: FOV,
-    blur: { px: 0, depth: 220 },
-    easing: ease.inOut,
-  });
-  const when = stops.slice(1, 5).map((s): [number, number] => [s - whip - 1, s + 1]);
-  when.push([stops[5] - 1, stops[5] + 30]);
-  return (
-    <Stage3D
-      lens={rig(keys)}
-      background="#000"
-      environment={{ preset: "dark", intensity: 0.6 }}
-      lights={(f) => [...threePoint([0, 0, 0], { distance: 2600, key: 1.6, fill: 0.3, rim: 3 }), reelLight(f)]}
-      shutter={{ angle: 180, when }}
-      samples={samplesForBlur(70)}
-    >
-      <OrbitSlab resolution={3}>
-        <Orbit cues={cues} title="Summer launch" />
-      </OrbitSlab>
-    </Stage3D>
-  );
-}
-
-const reelLight = sweep({
-  from: [2600, 900, 700],
-  to: [-2600, 900, 700],
-  at: 0,
-  duration: 380,
-  width: 260,
-  intensity: 5,
-});

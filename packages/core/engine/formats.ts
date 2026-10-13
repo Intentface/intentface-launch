@@ -85,9 +85,10 @@ export function platformZones(size: FormatSize, platforms: Platform[] = PLATFORM
 }
 
 /**
- * The largest rectangle clear of every platform's UI and of the title-safe
- * margin (`safe` px at 1080p): where text goes in a vertical cut. For other
- * shapes, the frame inside the margin.
+ * The largest rectangle clear of every platform's UI (the zones above) and of
+ * the title-safe margin (`safe` px at 1080p). For other shapes, the frame
+ * inside the margin. `check` holds 9:16 text to these zones; for laying out a
+ * vertical cut, `safeZone` is one rectangle that suits every app at once.
  */
 export function clearArea(size: FormatSize, safe = 96, platforms: Platform[] = PLATFORMS) {
   const unit = Math.min(size.width, size.height) / 1080;
@@ -103,4 +104,38 @@ export function clearArea(size: FormatSize, safe = 96, platforms: Platform[] = P
     else left = Math.max(left, z.x + z.width);
   }
   return { x: left, y: top, width: right - left, height: bottom - top };
+}
+
+/**
+ * Margins kept clear on a 1080×1920 frame, so one vertical cut works on
+ * TikTok, Instagram Reels and Stories, Facebook Reels and YouTube Shorts.
+ * As of October 2026; apps move their UI, so check again before a big release
+ * (the social-formats skill has the sources and the per-platform figures).
+ * Not official: no platform publishes one map for organic posts.
+ */
+export const SAFE_ZONES = {
+  /** Organic posts: the safe content area is 790 × 1200 (x 90 to 880, y 270 to 1470). */
+  organic: { top: 270, bottom: 450, left: 90, right: 200 },
+  /** One asset that must also run as a paid ad (TikTok's ad overlays, Meta's Reels ad guidance): 660 × 980. */
+  ads: { top: 270, bottom: 670, left: 120, right: 300 },
+} as const;
+export type SafeZoneKind = keyof typeof SAFE_ZONES;
+
+/**
+ * The rectangle where everything that matters goes in a vertical cut
+ * (headlines, the product's key UI, captions, logos, calls to action), in the
+ * frame's pixels; footage and backgrounds still fill the whole frame. For a
+ * frame that is not 9:16, the frame inside the 96 px title-safe margin.
+ */
+export function safeZone(size: FormatSize, kind: SafeZoneKind = "organic") {
+  if (!isVertical(size)) return clearArea(size);
+  const m = SAFE_ZONES[kind];
+  const sx = size.width / 1080;
+  const sy = size.height / 1920;
+  return {
+    x: m.left * sx,
+    y: m.top * sy,
+    width: size.width - (m.left + m.right) * sx,
+    height: size.height - (m.top + m.bottom) * sy,
+  };
 }

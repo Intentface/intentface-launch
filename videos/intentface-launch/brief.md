@@ -1,92 +1,43 @@
 # Intentface Launch: the launch film
 
-The example video for this repo and the hero of launch.intentface.com. It is made with Intentface Launch and shows what the tool makes: the product on screen is Orbit, a made-up release tracker built for this film (`sample-app.tsx`), so the film shows a launch video's material, not the tool's own UI.
-
-## Look
-
-Large type, minimal, stylish and dynamic, in the spirit of Swiss design and of Apple's launch films. Set in the Intentface brand, as asked (`@intentface/brand`, from npm; its DESIGN, MOTION and COPY rules apply, and where this direction goes further than them it says so below).
-
-- **One line at a time, quick to read.** Every line on screen is one to four words on a single line, never wrapped. A thought longer than that is split across cuts, a phrase per beat ("One video." / "Every size." / "Every update."). The messages the film must convey are carried by the pictures; the words only name them.
-- **One typographic style, the whole film:** Intent Sans Regular (400), 120 px, -0.03 em, sentence case, `#fafafa` on black. Alone on screen, the line is centred; beside the UI, it sits in the space the camera leaves free, aligned to the UI's edge, at the same size. The style breaks only where the break is the point: the montage, where "Any style." is itself set in a different style on every cut (3D, hand drawn, serif, neon, print, CRT, wide and condensed posters, echo, sliced, dot matrix), with nothing behind it.
-- **Negative space:** most of the frame empty and dark. UI is cropped hard by the frame edge rather than shrunk to fit.
-- **Colour:** black (`#000`) ground, `#fafafa` type. No gradient backgrounds (no `<Atmosphere>`). Colour comes from Orbit's own UI, the montage's styles, and the Launch mark's own gradient on the end card, which is on full black (`#000`), as is the whole film.
-- **Logo:** the Launch mark in its gradient from the brand package (`launch-color.svg`), never redrawn, on full black.
-- **Surfaces:** no shadows (brand); radii only where the UI has them.
-- **Motion, dynamic but exact:** lines are masked in by word on the beat (`Reveal`, no bounce) and cut away on the next; the camera moves in straight lines and lands; hard cuts on the downbeats. No em dashes on screen.
-- **The UI on screen:** Orbit, light, with its own blue accent and green for done, set in Intent Sans. Product shots fill the frame; lines are never over them, they get their own short card on the dark ground between product shots.
+The film for this repo and the hero of launch.intentface.com, made with Intentface Launch. It tells one task start to finish: a team wants to share a new feature, and instead of a screenshot, one prompt in the product's folder turns into a finished video for every platform.
 
 ## Claim
 
-Launch videos written as code, from your real UI.
+Ask Claude for a launch video in your product's repo, and get one made from your real UI.
 
-## Audience and placement
+## Look
 
-Developers and product teams shipping software, who make (or skip) launch videos. First on the launch.intentface.com hero and the README, muted autoplay first, so the story must read with the sound off. 63 s (the track's full length, with its tail), 16:9, with 9:16 and 1:1 delivered from the same source.
-
-## Recurring device
-
-Orbit, one made-up product the whole way through: clicked, taken apart in depth, rewritten in code, and delivered as every kind of video.
-
-## Hero and supports
-
-| | Feature | The moment it is seen | Source |
-|---|---|---|---|
-| Hero | Your real UI, in motion | Orbit's own Launch button is clicked; the product answers (launched, the checklist ticks, sign-ups climb) as the camera pulls back | LAUNCH.md "Captured UI", "Close-ups use snapshots" |
-| Support 1 | Written as code | One line of the video's code changes (Spring launch to Summer launch) and the frame beside it follows | README "A video in code" |
-| Support 2 | Any style | Orbit's cards burst apart in depth on the drop; then "Any style." in six styles, one per cut | core kit (`DrawOn`, `Displace`, `Halftone`, `Dither`, `FilmGrain`, `Scanlines`), three add-on (`Stage3D`, `Light.*`) |
-| Support 3 | One source, many outputs: launches, updates, podcast intros, ads, any size | The Orbit film as tiles: 16:9, then 9:16 and 1:1; an update variant; a podcast intro; ads | LAUNCH.md "Other shapes reflow", "Variants of one video" |
-| Close | Use it as a dependency or fork it | Two short lines, no commands; where to start is launch.intentface.com | README "Quick start" |
-
-Cut: the studio and Claude Code (reviewed: confusing in a launch film; the film shows what is made, not the tool), the review loop, `check` (strong, but a second "how" beat would slow the middle; it can be one line on the docs page), beats detection, captions, motion blur as its own feature (it is in every fast move anyway), performance numbers.
+- **Chat:** a plain dark chat, the film's type (Intent Sans), two made-up people.
+- **Terminal:** IBM Plex Mono on near-black, close up, on a subtle CRT with a soft glow (`Crt` from `@intentface-launch/three`): texture, not a costume. Claude Code's own layout (welcome box, input box, tool calls, the question panel), in its colours.
+- **Board:** the studio's real board view in dark mode, rebuilt in the film with the studio's tokens and fonts (`board.css`).
+- **The video:** a made-up to-do app (`todo-app.tsx`, "Example app"), dark, in its own window, as a 3D slab with real depth of field, then flat.
+- **Type of the film's own:** Intent Sans 400, 120 px, `#fafafa` on black, for "Create ___ video." and the end card. The Launch mark's own intro on black.
 
 ## Script
 
-Timed to the track (`audio/the-launch.wav`): times in seconds, cuts on the detected downbeats (`beatGrid`; 126 BPM is not a whole number of frames, so not `tempo()`).
+Delivered in 16:9 (YouTube, the site) and 4:5 (1080 × 1350, the social feeds); every scene is laid out again for 4:5, not cropped. Cut to `audio/clean-ringing-chord.wav` (39.9 s, about 125 BPM; `beats.json`, `out/sound-clean-ringing-chord.json`). The track starts on the frame `claude` is entered: film time = 10.1 s + track time. Every frame is in `timing.ts`.
 
-| # | Time (s) | Music | Picture: what, how close, what moves | Words | Hand-off |
+| # | Film (s) | Track (s) | Picture | Words | Hand-off |
 |---|---|---|---|---|---|
-| 1 hook | 0–3.8 | Pulse, riser ending at 3.76 | Macro on Orbit's Launch button, the UI tilted in perspective and fading into the dark at the edges; the cursor clicks on the riser's peak. | None | The click |
-| 2 product | 3.8–10.3 | Build, riser 9.6–11 | The button turns to Launched; the camera whips back (motion blur) over the checklist as it ticks, then to the whole app as sign-ups climb, the UI turning towards flat. | None | Cut to the line |
-| 4 code | 10.3–14.8 | Build | Code on the left, the frame on the right: `Spring` is deleted from the title and `Summer` typed; the card becomes Summer launch. | Typed code | Cut to the line |
-| 5 written | 14.8–17.0 | Swell into the drop | Alone on dark. | "Written as code." | Hard cut on the drop |
-| 6 layers | 17.0–23.1 | **Drop** | On the hit Orbit bursts into its cards in depth (motion blur), the view sweeping over them, and they land back together as the app. | None | Cut on the downbeat |
-| 7 styles | 23.1–28.9 | Groove | "Any style." in six styles, one per cut, nothing behind it: plain (held 1.4 s to read), 3D, hand drawn, serif italic, neon, a yellow poster; two beats each. | "Any style." | Back to the plain style on the section at 28.9 |
-| 8 create | 28.9–36.6 | Groove | Black, one line; the middle word rolls through on every second beat: product, update, intro, ad, demo, launch. No UI. | "Create product video." (the word cycling) | Cut |
-| 8b real UI | 36.6–40.4 | Groove | Alone on black, finishing the thought. | "From your real UI." | Cut |
-| 8c platforms | 46.1–51.7 | Lift | A device family in 3D, each on another kind of platform (video site 16:9, photo feed 1:1, short-video 9:16), one clip laid out for each; Launched on all three on the lift. | "Every platform." | Up to the impact at 51.45 |
-| 9 install | 44.2–51.7 | Change, lift at 47.8, hit at 51.4 | Alone on dark: "Install it.", then on the lift "Or fork it.", fading on the hit. No commands. | "Install it." "Or fork it." | Fades as the bass drops out |
-| 10 countdown | 51.7–55.75 | **Breakdown**, riser 54.9–55.75 | Full black: a breath, then a huge 3, 2, 1 every second beat into the hit. No logo yet. | 3, 2, 1 | The hit |
-| 11 end | 55.75–63.1 | **Hit**, then the tail | Full black; the Launch mark in its gradient appears on the hit and lifts into place; "Intentface Launch"; launch.intentface.com types in. | Name, URL | End |
-
-- **Running time:** 63.1 s (the track, with its tail).
-- **UI on screen:** Orbit in rows 1, 2, 4, 6 and 8: about 55%. The rest is type, by design.
-- **Overlay words:** about 20, in single lines of 2 to 4 words, plus the countdown.
-- **Text-only shots:** the line cards between product shots, row 8, the countdown and the end card.
-
-## Music
-
-`audio/the-launch.wav` (16-bit, 48 kHz, 63.12 s; the MP3 and M4A copies were removed). `pnpm launch beats`: 126 BPM, steady (beat-to-beat spread 20 ms), confidence 0.45; beats are found from the drop on, the intro's grid extends back at the same tempo. A minor, -16.2 LUFS (render masters to -14).
-
-| Time (s) | Frame | Section | Events (`pnpm launch sound`) |
-|---|---|---|---|
-| 0–17.0 | 0–1022 | Intro build, 8th-note pulse, no kick | Riser 0.24–3.76, riser 9.6–11.0, swell 16.6–17.4 |
-| 17.03 | 1022 | **Drop** | Cut to boom; first downbeat about 17.4 (f1045) |
-| 17.4–43.7 | 1045–2624 | Groove | Section at 28.9 (same energy); the pulse ends at 43.7 |
-| 43.7–47.5 | 2624–2848 | Change | Sweeps, cuts |
-| 47.5–52 | 2848–3115 | Lift | Section up at 47.5; impacts at 49.48 (+35 dB) and 51.45 (+31 dB) |
-| 52–55.75 | 3115–3345 | **Breakdown** | Sub drops out; riser 54.94–55.75 |
-| 55.75 | 3345 | **Hit** | Cut to boom, section up at 55.5 |
-| 60.5–63.1 | 3632–3787 | Tail | Decays to silence |
+| 1 chat | 0–5.9 | silent | Sara: "The task feature is done! Can we take a screenshot for our socials?" You: "I think we can do something cooler." Sara starts typing again. | The messages | Cut |
+| 2 install | 5.9–10.1 | silent | Close on the terminal in `~/code/productivity-app`: `npx @intentface-launch/core init` typed (the camera rides the caret), three lines of output, `claude` ⏎ | Typed | The music starts on ⏎ |
+| 3 prompt | 10.1–13.6 | 0–3.5 | Claude Code opens; "Create a 30 second video about our task feature" typed and sent on the first big hit | Typed | Lines below |
+| 4 ask | 13.6–20.6 | 3.5–10.5 | Tool calls on the beats (Skill, Read, Bash: look); two questions answered on the hits (Our current users; Bold and energetic); the board link; the pointer clicks it on the hit at 10.52 | Claude's | The window grows out of the link |
+| 5 board | 20.7–27.6 | 10.5–17.5 | The board lands on the boom (11.74); a note on shot 1, "Make this a closeup", typed and added; the camera holds on its panels as they turn into closeups, then finds "Done." under the note | Typed | Cut back |
+| 6 render | 27.6–29.1 | 17.5–19.0 | The render bar fills; "Done: out/task-feature.mp4 · 0:30" on the hit before the drop | | Cut on the drop |
+| 7 video | 29.1–33.9 | 19.0–23.8 | Drop: the to-do app in 3D, opening on the closeup the note asked for; the task checked on the downbeat; the week fills in as the camera pulls back to straight on | | Pixel-identical cut to flat |
+| 8 file | 33.9–35.8 | 23.8–25.7 | Player controls, then the frame shrinks into `task-feature.mp4` (`task-feature-portrait.mp4` in the 4:5 cut) | File name | Cut on the downbeat |
+| 9 create | 35.8–46.1 | 25.7–36.0 | "Create [product, feature, release, update, demo, tutorial, onboarding, teaser, ad, intro, recap, changelog, social, launch] video.": a bar for the first word, then every two beats (one on the boom at 27.18), then every beat, landing on "launch" | The line | Cut |
+| 10 end | 46.1–51.5 | 36.0–end | The Launch mark flies in through the breakdown and parks on the final hit (37.92); "Intentface Launch"; launch.intentface.com on the second hit | Name, URL | Fades with the tail |
 
 ## Facts and limits
 
-- No install commands on screen (the person's call): the film says it can be added or forked, and launch.intentface.com is where to start. Nothing on screen depends on the npm release.
-- Orbit is made up for this film: its name, data and look come from nothing real.
-- The montage's styles are all things the packages do today: no style is shown that the kit cannot render.
-- The tiles in row 7 become real renders in the build: an Orbit film made with this repo, in its `formats` and `variants`.
-- The repo URL is `github.com/Intentface/intentface-launch` (README).
+- The install command is the real one (README quick start); its output is simplified. The plugin was considered and not shown: it carries only the skills, while `init` brings the studio, board and render the film goes on to show.
+- Claude Code's screens are simplified: the music question and the script approval are left out; the reply to the note appears without a prompt.
+- The board, its note and reply, the render's file names (`-square`, `-vertical`) and the formats are what the tool does.
+- The to-do app, its data and the people in the chat are made up.
 
-## Open
+## Cut from the previous film
 
-- Whether the countdown also gets a voice ("three, two, one" as `audio.voice`), decided after hearing it with ticks only.
-- Hits to confirm by frame in the sketch: the drop's first downbeat (about f1045) and the logo hit (f3345), declared as `hits` so `check` holds them.
+The device family and the three files playing side by side (neither fitted the flat look), the Orbit launch planner, "Written as code", the code shot, the reel, "Any style", "From real product UI", "Install it / Or fork it / Open source", the countdown (the new track has no room for one).

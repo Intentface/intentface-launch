@@ -1,0 +1,17 @@
+{
+  "sounds": [
+    {
+      "id": "whoosh-deep",
+      "file": "whoosh-deep.mp3",
+      "category": "whoosh",
+      "tags": ["deep", "heavy", "low", "move", "transition"],
+      "duration": 1.401,
+      "onset": 0.193,
+      "peakOffset": 0.481,
+      "lufs": -16.6,
+      "peak": -3.3,
+      "license": "ElevenLabs, generated (core's starter pack, see packages/core/sfx/README.md)",
+      "source": "core's sfx:whoosh, pitched down 5 semitones (asetrate 0.75), low shelf +4 dB at 140 Hz, lowpass 5.5 kHz"
+    }
+  ]
+}

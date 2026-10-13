@@ -14,7 +14,7 @@ the frame, so any frame renders alone.
 | `defineVideo` | Declares a video: shots end to end, overlapped by their transitions, with audio, formats and variants. |
 | `useFrame` | The current frame, counted from the enclosing shot or `Sequence` (`{ from: "ask" }` counts from another shot). |
 | `useSeconds` | Seconds since the start of the enclosing shot or `Sequence`. |
-| `useVideoInfo` | The video's fps, size, format on screen and variant. |
+| `useVideoInfo` | The video's fps, size, format on screen and variant, and `duration`: the length of the enclosing shot in frames. |
 | `useVariant` | The variant on screen and its `data`. |
 | `Sequence` | Shows its children for a range of frames, with the clock restarting at 0. |
 | `waitFor` | Holds the frame until a promise settles (image decode, data load). Pass a label to name it in stall reports. |
@@ -33,13 +33,14 @@ the frame, so any frame renders alone.
 | `springEase` | A spring as an easing that still arrives when the key says. |
 | `springVelocity`, `springToVelocity` | A spring's speed at a frame: what a move hands to the next shot at a cut. |
 | `settleFrames` | Frames until a spring stays near its target: when the next beat can start. |
+| `landed` | A spring-driven position that lands on whole pixels: fractional while it moves, the rounded target once within 0.2 px. Rounding every frame makes the slow tail step. |
 | `springFeel`, `springsAt` | Springs as `{ duration, bounce }` in frames. |
 | `motion`, `personalities` | One easing family, spring, duration and stagger per video: `premium`, `energetic`, `playful`. |
 | `durations`, `staggers` | Named durations and staggers, scaled to the frame rate or a tempo. |
 | `random` | Seeded random numbers, the same in every worker. |
 | `lerp` | Linear interpolation. |
 | `toOklch`, `mixColor`, `formatOklch` | Colours in OKLCH, mixed the short way round the hue. |
-| `springColor` | `springTo` for a colour. |
+| `springColor` | `springTo` for a colour, in OKLCH. From or to a near neutral it moves straight in OKLab, so it never passes through other hues. |
 
 ## Music and sound
 
@@ -61,7 +62,8 @@ the frame, so any frame renders alone.
 | `lintText` | Flags headlines over 6 words and lines over 42 characters. |
 | `declareText` | Tells `check` what text a canvas or WebGL stage paints, so it is checked like DOM text. |
 | `resolveCaptions`, `cueAt`, `wrapLines` | Caption cues as frames, wrapped and kept from overlapping. |
-| `clearArea`, `platformZones` | Where text can go in a vertical cut, clear of TikTok, Reels and Shorts UI. |
+| `clearArea`, `platformZones` | Where text can go in a vertical cut, clear of TikTok, Reels and Shorts UI (what `check` holds 9:16 text to). |
+| `safeZone`, `SAFE_ZONES` | One rectangle for laying out a vertical cut that works on every app: `organic` (790 × 1200 at 1080 × 1920) or `ads` (660 × 980). Dated October 2026. |
 
 ## Transitions
 

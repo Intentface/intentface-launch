@@ -10,6 +10,7 @@ import { type CSSProperties, createContext, type ReactNode, useLayoutEffect, use
 import {
   Color,
   CustomBlending,
+  DepthTexture,
   ExternalTexture,
   FloatType,
   Group,
@@ -43,7 +44,7 @@ import { LUTCubeLoader } from "three/examples/jsm/loaders/LUTCubeLoader.js";
 import { htmlInCanvas, uploadElement } from "./dom-texture.js";
 import { EffectChain } from "./effects.js";
 import { type Environment, Environments } from "./environment.js";
-import { aimThroughLens, diskSample, type Lens, pixelJitter, shutterSlot } from "./lens.js";
+import { aimThroughLens, diskSample, distanceTo, type Lens, pixelJitter, shutterSlot } from "./lens.js";
 import { keyLight, type SoftBox } from "./lights.js";
 import {
   ADD_BLEND,
@@ -75,6 +76,11 @@ export type Stage3DProps = {
    * spends them where the blur is: `(f) => (f < 300 ? 256 : 32)` once the lens has stopped down.
    */
   samples?: number | ((frame: number) => number);
+  /**
+   * Merge the copies a defocused edge splits into across the lens samples, so bokeh is a smooth
+   * disc, not a spiky sunflower of ghosts (default true). Costs one cheap pass per blurred sample.
+   */
+  smoothBokeh?: boolean;
   /** Samples per frame in the studio. */
   preview?: number;
   /**
@@ -153,6 +159,56 @@ uniform float weight;
 varying vec2 vUv;
 void main() { gl_FragColor = texture2D(map, vUv) * weight; }`;
 
+// Bokeh smoothing. Every sample sees the scene through one point of the lens,
+// and every pixel shares those points, so a defocused edge averages into
+// n distinct copies of itself (a sunflower of ghosts: spiky, not a disc) until
+// n is in the thousands. Each sample is blurred here, before it is added, by
+// about the gap between neighbouring copies at that pixel's own depth: the
+// copies merge into a smooth disc, and what is in focus (gap under a pixel)
+// is left exactly as it was. Taps are weighed by their own blur, so a sharp
+// foreground does not bleed into a blurred background.
+const SMOOTH_FRAGMENT = /* glsl */ `
+uniform sampler2D map;
+uniform sampler2D depthMap;
+uniform float weight;
+uniform float cocScale;
+uniform float focus;
+uniform float near;
+uniform float far;
+uniform float spread;
+uniform vec2 texel;
+uniform float seed;
+varying vec2 vUv;
+float distanceAt(vec2 uv) {
+  float ndc = texture2D(depthMap, uv).x * 2.0 - 1.0;
+  return 2.0 * near * far / (far + near - ndc * (far - near));
+}
+// Radius in pixels of the gap between neighbouring copies of a point at this pixel's depth.
+float gapAt(vec2 uv) {
+  float d = distanceAt(uv);
+  return 0.5 * cocScale * abs(d - focus) / d * spread;
+}
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main() {
+  float r = gapAt(vUv);
+  vec4 own = texture2D(map, vUv);
+  if (r < 0.6) { gl_FragColor = own * weight; return; }
+  // A small disk of taps, turned per pixel and per sample, so the smoothing has no pattern of its own.
+  float turn = hash(gl_FragCoord.xy + seed) * 6.2831853;
+  vec4 acc = own;
+  float total = 1.0;
+  for (int k = 0; k < 12; k++) {
+    float fr = sqrt((float(k) + 0.5) / 12.0);
+    float a = float(k) * 2.39996323 + turn;
+    vec2 off = vec2(cos(a), sin(a)) * fr * r;
+    vec2 uv = vUv + off * texel;
+    float w = clamp(gapAt(uv) / max(length(off), 0.001), 0.0, 1.0);
+    acc += texture2D(map, uv) * w;
+    total += w;
+  }
+  gl_FragColor = acc / total * weight;
+}`;
+
 // Debug views (`still --stage-debug`): a linear buffer encoded for display,
 // or its alpha as grey.
 const DEBUG_FRAGMENT = /* glsl */ `
@@ -222,6 +278,8 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
   const w = Math.round(width * ratio);
   const h = Math.round(height * ratio);
   const sample = new WebGLRenderTarget(w, h, { type: HalfFloatType, depthBuffer: true });
+  // Read back by the bokeh smoothing: each pixel's distance sets how far its copies sit apart.
+  sample.depthTexture = new DepthTexture(w, h);
   const sum = new WebGLRenderTarget(w, h, { type: FloatType, depthBuffer: false });
   const reflection = new WebGLRenderTarget(w, h, { type: HalfFloatType, depthBuffer: true });
 
@@ -229,6 +287,25 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
     uniforms: { map: { value: sample.texture }, weight: { value: 1 } },
     vertexShader: QUAD_VERTEX,
     fragmentShader: ADD_FRAGMENT,
+    depthTest: false,
+    depthWrite: false,
+    ...ADD_BLEND,
+  });
+  const smooth = new ShaderMaterial({
+    uniforms: {
+      map: { value: sample.texture },
+      depthMap: { value: sample.depthTexture },
+      weight: { value: 1 },
+      cocScale: { value: 0 },
+      focus: { value: 1 },
+      near: { value: 1 },
+      far: { value: 1000 },
+      spread: { value: 0 },
+      texel: { value: [1 / w, 1 / h] },
+      seed: { value: 0 },
+    },
+    vertexShader: QUAD_VERTEX,
+    fragmentShader: SMOOTH_FRAGMENT,
     depthTest: false,
     depthWrite: false,
     ...ADD_BLEND,
@@ -256,6 +333,7 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
     sum,
     reflection,
     add,
+    smooth,
     output,
     quad,
     quadScene,
@@ -272,6 +350,7 @@ function createGpu(canvas: HTMLCanvasElement, width: number, height: number, rat
       sum.dispose();
       reflection.dispose();
       add.dispose();
+      smooth.dispose();
       output.dispose();
       this.bloom?.dispose();
       this.effects?.dispose();
@@ -321,6 +400,7 @@ export function Stage3D({
   lights,
   environment = 1,
   samples = 96,
+  smoothBokeh = true,
   preview = 8,
   shutter,
   background,
@@ -348,6 +428,7 @@ export function Stage3D({
     lights,
     environment,
     samples,
+    smoothBokeh,
     preview,
     shutter,
     background,
@@ -706,13 +787,31 @@ export function Stage3D({
     if (!again) renderer.clear(true, false, false);
     g.quad.material = g.add;
     g.add.uniforms.weight.value = 1 / n;
+    const smoothing = g.smooth.uniforms;
+    smoothing.weight.value = 1 / n;
+    // Neighbouring points of an n-point sunflower on a disk of radius R sit about R·√(π/n) apart.
+    smoothing.spread.value = Math.sqrt(Math.PI / n);
     for (let i = 0; i < (again ? 0 : n); i++) {
       const t = moving ? p.frame + (phase + ((shutterSlot(i, n) + 0.5) / n) * angle) / 360 : p.frame;
       drawSample(i, n, t);
       renderer.setRenderTarget(g.sum);
-      g.add.uniforms.map.value = g.sample.texture;
+      const lens = p.lens(t);
+      if (p.smoothBokeh && n > 1 && (lens.aperture ?? 0) > 0) {
+        const focus = lens.focus ?? distanceTo(lens);
+        const halfH = focus * Math.tan(((lens.fov ?? 30) * Math.PI) / 360);
+        smoothing.cocScale.value = ((lens.aperture ?? 0) / (2 * halfH)) * g.size.h;
+        smoothing.focus.value = focus;
+        smoothing.near.value = camera.near;
+        smoothing.far.value = camera.far;
+        smoothing.seed.value = i * 17.31;
+        g.quad.material = g.smooth;
+      } else {
+        g.add.uniforms.map.value = g.sample.texture;
+        g.quad.material = g.add;
+      }
       renderer.render(g.quadScene, g.quadCamera);
     }
+    g.quad.material = g.add;
 
     // postprocessing's effects on the averaged image, then the finishing: bloom
     // from it, then grade, vignette, LUT, grain.

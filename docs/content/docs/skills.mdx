@@ -7,6 +7,21 @@ source: packages/core/skills
 `init` installs them into the product repo's `.claude/skills/`, and
 `pnpm launch update` refreshes them. They are revised as we learn.
 
+They can also be installed on their own, to read or to try: in Claude Code as
+a plugin (`/plugin marketplace add Intentface/intentface-launch`, then
+`/plugin install intentface-launch@intentface-launch`), or in another agent
+with the [skills CLI](https://skills.sh)
+(`npx skills add Intentface/intentface-launch`). They call the CLI and the
+engine throughout, though, so in a product repo install the package with
+`init` instead: it copies the skills that match the installed version, and
+`update` keeps them in step. `init` does not overwrite skill folders it did
+not install, so remove copies from the skills CLI first, and uninstall the
+plugin so Claude does not see two copies.
+
+How your team makes its videos belongs in `launch/CLAUDE.md`, not in the
+skills, which `update` replaces. See
+[Write down how your team works](/recipes#write-down-how-your-team-works).
+
 | Skill | When Claude uses it |
 | --- | --- |
 | `product-launch-video` | The method, from finding what sets the product apart to the final mp4. Start here. |
@@ -18,3 +33,4 @@ source: packages/core/skills
 | `motion-review` | Rendering stills and contact sheets and looking at them, after every shot. |
 | `music-brief` | Writing the brief for a generated track, then cutting to its beats. |
 | `sound-design` | Sound effects: spotting, a palette, generating with ElevenLabs, syncing and mixing. |
+| `social-formats` | Which shapes to deliver for each social platform, the safe zones in a vertical cut, laying each shape out instead of cropping, and export settings. Dated October 2026. |

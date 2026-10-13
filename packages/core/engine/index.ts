@@ -1,6 +1,16 @@
 export { type Caption, type CaptionCue, type CaptionStyle, cueAt, resolveCaptions, wrapLines } from "./captions.js";
 export { type ColorTarget, formatOklch, mixColor, type Oklch, springColor, toOklch } from "./color.js";
-export { clearArea, type Format, type FormatSize, type Platform, platformZones, withFormat } from "./formats.js";
+export {
+  clearArea,
+  type Format,
+  type FormatSize,
+  type Platform,
+  platformZones,
+  SAFE_ZONES,
+  type SafeZoneKind,
+  safeZone,
+  withFormat,
+} from "./formats.js";
 export { audioLevels, type Band, type Levels } from "./levels.js";
 export { type DeclaredText, declareText, isTextHidden } from "./measure.js";
 export * from "./motion.js";
