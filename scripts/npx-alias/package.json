@@ -13,7 +13,7 @@
   "author": "Intentface",
   "type": "module",
   "bin": {
-    "intentface-launch": "./bin/launch.mjs"
+    "intentface-launch": "bin/launch.mjs"
   },
   "files": [
     "bin",

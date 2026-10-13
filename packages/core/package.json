@@ -28,7 +28,7 @@
     "prepack": "pnpm run build"
   },
   "bin": {
-    "intentface-launch": "./bin/launch.mjs"
+    "intentface-launch": "bin/launch.mjs"
   },
   "exports": {
     ".": "./engine/index.ts",
