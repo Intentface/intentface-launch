@@ -10,6 +10,17 @@ export const REPO = "https://github.com/Intentface/intentface-launch";
 // The deployed origin, for absolute links in llms.txt. Unset, links are relative.
 export const SITE = process.env.DOCS_URL?.replace(/\/$/, "") ?? "";
 
+/** The share image (public/og.png, 1200×630, made from the dark Launch tile), on every page. */
+export const SHARE = {
+  openGraph: {
+    siteName: "Intentface Launch",
+    images: [
+      { url: "/og.png", width: 1200, height: 630, alt: "Intentface Launch: product launch videos written as code" },
+    ],
+  },
+  twitter: { card: "summary_large_image" as const, images: ["/og.png"] },
+};
+
 export const source = loader(docs.toFumadocsSource(), { baseUrl: "/" });
 
 // fumadocs-core's `loader` collapses the page data generic to its base type, so

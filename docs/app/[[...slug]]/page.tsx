@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { DocsTOC } from "@/components/docs-toc";
 import { PageActions } from "@/components/page-actions";
 import { MenuButton } from "@/components/site-shell";
-import { getPage, getSectionLabel, slugOf, source } from "@/lib/source";
+import { getPage, getSectionLabel, SHARE, slugOf, source } from "@/lib/source";
 import { getMDXComponents } from "@/mdx-components";
 
 type PageProps = {
@@ -78,5 +78,7 @@ export async function generateMetadata(props: PageProps) {
     title: page.data.title,
     description: page.data.description,
     alternates: { types: { "text/markdown": `/${slugOf(page.url)}.md` } },
+    openGraph: { ...SHARE.openGraph, title: page.data.title, description: page.data.description },
+    twitter: SHARE.twitter,
   };
 }

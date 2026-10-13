@@ -12,11 +12,11 @@ You need Node 22 or later and ffmpeg (`brew install ffmpeg`); [uv](https://docs.
 
 ```sh
 npx @intentface-launch/core init    # or: pnpm dlx @intentface-launch/core init
-npx intentface-launch setup         # the browser renders use, once per machine
-npx intentface-launch dev           # the studio, at http://localhost:4400
+pnpm launch setup                   # the browser renders use, once per machine
+pnpm launch dev                     # the studio, at http://localhost:4400
 ```
 
-`init` adds the package as a dev dependency, a `launch/` folder (config, `videos/`, a `CLAUDE.md` for Claude), a `launch` script, and the skills in `.claude/skills/`. In a pnpm, yarn or bun repo, run the CLI as `pnpm launch`, `yarn launch` or `bun run launch`.
+`init` adds the package as a dev dependency, a `launch/` folder (config, `videos/`, a `CLAUDE.md` for Claude), a `launch` script, and the skills in `.claude/skills/`. In an npm, yarn or bun repo, run the CLI as `npx intentface-launch`, `yarn launch` or `bun run launch`.
 
 Then open Claude Code in the repo and ask for a video:
 
@@ -25,13 +25,13 @@ Then open Claude Code in the repo and ask for a video:
 ## Add-ons
 
 ```sh
-npx intentface-launch add three     # 3D: live UI on panels in space, real depth of field
-npx intentface-launch add shaders   # WebGPU effects from the Shaders library
+pnpm launch add three               # 3D: live UI on panels in space, real depth of field
+pnpm launch add shaders             # WebGPU effects from the Shaders library
 ```
 
 ## Documentation
 
-The guide, recipes and reference are in the repository: <https://github.com/Intentface/intentface-launch>. The guide agents read is `LAUNCH.md` in this package.
+The guide, recipes and reference: <https://launch.intentface.com>. The source: <https://github.com/Intentface/intentface-launch>. The guide agents read is `LAUNCH.md` in this package.
 
 ## Licence
 

@@ -12,7 +12,7 @@ It is built to be driven by [Claude Code](https://claude.com/claude-code). You d
 - **Cut to music.** Beats, sections and quiet stretches are detected from the track, and shots are timed in beats.
 - **3D when it earns it.** An add-on puts live UI on panels in space, shot through a real lens with depth of field and motion blur.
 
-> **Status:** early (0.x) and experimental; see [Use at your own risk](#use-at-your-own-risk). Developed and tested on an Apple M2 Pro Mac with Claude Opus 5.5 at High effort in Claude Code; other machines, operating systems and models are not guaranteed to work. See [requirements](docs/content/docs/requirements.mdx).
+> **Status:** early (0.x) and experimental; see [Use at your own risk](#use-at-your-own-risk). Developed and tested on an Apple M2 Pro Mac with Claude Opus 5.5 at High effort in Claude Code; other machines, operating systems and models are not guaranteed to work. See [requirements](https://launch.intentface.com/requirements).
 
 ## Quick start
 
@@ -29,7 +29,7 @@ pnpm launch dev                     # the studio, at http://localhost:4400
 
 `init` adds the package as a dev dependency, a `launch/` folder (a config, `videos/`, and a `CLAUDE.md` for Claude), a `launch` script in your `package.json`, and the skills in `.claude/skills/`. It works with pnpm, npm, yarn and bun; in an npm repo, run the CLI as `npx intentface-launch <command>`.
 
-To change the skills or the engine for your team, fork this repo: a checkout is a launch folder itself (link the product in `launch.config.ts` with `product: { path: "../my-app" }`), and a product repo can install from it. The [quick start](docs/content/docs/quick-start.mdx) covers both.
+To change the skills or the engine for your team, fork this repo: a checkout is a launch folder itself (link the product in `launch.config.ts` with `product: { path: "../my-app" }`), and a product repo can install from it. The [quick start](https://launch.intentface.com/quick-start) covers both.
 
 Now open Claude Code in your repo and ask for a video:
 
@@ -44,7 +44,7 @@ The `product-launch-video` skill takes it from there, and each step is agreed wi
 5. **Build.** Shots are finished one at a time, and Claude checks each in stills and contact sheets.
 6. **Check and render.** `pnpm launch check`, then `pnpm launch render` for the mp4.
 
-You can also start from screenshots of what to highlight, your own clips and music, or a recipe your team writes down once, such as a weekly update. See [recipes](docs/content/docs/recipes.mdx).
+You can also start from screenshots of what to highlight, your own clips and music, or a recipe your team writes down once, such as a weekly update. See [recipes](https://launch.intentface.com/recipes).
 
 To update later, update `@intentface-launch/core` (and any add-ons) like other dev dependencies, then run `pnpm launch update` to refresh the skills.
 
@@ -88,13 +88,13 @@ The headline slams in on the first beat and the line springs in on the second. `
 | --- | --- |
 | `@intentface-launch/core` | Engine, kit (camera, cursor, captures, kinetic type, transitions), CLI, studio, and the skills Claude uses. |
 | `@intentface-launch/three` | The 3D add-on: `pnpm launch add three`. |
-| `@intentface-launch/shaders` | 200 WebGPU effects from the [Shaders library](https://github.com/shader-effects-inc/shaders), on the video's clock: `pnpm launch add shaders`. |
+| `@intentface-launch/shaders` | 200 WebGPU effects from the [Shaders library](https://shaders.com), on the video's clock: `pnpm launch add shaders`. |
 
 A brand is an add-on too: a package with your fonts, logos and design, motion and copy rules, which `pnpm launch add <package>` installs and links into Claude's guide. Core itself is brand-neutral, so a video takes its look from your product.
 
 ## Documentation
 
-The docs are in [`docs/content/docs/`](docs/content/docs/): [requirements](docs/content/docs/requirements.mdx), [quick start](docs/content/docs/quick-start.mdx), [how it works](docs/content/docs/how-it-works.mdx), [commands](docs/content/docs/commands.mdx), [engine](docs/content/docs/engine.mdx), [kit](docs/content/docs/kit.mdx), [3D](docs/content/docs/three.mdx), [shader effects](docs/content/docs/shaders.mdx) and [skills](docs/content/docs/skills.mdx). `pnpm docs` serves them at <http://localhost:4410>.
+The docs are at <https://launch.intentface.com>: [requirements](https://launch.intentface.com/requirements), [quick start](https://launch.intentface.com/quick-start), [how it works](https://launch.intentface.com/how-it-works), [recipes](https://launch.intentface.com/recipes), [examples](https://launch.intentface.com/examples), [commands](https://launch.intentface.com/commands), [engine](https://launch.intentface.com/engine), [kit](https://launch.intentface.com/kit), [3D](https://launch.intentface.com/three), [shader effects](https://launch.intentface.com/shaders) and [skills](https://launch.intentface.com/skills). Their source is in [`docs/content/docs/`](docs/content/docs/); `pnpm docs` serves a local copy at <http://localhost:4410>.
 
 ## Contributing
 

@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { SiteShell } from "@/components/site-shell";
-import { SITE, source } from "@/lib/source";
+import { SHARE, SITE, source } from "@/lib/source";
 import corePackage from "../../packages/core/package.json";
 import "./globals.css";
 
@@ -27,10 +27,13 @@ const ioskeleyMono = localFont({
   display: "swap",
 });
 
+// metadataBase makes the share image's URL absolute.
 export const metadata: Metadata = {
-  metadataBase: SITE ? new URL(SITE) : undefined,
+  metadataBase: new URL(SITE || "https://launch.intentface.com"),
   title: { default: "Intentface Launch", template: "%s · Intentface Launch" },
   description: "Product launch videos written as code: React scenes rendered frame by frame, made with an agent.",
+  openGraph: { ...SHARE.openGraph, type: "website" },
+  twitter: SHARE.twitter,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

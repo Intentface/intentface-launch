@@ -10,7 +10,7 @@ import { parseArgs } from "./util.js";
 const HELP = `intentface-launch <command>   (pnpm launch <command> in a product repo)
 
   init [folder]                set up launch/ in this product repo: config, CLAUDE.md, skills
-  add <name…>                  install an add-on: three, or any add-on package (a brand); see addons
+  add <name…>                  install an add-on: three, shaders, or any add-on package (a brand)
   addons                       what can be added, and what is installed
   update                       refresh skills and CLAUDE.md from installed packages
   setup                        download the browser renders use (once per machine)

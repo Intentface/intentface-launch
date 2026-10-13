@@ -1,0 +1,6 @@
+Intent Sans 0.111 — experimental derivative of TASA Orbiter V1.001.
+Original design: Weizhong Zhang / Local Remote, © 2023.
+Original Reserved Font Name: TASA Orbiter.
+Variable binary baseline from the original V1 WOFF2; algorithmic width masters and derivative naming added for Intent Sans.
+Geist is a comparison reference only; no Geist outlines are included.
+Licensed under SIL OFL 1.1; see OFL.txt.

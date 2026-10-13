@@ -11,6 +11,8 @@ videos/_*/
 # Images and video are not committed: renders, stills and clips are regenerated
 # or shared outside git. (SVG logos in the brand package are source.)
 *.png
+# The docs' share image is served from git (docs/scripts/og.mjs makes it).
+!docs/public/og.png
 *.jpg
 *.jpeg
 *.gif

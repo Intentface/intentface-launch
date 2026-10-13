@@ -9,7 +9,7 @@ import { grab } from "./frames.js";
 import { writeLicences } from "./licences.js";
 import { mixAudio } from "./mix.js";
 import { resolveFrame } from "./review.js";
-import { assetPath, outDir, timer } from "./util.js";
+import { assetPath, outDir, rocketBar, timer } from "./util.js";
 
 export type RenderOptions = {
   /** Output size multiplier: 0.5 for a quick 960×540 animatic, 2 for 4K. */
@@ -130,9 +130,10 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   let moving = 0;
   let lastReport = 0;
   let lastReportAt = Date.now();
+  let tick = 0;
   const report = setInterval(() => {
     const line = `  ${done}/${frames.length} frames · ${elapsed()}`;
-    if (process.stdout.isTTY) process.stdout.write(`\r${line}   `);
+    if (process.stdout.isTTY) process.stdout.write(`\r\x1b[K  ${rocketBar(done / frames.length, tick++)}${line}`);
     // In a log: every tenth, and at least every 15 s, so a slow stretch is told from a stuck one.
     else if (done - lastReport >= frames.length / 10 || Date.now() - lastReportAt > 15_000) {
       console.log(line);
@@ -212,7 +213,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     }),
   );
   clearInterval(report);
-  if (process.stdout.isTTY) process.stdout.write("\n");
+  if (process.stdout.isTTY) process.stdout.write(`\r\x1b[K  ${rocketBar(done / frames.length, tick)}\n`);
   console.log(`  ${frames.length} frames, ${moving} motion-blurred · ${elapsed()}`);
   if (failed.length > 0) {
     throw new Error(

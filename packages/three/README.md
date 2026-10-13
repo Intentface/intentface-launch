@@ -7,7 +7,7 @@ The 3D add-on for [@intentface-launch/core](https://www.npmjs.com/package/@inten
 In a repo set up with `intentface-launch init`:
 
 ```sh
-npx intentface-launch add three     # or: pnpm launch add three
+pnpm launch add three     # or, in an npm repo: npx intentface-launch add three
 ```
 
 `add` installs the package and its peers (`three`, `postprocessing`) and links its guide (`LAUNCH.md`) into `launch/CLAUDE.md`, so Claude knows how to use it.
@@ -16,7 +16,7 @@ Panels draw live DOM through Chrome's HTML-in-Canvas, which the CLI's browser ha
 
 ## Documentation
 
-<https://github.com/Intentface/intentface-launch>, and `LAUNCH.md` in this package.
+<https://launch.intentface.com/three>, the source at <https://github.com/Intentface/intentface-launch>, and `LAUNCH.md` in this package.
 
 ## Licence
 
