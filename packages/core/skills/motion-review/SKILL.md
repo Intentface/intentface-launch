@@ -53,6 +53,8 @@ Look at each frame as the person will, as if it were the finished film, and ask 
 - Bokeh that is grainy, streaked or ragged at its edge: too few samples for the blur (256 for about 80 px), or something that moves (a cursor) out of the focus plane, blurring into a disc.
 - A camera that stops in the middle of a move: on `sheet --every 2`, neighbouring tiles bunch up mid-path. Look for a key in the middle of the move.
 - An empty product: unticked boxes, zero counts, empty cards on the hero UI.
+- An effect that fades in just after a hard cut (a Spotlight's dim, a vignette, a scrim): the first frames show the undimmed picture and it reads as a glitch. Start it already in place on the cut (`at` before 0) and let only its travel play.
+- Content off its optical centre: text in a field or a loader in a button a few pixels low. Judge it at 1:1 (`still --crop`), from the glyphs, not the box; an inline SVG sits on the text baseline inside a grid cell, so give it `display: block`.
 - Streaks under objects on a reflective floor: the floor's roughness smears small UI text; use about 0.03 with a short fade.
 
 Fix what you find and look again. Report what you checked and what you fixed, not just that it looks good.

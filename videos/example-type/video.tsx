@@ -41,29 +41,18 @@ import {
   useMeasureText,
 } from "@intentface-launch/core/kit";
 import type { CSSProperties } from "react";
+import { LIGHT, look } from "../example-look";
 
 const t = tempo(120, 60);
 
-/** The look every example video shares. */
-const look = {
-  ground: "#f4f3f0",
-  surface: "#ffffff",
-  ink: "#16161a",
-  muted: "#6b6b76",
-  line: "rgb(22 22 26 / 0.08)",
-  accent: "#4f5bff",
-  accentSoft: "rgb(79 91 255 / 0.12)",
-  darkGround: "#0f1013",
-  darkInk: "#f3f2ef",
-};
 const sans = '"Studio Sans", system-ui, sans-serif';
-const fill: CSSProperties = {
+const fill = (): CSSProperties => ({
   position: "absolute",
   inset: 0,
   background: look.ground,
   color: look.ink,
   fontFamily: sans,
-};
+});
 
 /** A CSS font shorthand in the shared face, for measuring. */
 const face = (weight: number, size: number) => `${weight} ${size}px "Studio Sans"`;
@@ -127,7 +116,7 @@ function BuildCentred({
   const target = targets.filter((k) => frame >= k.at).at(-1)?.to ?? targets[0].to;
   const left = landed(moving, target);
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <div
         style={{
           position: "absolute",
@@ -275,7 +264,7 @@ function Slot({
     maskRepeat: "repeat-x",
   };
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <div style={{ ...text, position: "absolute", left, top }}>
         <Reveal at={enterAt} every={3} frames={24} rise={0.25} blur={0.08}>
           {lead}
@@ -377,7 +366,7 @@ function WordmarkCut({ at = 0, frames = 72, from = 3.2, slide = 1500 }) {
   const scale = Math.exp(lerp(Math.log(from), 0, p));
   const moving = p < 1;
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <MotionBlur when={[[at, at + 30]]}>
         <Wordmark
           check={!moving}
@@ -417,7 +406,7 @@ function WordmarkClose({ zoom = 1.7, stopAt = [0.62, 0.6] }: { zoom?: number; st
     zoom,
   };
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <Camera keys={[{ at: 0, view }]}>
         <Wordmark check={false} />
       </Camera>
@@ -503,7 +492,7 @@ function Punch({
         ? { right: margin, textAlign: "right" }
         : { left: 0, width, textAlign: "center" };
   return (
-    <div style={{ ...fill, background: card.dark ? look.darkGround : look.ground }}>
+    <div style={{ ...fill, background: card.dark ? look.altGround : look.ground }}>
       <MotionBlur when={[[at[i], at[i] + flick + follow + 1]]}>
         <div
           style={{
@@ -519,7 +508,7 @@ function Punch({
           {card.lines.map((line, j) => {
             const p = progress(local, j * follow, flick, ease.expo);
             const shown = progress(local, j * follow, 4, ease.soft);
-            const color = card.accent === j ? look.accent : card.dark ? look.darkInk : look.ink;
+            const color = card.accent === j ? look.accent : card.dark ? look.altInk : look.ink;
             return (
               <div
                 key={`${i}-${j}`}
@@ -544,7 +533,7 @@ export default defineVideo({
   title: "Kinetic type patterns",
   logline: "Reusable kinetic type moves for launch videos, one pattern per shot.",
   bpm: t.bpm,
-  background: look.ground,
+  background: LIGHT.ground,
   shots: [
     {
       id: "build-centred",

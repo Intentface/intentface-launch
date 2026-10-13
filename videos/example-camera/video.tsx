@@ -27,34 +27,20 @@ import {
   useFontsReady,
 } from "@intentface-launch/core/kit";
 import type { CSSProperties, ReactNode } from "react";
+import { LIGHT, look } from "../example-look";
 
 const t = tempo(120, 60);
 
-/** The examples library's shared look: neutral, light, one accent. */
-const look = {
-  ground: "#f4f3f0",
-  surface: "#ffffff",
-  ink: "#16161a",
-  muted: "#6b6b76",
-  line: "rgb(22 22 26 / 0.08)",
-  accent: "#4f5bff",
-  accentSoft: "rgb(79 91 255 / 0.12)",
-  done: "#1f9d6b",
-  font: '"Studio Sans", system-ui, sans-serif',
-  mono: '"Studio Mono", ui-monospace, Menlo, monospace',
-  shadow: "0 1px 2px rgb(22 22 26 / 0.06), 0 6px 20px rgb(22 22 26 / 0.06)",
-};
-
 /** Colours for made-up marks: the accent and a few neutral companions. */
-const MARKS = [look.accent, look.done, "#e0a33a", "#d9576b", "#2f9bd6", "#8a63d2"];
+const marks = () => [look.accent, look.done, "#e0a33a", "#d9576b", "#2f9bd6", "#8a63d2"];
 
-const fill: CSSProperties = {
+const fill = (): CSSProperties => ({
   position: "absolute",
   inset: 0,
   background: look.ground,
   color: look.ink,
   fontFamily: look.font,
-};
+});
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
@@ -156,7 +142,7 @@ export function WideField({
   const focus = progress(frame, at - 12, 9, ease.soft);
 
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <MotionBlur when={[[panAt, panAt + pan]]}>
         <Camera
           keys={[
@@ -289,7 +275,7 @@ const CARD = { width: 400, height: 440, pitch: 448, perspective: 1400 };
 /** One template card: a made-up thumbnail of blocks, a name and a count, upright on the rail. */
 function TemplateCard({ index, selected }: { index: number; selected: number }) {
   const rnd = random(index + 11);
-  const tint = MARKS[index % MARKS.length];
+  const tint = marks()[index % 6];
   return (
     <div
       style={{
@@ -366,7 +352,7 @@ export function FlickRail({
   const frame = useFrame();
   const offset = flicks.reduce((sum, f) => sum + flickAt(frame, f), 0);
   return (
-    <div style={fill}>
+    <div style={fill()}>
       {/* Cards flying past are a montage, not copy: only the title is checked. */}
       <MotionBlur when={flicks.map(flickBlur)}>
         <div data-launch-check="off">
@@ -443,8 +429,8 @@ function GridCell({ col, row, at }: { col: number; row: number; at: number }) {
           position: "absolute",
           inset: 0,
           borderRadius: 14,
-          background: "rgb(255 255 255 / 0.7)",
-          border: "2px dashed rgb(22 22 26 / 0.2)",
+          background: look.slot,
+          border: `2px dashed ${look.slotLine}`,
           opacity: 1 - fade,
         }}
       />
@@ -464,7 +450,7 @@ function GridCell({ col, row, at }: { col: number; row: number; at: number }) {
           }}
         >
           <div style={{ opacity: content }}>
-            <Mark shape={Math.floor(rnd() * 8)} color={MARKS[Math.floor(rnd() * MARKS.length)]} size={30} />
+            <Mark shape={Math.floor(rnd() * 8)} color={marks()[Math.floor(rnd() * 6)]} size={30} />
             <div
               style={{
                 marginTop: 14,
@@ -558,7 +544,7 @@ export function CountGrid({
   }
 
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <MotionBlur when={[[0, pre + 24]]}>
         <Camera
           keys={[
@@ -580,7 +566,7 @@ export function CountGrid({
                 borderRadius: 14,
                 background: look.surface,
                 border: `1px solid ${look.line}`,
-                boxShadow: "0 2px 4px rgb(22 22 26 / 0.06), 0 16px 48px rgb(22 22 26 / 0.12)",
+                boxShadow: look.raised,
                 display: "grid",
                 placeItems: "center",
                 textAlign: "center",
@@ -701,13 +687,13 @@ export function IntegrationWall({
           transform: `scale(${0.7 + 0.3 * born})`,
         }}
       >
-        <Mark shape={(n * 5 + 3) & 7} color={MARKS[((n % 6) + 6) % 6]} size={52} />
+        <Mark shape={(n * 5 + 3) & 7} color={marks()[((n % 6) + 6) % 6]} size={52} />
         <div style={{ fontSize: 20, fontWeight: 500, color: look.muted }}>{APPS[i]}</div>
       </div>,
     );
   }
   return (
-    <div style={fill}>
+    <div style={fill()}>
       <Camera
         keys={[
           { at: 0, view: { x: 960, y: 540, zoom: zoom[0] } },
@@ -726,7 +712,7 @@ export function IntegrationWall({
           borderRadius: 14,
           background: look.surface,
           border: `1px solid ${look.line}`,
-          boxShadow: "0 2px 4px rgb(22 22 26 / 0.06), 0 24px 64px rgb(22 22 26 / 0.14)",
+          boxShadow: look.raised,
           display: "grid",
           placeItems: "center",
           fontSize: 80,
@@ -757,7 +743,7 @@ export default defineVideo({
   title: "Examples: camera and composition",
   logline: "Reusable camera patterns: a page across a wide field, a flicked rail, proof by multiplication, a wall.",
   bpm: t.bpm,
-  background: look.ground,
+  background: LIGHT.ground,
   shots: [
     {
       id: "wide-field",

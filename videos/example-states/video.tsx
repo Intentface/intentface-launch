@@ -42,27 +42,9 @@ import {
   useFontsReady,
 } from "@intentface-launch/core/kit";
 import type { CSSProperties, ReactNode } from "react";
+import { LIGHT, look } from "../example-look";
 
 const t = tempo(120, 60);
-
-/** The examples library's shared look: a light, neutral app on a warm ground. */
-const look = {
-  ground: "#f4f3f0",
-  surface: "#ffffff",
-  ink: "#16161a",
-  muted: "#6b6b76",
-  line: "rgb(22 22 26 / 0.08)",
-  accent: "#4f5bff",
-  accentSoft: "rgb(79 91 255 / 0.12)",
-  done: "#1f9d6b",
-  /** A neutral fill for controls and avatars at rest. */
-  quiet: "#ebeae6",
-  font: '"Studio Sans", system-ui, sans-serif',
-  mono: '"Studio Mono", ui-monospace, Menlo, monospace',
-  radius: 14,
-  control: 10,
-  shadow: "0 1px 2px rgb(22 22 26 / 0.06), 0 12px 32px rgb(22 22 26 / 0.07)",
-};
 
 /** Long before any shot starts: the value a spring rests at before its first change. */
 const BEFORE = -1e4;
@@ -108,7 +90,7 @@ function AppWindow({
         }}
       >
         {[0, 1, 2].map((i) => (
-          <div key={i} style={{ width: 12, height: 12, borderRadius: 6, background: "rgb(22 22 26 / 0.12)" }} />
+          <div key={i} style={{ width: 12, height: 12, borderRadius: 6, background: look.dots }} />
         ))}
         {/* Window chrome, not copy: off the reading checks (a receding window shrinks it under 28 px). */}
         <div data-launch-check="off" style={{ marginLeft: 14, font: `500 28px/1 ${look.font}`, color: look.muted }}>
@@ -309,9 +291,32 @@ function StatusLine({ prefix, states, size = 120 }: { prefix: string; states: Pi
 }
 
 const BUILD: PillState[] = [
-  { at: 0, label: "queued", fill: "#dfe0e8", text: look.ink },
-  { at: t.beats(3), label: "running", fill: look.accent, text: "#fff" },
-  { at: t.beats(6), label: "live", fill: look.done, text: "#fff" },
+  {
+    at: 0,
+    label: "queued",
+    get fill() {
+      return look.pill;
+    },
+    get text() {
+      return look.ink;
+    },
+  },
+  {
+    at: t.beats(3),
+    label: "running",
+    get fill() {
+      return look.accent;
+    },
+    text: "#fff",
+  },
+  {
+    at: t.beats(6),
+    label: "live",
+    get fill() {
+      return look.done;
+    },
+    text: "#fff",
+  },
 ];
 
 function Status() {
@@ -624,7 +629,7 @@ function ExportToast({ start, done, label, result }: { start: number; done: numb
     frame,
     fps,
     [
-      { at: BEFORE, to: look.ink },
+      { at: BEFORE, to: look.toast },
       { at: done + 4, to: look.done },
     ],
     { duration: 18 },
@@ -646,7 +651,7 @@ function ExportToast({ start, done, label, result }: { start: number; done: numb
         color: "#fff",
         overflow: "hidden",
         display: "grid",
-        boxShadow: "0 10px 30px rgb(22 22 26 / 0.18)",
+        boxShadow: look.raised,
         opacity: fade,
         transform: arrive < 1 ? `translateY(${16 * (1 - arrive)}px) scale(${0.97 + 0.03 * arrive})` : undefined,
         filter: arrive < 1 ? `blur(${2 * (1 - arrive)}px)` : undefined,
@@ -711,15 +716,13 @@ function ExportToast({ start, done, label, result }: { start: number; done: numb
   );
 }
 
-const SWATCHES = ["#dfe2ff", "#d7efe5", "#f1e6d8", "#e6e5e1", "#e9ddf3", "#dcecf3"];
-
 /** What is being exported: a catalogue of six pages, as tiles. Decoration, not read. */
 function Catalogue() {
   return (
     <div style={{ padding: "36px 44px" }}>
       <div style={{ font: `650 40px/1.1 ${look.font}`, letterSpacing: "-0.02em" }}>Spring catalogue</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginTop: 28 }}>
-        {SWATCHES.map((c) => (
+        {look.swatches.map((c) => (
           <div key={c} style={{ height: 200, borderRadius: look.control, background: c }} />
         ))}
       </div>
@@ -823,12 +826,12 @@ type Message = {
   lands?: number;
 };
 
-const AVATAR_TINTS: Record<string, [string, string]> = {
+const avatarTints = (): Record<string, [string, string]> => ({
   "Mira Okafor": [look.accentSoft, look.accent],
-  "Theo Lind": ["rgb(31 157 107 / 0.14)", look.done],
-  "Sana Iqbal": ["#f1e6d8", "#8a5a1f"],
+  "Theo Lind": [look.doneSoft, look.done],
+  "Sana Iqbal": look.warm,
   "Jonas Berg": [look.quiet, look.ink],
-};
+});
 
 const LINE = 44;
 const HEADER = 40;
@@ -886,7 +889,7 @@ function TypingDots({ from }: { from: number }) {
 function MessageSlot({ message, top }: { message: Message; top: number }) {
   const frame = useFrame();
   const appear = message.typing === undefined ? 1 : progress(frame, message.typing, 15, ease.out);
-  const [tint, letter] = AVATAR_TINTS[message.from] ?? [look.quiet, look.ink];
+  const [tint, letter] = avatarTints()[message.from] ?? [look.quiet, look.ink];
   const text = (
     <div style={{ font: `400 32px/${LINE}px ${look.font}` }}>
       {message.lines.map((l) => (
@@ -1035,7 +1038,7 @@ function Thread({ channel, messages }: { channel: string; messages: Message[] })
             style={{
               height: 72,
               borderRadius: look.control,
-              border: `1px solid rgb(22 22 26 / 0.14)`,
+              border: `1px solid ${look.lineStrong}`,
               display: "flex",
               alignItems: "center",
               padding: "0 24px",
@@ -1081,7 +1084,7 @@ export default defineVideo({
   logline:
     "Reusable patterns for UI that changes state: a status pill, a ripple through a list, a finishing task, a chat filling in.",
   bpm: t.bpm,
-  background: look.ground,
+  background: LIGHT.ground,
   shots: [
     {
       id: "status",

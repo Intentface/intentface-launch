@@ -47,25 +47,9 @@ import {
   type View,
 } from "@intentface-launch/core/kit";
 import type { ReactNode } from "react";
+import { LIGHT, look } from "../example-look";
 
 const t = tempo(120, 60);
-
-/** The look every example video shares, so the library reads as one set. */
-const look = {
-  ground: "#f4f3f0",
-  surface: "#ffffff",
-  ink: "#16161a",
-  muted: "#6b6b76",
-  line: "rgb(22 22 26 / 0.08)",
-  accent: "#4f5bff",
-  accentSoft: "rgb(79 91 255 / 0.12)",
-  done: "#1f9d6b",
-  font: '"Studio Sans", system-ui, sans-serif',
-  mono: '"Studio Mono", ui-monospace, Menlo, monospace',
-  radius: 14,
-  control: 10,
-  shadow: "0 1px 2px rgb(22 22 26 / 0.04), 0 12px 32px rgb(22 22 26 / 0.06)",
-};
 
 /** The app window, in content pixels: the same in every shot, so the shots cut together. */
 const WINDOW: Rect = { x: 200, y: 150, width: 1520, height: 780 };
@@ -450,7 +434,7 @@ const CHAT = { left: 460, right: 1460 };
 const QUESTION_TOP = 280;
 const ANSWER_TOP = 530;
 const ANSWER_LINE = 60;
-const ANSWER_FONT = `400 34px/1 ${look.font}`;
+const ANSWER_FONT = `400 34px/1 ${LIGHT.font}`;
 /** The answer's actions under it, once it is complete. */
 const ACTIONS_H = 56;
 /** The whole exchange, the question and the full answer: the framing the pull-back lands on. */
@@ -693,7 +677,7 @@ function ActionChip({ actions, press }: { actions: string[]; press: number }) {
         borderRadius: look.radius,
         background: look.surface,
         border: `1px solid ${look.line}`,
-        boxShadow: "0 2px 4px rgb(22 22 26 / 0.06), 0 12px 28px rgb(22 22 26 / 0.1)",
+        boxShadow: look.raised,
         font: `500 28px/1 ${look.font}`,
         whiteSpace: "nowrap",
       }}
@@ -707,7 +691,7 @@ function ActionChip({ actions, press }: { actions: string[]; press: number }) {
             gap: 10,
             padding: "0 18px",
             borderRadius: look.control,
-            background: i === 0 ? mixColor("#eef0ff", look.accent, fill) : "transparent",
+            background: i === 0 ? mixColor(look.chip, look.accent, fill) : "transparent",
             color: i === 0 ? mixColor(look.accent, "#ffffff", fill) : look.ink,
             transform: i === 0 ? `scale(${1 - 0.05 * down})` : undefined,
           }}
@@ -841,7 +825,7 @@ function Select({
               width: Math.max(0, band.size),
               height: DOC_SIZE * 1.36,
               borderRadius: 6,
-              background: "rgb(79 91 255 / 0.2)",
+              background: look.selection,
             }}
           />
         )}
@@ -1108,7 +1092,7 @@ export default defineVideo({
   logline:
     "Reusable patterns for showing AI features at work: cut in on the caret, a streaming answer, a selection with an action, an agent's log.",
   bpm: t.bpm,
-  background: look.ground,
+  background: LIGHT.ground,
   shots: [
     {
       id: "cut-in",

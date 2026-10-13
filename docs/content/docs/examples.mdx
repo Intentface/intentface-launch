@@ -71,7 +71,11 @@ Or open the studio (`pnpm launch dev`) and pick the video.
 ## Add a pattern
 
 A new pattern goes in the example video of its family (or a new
-`videos/example-<family>`), in the shared look the others use, as a component
-with props and a comment giving its numbers and their reasons. Check it with
+`videos/example-<family>`), in the shared look the others use
+(`videos/example-look.tsx`), as a component with props and a comment giving its
+numbers and their reasons. The look has a light and a dark theme: an example is
+light, and plays dark inside `<ExampleTheme value={DARK}>` (a reel on a dark film
+does this). Read its colours from `look` while rendering, never into a
+module-level constant, or the theme cannot reach them. Check it with
 `still`, `sheet`, `measure` and `check` like any shot, then add it to
 `patterns.md` and to this page.

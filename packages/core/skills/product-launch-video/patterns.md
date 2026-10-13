@@ -1,6 +1,6 @@
 # Animation patterns
 
-Moves that recur in product launch videos, each built and checked once in this engine, so a shot that needs one starts from a working version instead of from nothing. The code is in the packages' repo, `videos/example-<family>/video.tsx` (<https://github.com/Intentface/intentface-launch/tree/main/videos>): one shot per pattern, each a small component whose copy and cue frames are props, with a JSDoc that gives its numbers and why. They are drawn on a neutral made-up app; in a product video the same moves run on the product's own UI (a `Snapshot`'s `animate`, `api.type`, `api.textRects`), in its look.
+Moves that recur in product launch videos, each built and checked once in this engine, so a shot that needs one starts from a working version instead of from nothing. The code is in the packages' repo, `videos/example-<family>/video.tsx` (<https://github.com/Intentface/intentface-launch/tree/main/videos>): one shot per pattern, each a small component whose copy and cue frames are props, with a JSDoc that gives its numbers and why. They are drawn on a neutral made-up app, light, or dark inside `<ExampleTheme value={DARK}>` (`videos/example-look.tsx`); in a product video the same moves run on the product's own UI (a `Snapshot`'s `animate`, `api.type`, `api.textRects`), in its look.
 
 A pattern is a starting point for a beat the script already has, not a reason to add a beat. Pick by what the story needs to show, then take the numbers.
 

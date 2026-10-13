@@ -27,7 +27,7 @@ Write the palette down in `brief.md`, under Sound, before any prompt: 1 or 2 mat
 
 | Sound | Use it for | Watch out |
 |---|---|---|
-| Whoosh | Camera moves, a thing arriving through space | The most overused sound. Length matches the move; its loudest point sits on the fastest frame. |
+| Whoosh | Camera moves, a thing arriving through space | The most overused sound. Length matches the move; its loudest point sits on the fastest frame. Only on visibly fast motion: a soft whoosh or swish under a slow move (a spotlight travelling, a card lifting, a line drawing on) "sounds cheap" (a reviewer); leave those silent, and use a short `whip` per whip or flung card. |
 | Riser | 1 to 4 s into a reveal or logo | Must resolve into a hit or a deliberate silence. |
 | Impact | The payoff, the logo lock | Needs a tail, or it sounds small. One lands; four in a row is a parody. |
 | Swell, shimmer | "Aha" moments, results arriving, end cards | Washes the mix out: high-pass it, keep it short, in key. |
