@@ -202,6 +202,7 @@ export function Sweep({
           >
             {glint && p < 1 && (
               <div
+                data-launch-check="decor"
                 style={{
                   position: "absolute",
                   top: 0,

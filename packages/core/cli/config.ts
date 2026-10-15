@@ -32,6 +32,13 @@ export type CheckRules = {
    * the UI is shown too far away to read. A warning.
    */
   uiText?: number;
+  /**
+   * Smallest gap between overlay text (40 px and up at 1080p) and a surface beside it (a panel,
+   * card, window or Snapshot covering at least 5% of the frame), in ems of the text's on-screen
+   * size (default 0.5). Closer than that, or touching, for half a second is an error. A surface
+   * the text sits on is not beside it.
+   */
+  clearance?: number;
   /** WCAG contrast ratio text needs against what is behind it (default 4.5). Under two thirds of it is an error. */
   contrast?: number;
   /** The ratio large text needs (default 3, as WCAG): text from `largeText` px, or from three quarters of that at bold weight. */

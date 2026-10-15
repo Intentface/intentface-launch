@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import sharp from "sharp";
 import { clearArea, platformZones } from "../engine/formats.js";
-import type { Box, LayerBox } from "../engine/measure.js";
+import type { Box, Clearance, LayerBox } from "../engine/measure.js";
 import { beatGrid, tempo } from "../engine/motion.js";
 import { lintText, readingTime } from "../engine/reading.js";
 import type { Beats } from "./beats.js";
@@ -28,7 +28,7 @@ export type Problem = {
   message: string;
 };
 
-type Sample = { frame: number; visible: number; size: number; weight: number; boxes: Box[] };
+type Sample = { frame: number; visible: number; size: number; weight: number; boxes: Box[]; clearance?: Clearance };
 export type Item = { id: number; shot: string; text: string; declared?: boolean; samples: Sample[] };
 
 /**
@@ -38,6 +38,8 @@ export type Item = { id: number; shot: string; text: string; declared?: boolean;
  */
 const STILL = 0.9;
 const THUMB = 240;
+/** Smallest text, in pixels at 1080p, held to `clearance`: overlay type, not UI labels. */
+const CLEARANCE_FROM = 40;
 /** Samples per frame for 3D stages while checking (`check --samples N` to change). */
 export const DRAFT_SAMPLES = 8;
 
@@ -399,7 +401,14 @@ export async function sampleText(r: Renderer, frame: number, items: Map<number, 
       items.set(s.id, item);
     }
     if (s.text.length >= item.text.length) item.text = s.text;
-    item.samples.push({ frame, visible: s.visible, size: s.size, weight: s.weight, boxes: s.boxes });
+    item.samples.push({
+      frame,
+      visible: s.visible,
+      size: s.size,
+      weight: s.weight,
+      boxes: s.boxes,
+      clearance: s.clearance,
+    });
   }
 }
 
@@ -416,7 +425,7 @@ export type TextEntry = {
 
 /**
  * What the text samples break: reading time, size, safe area, platform UI,
- * copy rules and lint, one entry per text block, and the frames where each
+ * clearance from the surfaces beside it, copy rules and lint, one entry per text block, and the frames where each
  * block's contrast should be measured. Pure: `board` runs it too.
  */
 export function textChecks(items: Map<number, Item>, info: Info, rules: Rules, step: number) {
@@ -497,6 +506,23 @@ export function textChecks(items: Map<number, Item>, info: Info, rules: Rules, s
         check: "safe",
         severity: "error",
         message: `inside the ${rules.safe} px safe margin for ${sec(outside.length * step, fps)}`,
+      });
+    }
+    // Clearance: a line of overlay type (40 px and up: smaller labels belong to UI, like a name
+    // above its chat bubble) crowding a panel, card or window beside it, touching it or nearly.
+    const crowded = readable.filter(
+      (s) => s.size / unit >= CLEARANCE_FROM && s.clearance && s.clearance.gap < rules.clearance * s.size,
+    );
+    if (tooLong(crowded)) {
+      const worst = crowded.reduce((a, b) => ((b.clearance?.gap ?? 0) < (a.clearance?.gap ?? 0) ? b : a));
+      const gap = worst.clearance?.gap ?? 0;
+      const wanted = Math.round((rules.clearance * worst.size) / unit);
+      problems.push({
+        ...at,
+        frame: worst.frame,
+        check: "clearance",
+        severity: "error",
+        message: `${gap < 1 ? "touches or overlaps" : `${Math.round(gap / unit)} px from`} ${worst.clearance?.name} (at 1080p; at least ${rules.clearance} em, ${wanted} px, wanted): give the line room, or place it by what it names. A surface it is meant to touch: data-launch-clearance="ok"`,
       });
     }
     // Platform UI over a 9:16 frame: TikTok, Reels and Shorts draw their bars and buttons there.

@@ -95,7 +95,16 @@ export type TextSample = {
   boxes: Box[];
   /** Declared by a canvas (`declareText`) rather than found in the DOM. */
   declared?: boolean;
+  /** The nearest painted surface beside the block (not one it sits on), and the gap to it. */
+  clearance?: Clearance;
 };
+
+/**
+ * How close a text block comes to a surface beside it: a panel, card, window or Snapshot that it
+ * neither sits on nor belongs to. `gap` is in stage pixels between the block's text boxes and the
+ * surface's box, 0 when they overlap.
+ */
+export type Clearance = { gap: number; name: string };
 
 type State = { opacity: number; scale: number; clip: Box | null; off: boolean };
 
@@ -301,6 +310,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
   }
 
   const out: TextSample[] = [];
+  let surfaces: Surface[] | undefined;
   for (const [el, b] of blocks) {
     if (!b.shown) continue;
     let id = ids.get(el);
@@ -308,6 +318,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
       id = nextId++;
       ids.set(el, id);
     }
+    surfaces ??= measureSurfaces(stage);
     out.push({
       id,
       shot: b.shot,
@@ -316,6 +327,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
       size: b.size,
       weight: b.weight,
       boxes: b.boxes,
+      clearance: clearanceOf(el, b.boxes, surfaces),
     });
   }
 
@@ -369,6 +381,104 @@ export function measureText(stage: HTMLElement): TextSample[] {
     });
   }
   return out;
+}
+
+type Surface = { el: Element; box: Box; name: string };
+
+/** Whether an element draws a surface of its own: a background, border, outline or shadow, or a Snapshot. */
+function paints(el: Element) {
+  if (el.tagName === "IFRAME") return true;
+  const style = getComputedStyle(el);
+  return (
+    !transparent(style.backgroundColor) ||
+    style.backgroundImage !== "none" ||
+    ["top", "right", "bottom", "left"].some(
+      (side) => Number.parseFloat(style.getPropertyValue(`border-${side}-width`)) > 0,
+    ) ||
+    (style.outlineStyle !== "none" && Number.parseFloat(style.outlineWidth) > 0) ||
+    style.boxShadow !== "none"
+  );
+}
+
+/**
+ * Painted surfaces on screen that text could crowd: boxes with a background, border, outline or
+ * shadow of their own (panels, cards, windows) and Snapshots (iframes), at least 5% of the frame,
+ * at least half opaque, unrotated. Images, SVGs and canvases are left out (their
+ * transparent margins are not their edge), as are backgrounds covering most of the frame,
+ * decoration (`data-launch-check="decor"`) and anything marked `data-launch-clearance="ok"`.
+ */
+function measureSurfaces(stage: HTMLElement): Surface[] {
+  const origin = stage.getBoundingClientRect();
+  const area = origin.width * origin.height;
+  const out: Surface[] = [];
+  for (const el of stage.querySelectorAll("*")) {
+    if (el instanceof SVGElement) continue;
+    if (!paints(el)) continue;
+    const r = el.getBoundingClientRect();
+    // Panels, cards and windows: at least 5% of the frame (about 460×225 at 1080p). Pills, chips,
+    // bubbles and buttons are smaller and belong with the text beside them ("Your build is [queued]").
+    if (r.width * r.height < area * 0.05 || r.width * r.height > area * 0.9) continue;
+    if (el.closest('[data-launch-clearance="ok"], [data-launch-check="decor"]')) continue;
+    let opacity = 1;
+    let hidden = false;
+    for (let e: Element | null = el; e && e !== stage; e = e.parentElement) {
+      const s = getComputedStyle(e);
+      opacity *= Number(s.opacity);
+      if (s.display === "none" || s.visibility === "hidden") hidden = true;
+    }
+    if (hidden || opacity < 0.5 || !axisAligned(el, stage)) continue;
+    const box = { x: r.x - origin.x, y: r.y - origin.y, width: r.width, height: r.height };
+    if (!intersect(box, { x: 0, y: 0, width: origin.width, height: origin.height })) continue;
+    // Scene boxes rarely have names: say where it is, in stage pixels at the frame's own size.
+    const where = `${Math.round(box.width)}×${Math.round(box.height)} at ${Math.round(box.x)},${Math.round(box.y)}`;
+    out.push({ el, box, name: el.tagName === "IFRAME" ? `a Snapshot (${where})` : `a box (${where})` });
+  }
+  return out;
+}
+
+/**
+ * The nearest surface beside a text block and the gap to it. A surface the block sits on (it
+ * contains the block's text, like a plate or a card the label belongs to) or is part of is not
+ * beside it; nor is one inside the block, or one marked off on the text's side
+ * (`data-launch-clearance="ok"` on the text).
+ */
+function clearanceOf(block: Element, boxes: Box[], surfaces: Surface[]): Clearance | undefined {
+  if (!boxes.length || block.closest('[data-launch-clearance="ok"]')) return undefined;
+  const x = Math.min(...boxes.map((b) => b.x));
+  const y = Math.min(...boxes.map((b) => b.y));
+  const text = {
+    x,
+    y,
+    width: Math.max(...boxes.map((b) => b.x + b.width)) - x,
+    height: Math.max(...boxes.map((b) => b.y + b.height)) - y,
+  };
+  // Text on a panel or plate answers to that surface's own contents, not to what the surface
+  // covers: the nearest painted box around it, of any size, is its world.
+  let host: Element | undefined;
+  for (let e = block.parentElement; e && !e.classList.contains("launch-stage"); e = e.parentElement) {
+    if (e.hasAttribute("data-shot")) break;
+    if (paints(e)) {
+      host = e;
+      break;
+    }
+  }
+  let nearest: Clearance | undefined;
+  for (const s of surfaces) {
+    if (s.el.contains(block) || block.contains(s.el)) continue;
+    if (host && !host.contains(s.el)) continue;
+    const b = s.box;
+    const on =
+      b.x <= text.x + 1 &&
+      b.y <= text.y + 1 &&
+      b.x + b.width >= text.x + text.width - 1 &&
+      b.y + b.height >= text.y + text.height - 1;
+    if (on) continue;
+    const dx = Math.max(b.x - (text.x + text.width), text.x - (b.x + b.width), 0);
+    const dy = Math.max(b.y - (text.y + text.height), text.y - (b.y + b.height), 0);
+    const gap = Math.hypot(dx, dy);
+    if (!nearest || gap < nearest.gap) nearest = { gap, name: s.name };
+  }
+  return nearest;
 }
 
 /** Hide all text (for measuring what is behind it), or show it again. */

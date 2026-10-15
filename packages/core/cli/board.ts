@@ -31,7 +31,7 @@ export type BoardFile = {
 };
 
 /** Checks the board runs: the ones a timing or layout decision fixes, before anything is built. */
-const BOARD_CHECKS = new Set(["reading", "size", "safe", "platform", "copy"]);
+const BOARD_CHECKS = new Set(["reading", "size", "safe", "clearance", "platform", "copy"]);
 
 /**
  * Check's text pass over the whole video: text sampled every 0.1 s, held
