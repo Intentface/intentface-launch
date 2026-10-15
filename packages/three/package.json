@@ -1,6 +1,6 @@
 {
   "name": "@intentface-launch/three",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "3D for intentface-launch: live UI on panels in space, thin-lens depth of field, soft light, glass, reflections and in-camera motion blur.",
   "keywords": [
@@ -45,7 +45,7 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@intentface-launch/core": "^0.1.0",
+    "@intentface-launch/core": "^0.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "three": ">=0.180.0",

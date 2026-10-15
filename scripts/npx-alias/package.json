@@ -1,6 +1,6 @@
 {
   "name": "intentface-launch",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Runs the intentface-launch CLI from @intentface-launch/core: product launch videos written as code.",
   "homepage": "https://launch.intentface.com",
@@ -24,6 +24,6 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@intentface-launch/core": "^0.1.0"
+    "@intentface-launch/core": "^0.2.0"
   }
 }

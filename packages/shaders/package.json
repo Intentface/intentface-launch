@@ -1,6 +1,6 @@
 {
   "name": "@intentface-launch/shaders",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "WebGPU and WebGL effects for intentface-launch: the 200+ components of the Shaders library (shaders.com) and Paper's shaders (shaders.paper.design), driven frame by frame.",
   "keywords": [
@@ -48,7 +48,7 @@
     "shaders": "4.0.4"
   },
   "peerDependencies": {
-    "@intentface-launch/core": "^0.1.0",
+    "@intentface-launch/core": "^0.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
