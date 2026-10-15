@@ -1,6 +1,6 @@
 {
   "name": "@intentface-launch/shaders",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "description": "WebGPU effects for intentface-launch: the 200+ components of the Shaders library (shaders.com), driven frame by frame.",
   "keywords": [

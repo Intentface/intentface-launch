@@ -1,0 +1,32 @@
+---
+title: Changelog
+description: What changed in each release of the packages and skills, newest first.
+---
+
+Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
+then `pnpm launch update` to refresh the skills and guides in `launch/`.
+
+## 0.1.1 (2026-10-15)
+
+### Improved
+
+- **`check` and `board` catch text crowding the UI.** A new `clearance` check
+  measures the gap between each line of overlay text and the nearest panel,
+  card, window or Snapshot beside it, as the viewer sees it after the camera.
+  Closer than half the line's size, or touching, for half a second is an
+  error, reported per shot in the board's text pass and in `check`. Text
+  sitting on a surface (a label on its card, a plate behind a headline) is not
+  beside it, and text on a panel is measured only against that panel's own
+  contents. Set the minimum with `checks.clearance` in `launch.config.ts` (in
+  ems, default 0.5), and mark a surface or line meant to touch with
+  `data-launch-clearance="ok"`.
+- **Skills.** product-launch-video asks for room around every line beside UI
+  (at least half its size), measured where the UI lands after the camera.
+  motion-review adds "text crowding the UI" to its defects and asks for a 1:1
+  look at every line beside UI, since a grid tile hides a 5 px gap.
+
+## 0.1.0 (2026-10-13)
+
+The first release: `@intentface-launch/core` (engine, kit, CLI, studio and
+skills), `@intentface-launch/three` (3D) and `@intentface-launch/shaders`
+(WebGPU shader effects), and the `intentface-launch` alias for `npx`.
