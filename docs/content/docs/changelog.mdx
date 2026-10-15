@@ -6,6 +6,16 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## 0.2.1 (2026-10-16)
+
+### Fixed
+
+- **Installs from npm work again.** 0.1.1 and 0.2.0 were published with
+  their exports pointing at TypeScript source the packages do not include, so
+  in a repo installed from npm `launch.config.ts` could not load
+  `@intentface-launch/core/config` and no command ran. Repos linked to a
+  checkout were not affected. Update core and its add-ons to 0.2.1.
+
 ## 0.2.0 (2026-10-16)
 
 ### Added

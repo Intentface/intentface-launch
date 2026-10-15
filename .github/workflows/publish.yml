@@ -1,7 +1,7 @@
 # Publishes the packages to npm when a version tag is pushed:
 #   bump "version" in packages/*/package.json and scripts/npx-alias/package.json
 #   (all four the same, and the alias's and add-ons' ranges on core), commit, then
-#   git tag v0.2.0 && git push origin v0.2.0
+#   git tag v0.2.1 && git push origin v0.2.1
 # Trusted publishing: no token. Each package names this repo and publish.yml as a
 # trusted publisher on npmjs.com (package Settings, Trusted publishing), and npm
 # signs provenance itself.
@@ -40,14 +40,23 @@ jobs:
           done
       - run: pnpm typecheck
       - run: pnpm lint
-      # Core first, then the add-ons that peer on it and the alias that depends on
-      # it; prepack builds each one's dist/. No workspace: ranges, so npm publishes
-      # the folders as they are.
-      - run: npm publish --access public
-        working-directory: packages/core
-      - run: npm publish --access public
-        working-directory: packages/three
-      - run: npm publish --access public
-        working-directory: packages/shaders
-      - run: npm publish --access public
-        working-directory: scripts/npx-alias
+      # pnpm packs the packages: prepack builds each one's dist/, and publishConfig's
+      # exports (dist/) replace the source ones. npm publish on a folder skips that
+      # swap and shipped exports into source the package does not hold (0.1.1, 0.2.0),
+      # so npm publishes pnpm's tarballs as they are. The alias has no exports.
+      - name: Pack
+        run: |
+          mkdir -p "$RUNNER_TEMP/packs"
+          for p in core three shaders; do
+            (cd packages/$p && pnpm pack --pack-destination "$RUNNER_TEMP/packs")
+          done
+          (cd scripts/npx-alias && npm pack --pack-destination "$RUNNER_TEMP/packs")
+      - name: Every export is in its tarball
+        run: node scripts/check-pack.mjs "$RUNNER_TEMP"/packs/*.tgz
+      # Core first, then the add-ons that peer on it and the alias that depends on it.
+      - name: Publish
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for t in intentface-launch-core intentface-launch-three intentface-launch-shaders intentface-launch; do
+            npm publish "$RUNNER_TEMP/packs/$t-$v.tgz" --access public
+          done
