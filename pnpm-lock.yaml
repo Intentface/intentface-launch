@@ -60,6 +60,9 @@ importers:
       '@keyline-icons/react':
         specifier: ^1.7.0
         version: 1.7.0(react@19.3.0)
+      '@plausible-analytics/tracker':
+        specifier: ^0.4.6
+        version: 0.4.6
       '@tabler/icons-react':
         specifier: ^3.46.0
         version: 3.49.0(react@19.3.0)
@@ -678,6 +681,9 @@ packages:
 
   '@oxc-project/types@0.151.0':
     resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
+
+  '@plausible-analytics/tracker@0.4.6':
+    resolution: {integrity: sha512-nbu6xGgSP6jeYuoVklZBzucUnIpo75tVu3Kr+R0EDycVKaMC/jF5Q/YCaM/8gR4fPZ1IDcXt6FdBJFZ1uZwEPA==}
 
   '@rolldown/binding-android-arm-eabi@1.2.11':
     resolution: {integrity: sha512-A5kXfGKvKWWZE0TtPrfsvT+q4Y5d1QG8gGUzpYjGydM+fARM9MuX90PrXYXe0XbsDVgyxxNzHo6giCj90bsFNw==}
@@ -2505,6 +2511,8 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.151.0': {}
+
+  '@plausible-analytics/tracker@0.4.6': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.11':
     optional: true

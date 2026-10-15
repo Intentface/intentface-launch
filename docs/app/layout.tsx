@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+import { Analytics } from "@/components/analytics";
 import { SiteShell } from "@/components/site-shell";
 import { SHARE, SITE, source } from "@/lib/source";
 import corePackage from "../../packages/core/package.json";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </SiteShell>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

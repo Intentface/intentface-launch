@@ -17,8 +17,12 @@ const nextConfig: NextConfig = {
         destination: "/docs-markdown/:slug",
       },
     ],
-    // Not the skills' own files, which are markdown already.
-    afterFiles: [{ source: "/:slug((?!\\.well-known/).+)\\.md", destination: "/docs-markdown/:slug" }],
+    afterFiles: [
+      // Not the skills' own files, which are markdown already.
+      { source: "/:slug((?!\\.well-known/).+)\\.md", destination: "/docs-markdown/:slug" },
+      // Plausible through our own origin (see lib/analytics.ts).
+      { source: "/p/event", destination: "https://plausible.io/api/event" },
+    ],
     fallback: [],
   }),
   headers: async () => [
