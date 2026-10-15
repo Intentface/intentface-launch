@@ -463,6 +463,41 @@ void main() {
   vec4 paper = vec4(u_paper.rgb * u_paper.a, u_paper.a);
   gl_FragColor = mix(paper, ink, dot);
 }`,
+  /**
+   * Smoke rolling in from an edge (`u_from`, a unit vector pointing where it
+   * comes from) until it fills the frame: billows of domain-warped noise
+   * drifting with it and curling, the front pushed ahead in tongues, its body
+   * `u_color`, the thin smoke at its edge lit `u_light`. `u_progress` 0 is
+   * clear, 1 is filled.
+   */
+  smoke: /* glsl */ `
+uniform vec3 u_color;
+uniform vec3 u_light;
+uniform vec2 u_from;
+uniform float u_scale;
+uniform float u_speed;
+void main() {
+  float aspect = u_resolution.x / u_resolution.y;
+  vec2 p = vec2(v_uv.x * aspect, v_uv.y) * u_scale + u_seed * 7.3;
+  float t = u_time * u_speed;
+  // The billows drift the way the smoke travels (away from its edge: the noise is read further toward it), curling as they go.
+  vec2 drift = u_from * t * 0.32 + vec2(-u_from.y, u_from.x) * t * 0.04;
+  vec2 q = vec2(fbm(p + drift), fbm(p + drift + vec2(5.2, 1.3) - t * 0.08));
+  vec2 r = vec2(fbm(p + 3.2 * q + vec2(1.7, 9.2) + drift * 0.5), fbm(p + 3.2 * q + vec2(8.3, 2.8)));
+  float n = fbm(p + 2.6 * r + drift);
+  // Distance into the frame from the smoke's edge, 0 at that edge and 1 at the far one.
+  vec2 c = v_uv - 0.5;
+  float along = 0.5 - dot(c, u_from) / (abs(u_from.x) * 0.5 + abs(u_from.y) * 0.5) * 0.5;
+  // The front runs from past its edge to past the far one; the billows push it on and hold it back.
+  float front = mix(-0.2, 1.6, u_progress);
+  float behind = (front - along) + (n - 0.5) * 0.75 + (r.y - 0.5) * 0.3;
+  float body = smoothstep(-0.04, 0.32, behind);
+  float a = max(body, smoothstep(0.9, 1.0, u_progress));
+  // Where the smoke is thin, it is lit: its colour runs to u_light (written premultiplied below).
+  float lit = clamp((1.0 - smoothstep(0.2, 0.75, body)) * (0.6 + n), 0.0, 1.0);
+  vec3 col = mix(u_color, u_light, lit);
+  gl_FragColor = vec4(col * a, a);
+}`,
 };
 
 type Preset = Omit<ShaderProps, "frag" | "uniforms">;
@@ -639,6 +674,58 @@ export function Halftone({
         u_source: source === "noise" ? 1 : 0,
         u_speed: speed,
       }}
+      {...rest}
+    />
+  );
+}
+
+/** Where smoke comes from, as the unit vector pointing to that edge (uv space, y up). */
+const SMOKE_FROM = {
+  right: [1, 0],
+  left: [-1, 0],
+  top: [0, 1],
+  bottom: [0, -1],
+} as const;
+
+/**
+ * Smoke rolling in from an edge until it fills the frame: billowing,
+ * curling, its front pushed ahead in tongues, the thin smoke at its edge
+ * catching a little light. `progress` 0 is clear, 1 is filled with `color`.
+ * An ending (black smoke taking the last frame over the music's tail), a
+ * transition into a dark shot, a reveal run backwards. No simulation: any
+ * frame renders alone. Drive `progress` steadily (`interpolate`): an ease in
+ * leaves it off frame for its first second.
+ */
+export function Smoke({
+  progress,
+  from = "right",
+  color = "#000000",
+  light = "#1a1b1f",
+  scale = 2.1,
+  speed = 1,
+  resolution = 0.5,
+  style,
+  ...rest
+}: Omit<Preset, "progress"> & {
+  progress: number;
+  /** The edge it rolls in from. */
+  from?: keyof typeof SMOKE_FROM;
+  /** The smoke's body. */
+  color?: string;
+  /** The thin smoke at its edge, where light catches it. */
+  light?: string;
+  /** Billow size: larger is finer smoke. */
+  scale?: number;
+  /** How fast the billows drift and curl. */
+  speed?: number;
+}) {
+  return (
+    <Shader
+      frag={shaders.smoke}
+      progress={progress}
+      resolution={resolution}
+      uniforms={{ u_color: color, u_light: light, u_from: [...SMOKE_FROM[from]], u_scale: scale, u_speed: speed }}
+      style={{ pointerEvents: "none", ...style }}
       {...rest}
     />
   );

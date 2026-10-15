@@ -1,11 +1,13 @@
 ---
 title: Shader effects
-description: The 200 WebGPU components of the Shaders library on the video's clock, from the @intentface-launch/shaders add-on.
+description: The 200 WebGPU components of the Shaders library and Paper's shaders on the video's clock, with type, footage and a cursor as their input, from the @intentface-launch/shaders add-on.
 source: packages/shaders
 ---
 
-`pnpm launch add shaders`, then `import { Shaders } from "@intentface-launch/shaders"`.
-Gradients, noise, light, glass, metal, distortions, blurs, wipes, particles and fluids from the [Shaders library](https://shaders.com) (MIT), for backdrops, transitions and texture around the product. Read their code too when writing your own `Shader` from the kit.
+`pnpm launch add shaders`, then `import { Shaders, useShapes, usePictures, textPicture, clipTexture, shift, LiquidMetal, PaperShader } from "@intentface-launch/shaders"`.
+Gradients, noise, light, glass, metal, distortions, blurs, wipes, particles and fluids from the [Shaders library](https://shaders.com) (MIT), and [Paper's shaders](https://shaders.paper.design) (Apache-2.0: liquid metal, mesh and grain gradients, dithering, halftones). Use them for backdrops, transitions and texture around the product, for type made of chrome, glass or molten gold, and for UI materials such as a liquid-metal button.
+
+[Shaders in Intentface Launch: type in chrome, glass and liquid metal, footage under a lens, a cursor of liquid glass](https://www.youtube.com/watch?v=91ejkTrWFwI)
 
 ## The layer
 
@@ -24,19 +26,90 @@ Gradients, noise, light, glass, metal, distortions, blurs, wipes, particles and 
 | `components` | The layer tree as the library's vanilla API takes it: `{ type, props, children, id }`, first at the bottom. A function of the frame animates props. |
 | `width`, `height` | The layer's size in CSS pixels. Default: the video's. |
 | `resolution` | Drawing-buffer pixels per CSS pixel. 0.5 for soft fields. |
+| `text` | The text the layer draws (a word made of a shader), so `check` reads it like DOM text. Without it the layer is left out of the reading checks. |
+| `pointer` | A pointer from the frame, `(f) => ({ x, y, down })` in the layer's pixels, for the components that follow one. |
 
-The catalogue and every prop are in the library's own skill (`skills/shaders/components.md` in its repo) and at `https://shaders.com/docs/components/<Name>`. Its JSX maps one to one: `<Aurora colorA="#…" />` is `{ type: "Aurora", props: { colorA: "#…" } }`.
+The catalogue and every prop are in the library's own skill (`skills/shaders/components.md` in its repo) and at `https://shaders.com/docs/components/<Name>`. Its JSX maps one to one: `<Aurora colorA="#…" />` is `{ type: "Aurora", props: { colorA: "#…" } }`. Any node can be masked by another (`maskSource`, `maskType`), confined to a rounded rect (`boundingBox`), moved (`transform`), faded (`opacity`) and blended (`blendMode`).
+
+## Your type as a shader
+
+The library's shape effects (Chrome, Glass, LiquidMetal, Obsidian, Frost, Plastic, Holographic, Crystal, Neon, Water and more) take a custom shape as a signed distance field. `useShapes` bakes one in the page from a word in any font the page has loaded, an SVG path, or any canvas drawing, so a headline in the video's own face can be chrome:
+
+```tsx
+const [word] = useShapes([{ text: "launch", font: '600 800px "Intent Sans"', letterSpacing: -0.045 }]);
+
+<Shaders
+  text={word?.text(x, 540)}
+  components={(f) => word ? [
+    { type: "StudioBackground", props: { color: "#1d1e22" } },
+    { type: "Chrome", props: { ...word.at(x, 540), bevelWidth: 0.011 } },
+  ] : []}
+/>
+```
+
+- `shape.at(x, y, { scale, rotation, extrude })` gives the props that put the shape's centre at (x, y); `extrude` makes it a solid the effect lights on its sides.
+- `shape.text(x, y, { bleed })` is what it says, for the layer's `text`. `bleed: true` marks type larger than the frame on purpose: it skips the safe margin.
+- Bevel widths are fractions of the field: a wide word wants small ones (0.01 to 0.02).
+- The field is 512 × 512 over the whole shape, so a close-up of a whole word steps in its bevels. To cut in close, bake only the part of the word in frame (a `draw` source of that crop) at `scale` = the zoom, and multiply bevel width, edge softness and glass thickness by the whole word's `side` over the crop's, so the material keeps its widths.
+- Crystal bends a band of the ground round its shape unless `cutout` is on. To keep the ground still, put the cut-out Crystal over its own copy of the ground in a `Group`.
+
+## Pictures, words and footage as input
+
+| Helper | What it does |
+| --- | --- |
+| `usePictures([{ key, width, height, fonts, draw }])` | Pictures drawn on a canvas once, as URLs for `ImageTexture`: masks, a word for a filter or a distortion to work on, a shadow. |
+| `textPicture({ text, font, x, y, align, color })` | A line of text as a full-layer picture, with the text it shows for the layer's `text`. |
+| `shift(dx, dy, { scale, rotation, anchor })` | A node's `transform` in pixels: draw a picture once and move it every frame. |
+| `clipTexture(src, seconds)` | A video file's frame as an `ImageTexture`, frame exact, for glass, crystal or halftone over footage. |
+
+## Shaders that follow the cursor
+
+Give the layer the kit cursor's own path and CursorRipples, CursorTrail, Liquify and InkFlow answer the cursor on screen, so type turns fluid where it passes:
+
+```tsx
+<Shaders
+  pointer={(f) => cursorAt(keys, f)}
+  components={[word, { type: "CursorRipples", props: { intensity: 9, decay: 4, chromaticSplit: 1.2 } }]}
+/>
+<Cursor keys={keys} look="frosted" />
+```
+
+Trees that follow a pointer are stepped from the start of the shot, with the library's clock set to the video's, so they render the same every time: frame 40 of a ripple shot rendered straight and after the frames before it are identical. Keep one pointer-driven layer on screen at a time.
+
+## Paper's shaders and liquid metal
+
+`PaperShader` runs any of Paper's fragment shaders frame-locked, with the uniforms Paper's React component would pass. `LiquidMetal` is ready to use: polished metal whose reflections flow through a shape and split into colour where they bend.
+
+| Prop | What it does |
+| --- | --- |
+| `shape` | A picture (white on transparent, the layer's size) of what the metal fills: a pill, a ring round a button, a logo, a word. |
+| `matte` | 0 polished, rainbow along the bends, to 1 satin, no colour split. |
+| `repetition`, `softness`, `shiftRed`, `shiftBlue`, `distortion`, `contour` | Paper's own controls, overriding `matte` one by one. |
+| `speed`, `flow` | How fast it flows, and seconds of flow added (a surge on a click). |
+| `still` | A frame: draw it once, as it is at that frame, as a picture every copy shares. For a shot a page curl carries off, which draws it once per strip (`PaperShader` takes `still` too). |
 
 ## On the video's clock
 
-The library's own components run on the wall clock. `Shaders` drives its renderer frame by frame instead, so any frame renders alone, in any order, the same every time. That was measured over the whole catalogue by rendering each component's frame both directly and after the frames before it.
+The libraries' own components run on the wall clock. `Shaders` and `PaperShader` draw frame by frame instead, so any frame renders alone, in any order, the same every time. That was measured over the whole catalogue by rendering each component's frame both directly and after the frames before it.
 
 | Kind | How it renders |
 | --- | --- |
 | Most components | At the frame's exact time, fractional frames and motion blur included. |
-| Simulations: Boids, DataMosh, FloatingParticles, InkFlow, KeyFrames, Liquify, MagneticFilings, ParticleField, ParticleFlow, Particles, PixelSort, ReactionDiffusion, Smoke, SmokeFill, SmokeFlow, Surface3D, TimeTrail | One whole frame at a time from the start of the shot. A late frame replays the ones before it, so keep these shots short. No motion blur. |
-| `ImageTexture` | Waits for its image before the frame is let go. Not under a simulation. |
-| `auto-animate`, `mouse`, `mouse-position` drivers | Refused: animate with a function of the frame. |
-| CursorTrail, CursorRipples, WebcamTexture, ObjectTracker, VideoTexture, Text, HTMLInCanvas, DOMTexture, Fog | Refused, with what to use instead. Fog renders differently on every run, so render chunks would not join. |
+| Simulations (Boids, DataMosh, FloatingParticles, InkFlow, KeyFrames, Liquify, MagneticFilings, ParticleField, ParticleFlow, Particles, PixelSort, ReactionDiffusion, Smoke, SmokeFill, SmokeFlow, Surface3D, TimeTrail, and CursorRipples and CursorTrail with a pointer) | One whole frame at a time from the start of the shot. A late frame replays the ones before it, so keep these shots short. No motion blur. |
+| `ImageTexture`, baked shapes | The frame waits until each one is on the GPU, including every new frame of a clip. |
+| A node starting or stopping a transform, crossing full opacity, or changing blend mode, mask or visibility | The layer starts a fresh renderer (about 0.2 s) so the frame never shows half-compiled; values then change in place. |
+| `auto-animate` drivers; `mouse` drivers without a `pointer` | Refused: animate with a function of the frame, or give the layer a pointer. |
+| WebcamTexture, ObjectTracker, VideoTexture, Text, HTMLInCanvas, DOMTexture, Fog | Refused, with what to use instead (`clipTexture` for video, `useShapes` or `textPicture` for type). Fog renders differently on every run, so render chunks would not join. |
 
-Rendering needs WebGPU, which the renderer's Chromium has. In the studio, use a browser with WebGPU.
+Rendering needs WebGPU (Paper's shaders need WebGL 2), which the renderer's Chromium has. In the studio, use a browser with WebGPU.
+
+## What reads well
+
+- Materials that live inside the letters (chrome, black glass, liquid metal, gold, ice, crystal over footage) read as premium; outer glows and neon halos read as cheap.
+- Type made of a material reads best larger than the frame and cut by its edges, drifting slowly, one material per beat.
+- Grade the shader shots with the music: a dark track wants black and graphite grounds, metal and gold; a bright one soft neutral gradients. Pastels wash out on grey.
+- Letters that go fluid under the cursor read as an effect; colour appearing inside still letters reads as a fill. For a word that comes apart, split it into RGB behind the cursor, erode the split copies with `NoiseDissolve`, and smear the ink after the cursor with `Liquify` under strong ripples.
+- A round glass lens with strong refraction (1.7, thickness 0.6, inner zoom 1.45) reads as liquid glass; a polite rounded square does not.
+- Black metal: `Chrome` with a grey tint, deep shadows and a bright environment. Gold reads as gold on white; gold or brown on a brown ground reads as chocolate.
+- Footage under glass reads best in black and white, graded in the file (glass refracts the stack under it and reads adjustment effects there as white).
+- UI materials need to be seen close: a liquid-metal button 1,200 px wide or more, with a slow push.

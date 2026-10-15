@@ -1,5 +1,7 @@
 import { type CSSProperties, createElement as h, type ReactNode } from "react";
-import { type Easing, ease, lerp, type SpringConfig, settleFrames, springs, springTo } from "./motion.js";
+import { type CurlFrom, PageCurl, type PageCurlOptions } from "../kit/page-curl.js";
+import { resolvePaper } from "../kit/paper.js";
+import { bezier, type Easing, ease, lerp, type SpringConfig, settleFrames, springs, springTo } from "./motion.js";
 import type { Transition, TransitionFrame } from "./video.js";
 
 /*
@@ -10,7 +12,7 @@ import type { Transition, TransitionFrame } from "./video.js";
  * the easing.
  *
  * Which ones put a filter on the shots (`filters: true`): blur, zoom, whip,
- * displace, luma, chromatic. Over a `Stage3D` shot those stall the renderer
+ * displace, luma, chromatic, and pageCurl with a paper you can see through. Over a `Stage3D` shot those stall the renderer
  * under several workers. The mask and transform ones (fade, push, wipe, iris,
  * shape, clock, sweep, zoomInto, honest, matchCut) put no filter on the shots;
  * masks and clip paths over a `Stage3D` are not yet proven under several
@@ -607,6 +609,41 @@ export const chromatic = (
     },
   };
 };
+
+// --- Paper -------------------------------------------------------------------------------
+
+export type { CurlFrom };
+
+export type PageCurlTransitionOptions = PageCurlOptions & { easing?: Easing };
+
+/**
+ * The outgoing shot peels away like a sheet of paper from an edge or corner
+ * (default the bottom right), the fold sweeping across, the sheet rolling
+ * back over itself and off the frame to show the next shot under it. Its
+ * back shows as it turns over, shaded across the curl, and it casts a soft
+ * shadow on the next shot that tightens along the fold. `paper` is any of
+ * the kit's papers: with `film`, `vellum` or `smoke` the next shot shows
+ * through the lifting sheet, blurred more the higher it lifts (that copies
+ * both shots into every strip of the curl: keep them to DOM, not 3D).
+ * About 48 to 60 frames. The default easing lifts gently and speeds up as
+ * the sheet leaves, as a sheet flicked away does (`curlEase`); with
+ * `ease.inOut` it is gone well before the end. The outgoing shot is drawn
+ * once per strip of the curl (about 15): no filter on the shots unless the
+ * paper is translucent.
+ */
+export const curlEase = bezier(0.32, 0, 0.72, 0.86);
+
+export const pageCurl = (
+  frames = 54,
+  { easing = curlEase, ...options }: PageCurlTransitionOptions = {},
+): Transition => ({
+  name: `Page curl${options.from ? ` ${options.from}` : ""}`,
+  frames,
+  filters: resolvePaper(options.paper ?? "paper").seeThrough >= 0.1,
+  style: () => ({ out: {}, in: {} }),
+  compose: (p, frame, shots) =>
+    h(PageCurl, { ...options, e: easing(p), width: frame.width, height: frame.height, out: shots.out, in: shots.in }),
+});
 
 // --- Cuts -------------------------------------------------------------------------------
 

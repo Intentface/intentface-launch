@@ -6,6 +6,76 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## Unreleased
+
+### Added
+
+- **Type, footage and a cursor as shader input** (`@intentface-launch/shaders`).
+  `useShapes` bakes a word in any loaded font (or an SVG path, or a canvas
+  drawing) into the shape the library's shape effects read, so Chrome, Glass,
+  LiquidMetal, Obsidian, Frost, Crystal and the rest draw your own type.
+  `usePictures` and `textPicture` draw pictures and words once for
+  `ImageTexture`; `shift` moves them in pixels; `clipTexture` plays a video
+  file's frames, frame exact. A layer's `text` declares what it says, so
+  `check` reads it, and `pointer` feeds a frame-driven pointer to
+  CursorRipples, CursorTrail, Liquify and InkFlow: type turns fluid under the
+  kit cursor, the same in every render.
+- **Paper's shaders.** `PaperShader` runs Paper's fragment shaders
+  frame-locked, and `LiquidMetal` fills any shape with flowing liquid metal,
+  from polished (`matte` 0) to satin (1). `still` draws either once, as a
+  picture every copy shares, so a page curl can carry a shot with liquid
+  metal in it.
+- **Kit.** `Flame`: a jet of fire from a point, in tongues across a fan (a
+  logo's rays catching fire), coloured across it or hot to cool along it.
+  `MiddleCard`: a rounded card in the middle of the frame over a shader or
+  clip, frosted or as a sharp window with the surround blurred, the hero
+  template. `Cursor`'s `look="frosted"`: an arrow of frosted glass, and
+  `look="glass"`: clear liquid glass that refracts what is under it (DOM,
+  video, shader canvases), the colours fringing where it bends.
+- **Text that scales smoothly, and smoke.** `TextImage` (kit) draws a line
+  of text once as a picture laid exactly where the text would be, so a
+  camera can keep pushing in on an end card without the text stepping a
+  pixel at a time; `picture` and `usePictures` move into the kit (the
+  shaders add-on re-exports them). `Smoke` rolls smoke in from an edge until
+  it fills the frame: an ending into black.
+- **A book that turns, and a page curl.** `PageFlip` (kit) lays out an open
+  book and turns its leaves from the frame, each leaf bending as real paper
+  does, with paper you can see through (`film`, `vellum`, `parchment`,
+  `paper`, `smoke`, `graphite`, `black`, or a see-through amount): what lies
+  beneath shows through, blurred by the gap, light comes through the sheet,
+  and it casts soft shadows tinted by what it lets through. Pages can carry
+  art in depth layers that shift in parallax as they turn and redraw like
+  e-ink when a leaf lands. `transitions.pageCurl` peels the outgoing shot off
+  from an edge or corner, in any of those papers.
+- **Examples.** `example-shaders`: the middle card both ways, fluid type,
+  liquid metal.
+
+### Improved
+
+- **Shaders render what they are asked.** Images and baked shapes are waited
+  for on every fresh renderer and URL change (a second renderer no longer
+  shows an image missing), changes in how a node is composed (opacity crossing
+  1, a transform starting) rebuild the layer instead of drawing before the
+  library has recompiled, and simulations may run over images.
+- **Shaders pre-bundled in pnpm repos.** The add-on's own dependencies (the
+  Shaders library, Paper's shaders) are pre-bundled through the add-on, so in
+  a pnpm product repo Vite no longer fails to resolve them at startup and
+  then finds them mid-render, where the page could reload under the renderer.
+- **Page turns and curls close up.** The guides say what keeps a
+  see-through sheet whole at a high zoom (no texture, a light blur, only the
+  pages in frame), and why repeated e-ink redraws read as flicker.
+- **Paper textures by any URL.** A `PageFlip` or page curl paper's `texture`
+  is quoted in CSS, so a data URL (an SVG drawn in code) or a path with
+  brackets or spaces shows instead of silently going missing.
+- **`check`.** `creep` only flags DOM text (a canvas that declares its text
+  scales smoothly), and declared text with `bleed: true` (type larger than the
+  frame on purpose) skips the safe margin.
+- **Skills.** product-launch-video asks for the film's look and grade with the
+  music (light or dark, palette, finish, contrast, warmth, texture, a
+  reference), and music-brief checks the track's mood against it, and times
+  a sung or spoken track's words with a local Whisper so cuts can land on
+  them.
+
 ## 0.1.1 (2026-10-15)
 
 ### Improved

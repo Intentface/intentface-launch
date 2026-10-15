@@ -2,7 +2,7 @@
   "name": "@intentface-launch/shaders",
   "version": "0.1.1",
   "license": "MIT",
-  "description": "WebGPU effects for intentface-launch: the 200+ components of the Shaders library (shaders.com), driven frame by frame.",
+  "description": "WebGPU and WebGL effects for intentface-launch: the 200+ components of the Shaders library (shaders.com) and Paper's shaders (shaders.paper.design), driven frame by frame.",
   "keywords": [
     "video",
     "motion-design",
@@ -44,6 +44,7 @@
     "LICENSE"
   ],
   "dependencies": {
+    "@paper-design/shaders": "0.0.81",
     "shaders": "4.0.4"
   },
   "peerDependencies": {
@@ -58,6 +59,7 @@
   },
   "intentface-launch": {
     "optimizeDeps": [
+      "@paper-design/shaders",
       "shaders/core",
       "shaders/core/AngularBlur",
       "shaders/core/Arc",

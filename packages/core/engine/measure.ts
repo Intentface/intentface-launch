@@ -31,6 +31,12 @@ export type DeclaredText = {
   opacity?: number;
   /** Keeps the text one block across frames while it changes (default: its place in the list). */
   key?: string;
+  /**
+   * Larger than the frame on purpose: type as a picture, cut by the frame's
+   * edges as it drifts across. Left out of the safe-area check; everything
+   * else (reading time, size, contrast) still applies.
+   */
+  bleed?: boolean;
 };
 
 const declared = new Map<Element, DeclaredText[]>();
@@ -95,6 +101,8 @@ export type TextSample = {
   boxes: Box[];
   /** Declared by a canvas (`declareText`) rather than found in the DOM. */
   declared?: boolean;
+  /** Declared as bleeding off the frame on purpose (`DeclaredText.bleed`). */
+  bleed?: boolean;
   /** The nearest painted surface beside the block (not one it sits on), and the gap to it. */
   clearance?: Clearance;
 };
@@ -377,6 +385,7 @@ export function measureText(stage: HTMLElement): TextSample[] {
         weight: t.weight ?? 400,
         boxes: [{ x: part.x - origin.x, y: part.y - origin.y, width: part.width, height: part.height }],
         declared: true,
+        bleed: t.bleed || undefined,
       });
     });
   }

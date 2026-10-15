@@ -67,36 +67,50 @@ export function Stage({ video, frame }: { video: Video; frame: number }) {
       </div>,
     );
   });
+  /** A shot's scene on its own clock (a shot that `continues` another runs on that shot's clock). */
+  const content = (shot: PlacedShot, local: number) => {
+    const Component = shot.component;
+    const lead = shot.from - (shot.clock ?? shot.from);
+    return (
+      <ClockProvider
+        value={{
+          frame: local + lead,
+          absolute: frame,
+          duration: shot.duration + lead,
+          fps,
+          width,
+          height,
+          format: video.format,
+          shots: starts,
+        }}
+      >
+        <Component />
+      </ClockProvider>
+    );
+  };
   return (
     <div className="launch-stage" style={{ position: "relative", width, height, overflow: "hidden", background }}>
       {shots.map((shot, i) => {
         const state = shotAt(shot, shots[i + 1], frame, size);
         if (!state) return null;
-        const Component = shot.component;
-        // A shot that `continues` another runs on that shot's clock.
         const lead = shot.from - (shot.clock ?? shot.from);
+        // A transition that draws the outgoing shot itself (a page curl) gets both shots, and keeps the outgoing one on top.
+        const next = shots[i + 1];
+        const into = next ? frame - next.from : -1;
+        const t = next?.transition;
+        const composing = t?.compose && into >= 0 && into < t.frames ? t : undefined;
+        const body = content(shot, state.local);
         return (
           <div
             key={shot.id}
             data-shot={shot.id}
             data-launch-from={shot.from - lead}
             // Later shots stack on top, so an incoming shot covers the outgoing one.
-            style={{ ...fill, zIndex: i, ...state.style }}
+            style={{ ...fill, zIndex: composing ? i + 2 : i, ...state.style }}
           >
-            <ClockProvider
-              value={{
-                frame: state.local + lead,
-                absolute: frame,
-                duration: shot.duration + lead,
-                fps,
-                width,
-                height,
-                format: video.format,
-                shots: starts,
-              }}
-            >
-              <Component />
-            </ClockProvider>
+            {composing?.compose && next
+              ? composing.compose(into / spanOf(composing), size, { out: body, in: content(next, into) })
+              : body}
           </div>
         );
       })}

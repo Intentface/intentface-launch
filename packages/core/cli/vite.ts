@@ -86,20 +86,33 @@ function productAliases(path: string): Alias[] {
  * Each declares its browser dependencies in package.json under
  * "intentface-launch".optimizeDeps; pre-bundle those up front, or Vite finds
  * them mid-render, re-optimises, and the page mixes chunks from two builds.
+ * A package's own dependencies (the shaders add-on's `shaders`) are named
+ * through it (`@intentface-launch/shaders > shaders/core`): under pnpm only the
+ * package can resolve them, and pnpm's NODE_PATH makes them look resolvable
+ * from the project to Node while Vite cannot find them. Peers (React, Three)
+ * resolve from the project, one copy for everyone.
  */
 function packageDeps(root: string) {
-  const require = createRequire(join(root, "package.json"));
-  const resolves = (id: string) => {
+  const resolves = (from: string, id: string) => {
     try {
-      require.resolve(id);
+      createRequire(join(from, "package.json")).resolve(id);
       return true;
     } catch {
       return false;
     }
   };
-  return launchPackages(root)
-    .flatMap((p) => (p.meta.optimizeDeps ?? []) as string[])
-    .filter(resolves);
+  const packageName = (id: string) =>
+    id
+      .split("/")
+      .slice(0, id.startsWith("@") ? 2 : 1)
+      .join("/");
+  return launchPackages(root).flatMap((p) => {
+    const own = Object.keys(JSON.parse(readFileSync(join(p.dir, "package.json"), "utf8")).dependencies ?? {});
+    return ((p.meta.optimizeDeps ?? []) as string[]).flatMap((id) => {
+      if (own.includes(packageName(id))) return resolves(p.dir, id) ? [`${p.name} > ${id}`] : [];
+      return resolves(root, id) ? [id] : [];
+    });
+  });
 }
 
 /** Vite for the studio and the renderer, rooted at the launch folder. */

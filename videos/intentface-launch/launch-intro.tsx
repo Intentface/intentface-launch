@@ -88,12 +88,21 @@ export function LaunchIntro({
   at = 0,
   size = 360,
   glint,
+  burner = 1,
+  lines = 1,
+  colors = ["#7CE7FF", "#FE9EFF", "#FFEFA9"],
   style,
 }: {
   at?: number;
   size?: number;
   /** A frame (in the shot) at which a band of light runs once along the parked mark, from the rocket out through the rays. */
   glint?: number;
+  /** The burner rays' opacity (1): lower it when real flames take over from them. */
+  burner?: number;
+  /** The motion lines' opacity (1). */
+  lines?: number;
+  /** The rays' gradient, three stops (default the mark's own cyan, pink and butter). */
+  colors?: [string, string, string];
   style?: CSSProperties;
 }) {
   const frame = useFrame();
@@ -134,9 +143,9 @@ export function LaunchIntro({
     >
       <defs>
         <linearGradient id="launch-intro-g" gradientUnits="userSpaceOnUse" {...GRAD}>
-          <stop stopColor="#7CE7FF" />
-          <stop offset="0.505208" stopColor="#FE9EFF" />
-          <stop offset="1" stopColor="#FFEFA9" />
+          <stop stopColor={colors[0]} />
+          <stop offset="0.505208" stopColor={colors[1]} />
+          <stop offset="1" stopColor={colors[2]} />
         </linearGradient>
         <clipPath id="launch-intro-w">
           <polygon points={`${APEX},0 ${APEX + 1000},-1732 ${APEX + 1000},1732`} />
@@ -170,7 +179,7 @@ export function LaunchIntro({
         </linearGradient>
       </defs>
       <g mask="url(#launch-intro-m)">
-        <g opacity={(linesOp * LINE_MAX).toFixed(4)} transform={`rotate(-45 ${C} ${C})`}>
+        <g opacity={(linesOp * LINE_MAX * lines).toFixed(4)} transform={`rotate(-45 ${C} ${C})`}>
           {LINES.map((l) => {
             const travel = l.k * (560 * t + 1.1 * flown);
             const u = ((((l.u0 - travel + LINE_SPAN + 240) % span) + span) % span) - LINE_SPAN - 240;
@@ -189,7 +198,7 @@ export function LaunchIntro({
         </g>
       </g>
       <g transform={`translate(${mx.toFixed(2)} ${my.toFixed(2)}) rotate(135)`}>
-        <g clipPath="url(#launch-intro-w)" fill="url(#launch-intro-g)" opacity={ignite}>
+        <g clipPath="url(#launch-intro-w)" fill="url(#launch-intro-g)" opacity={ignite * burner}>
           {rays.map((points, i) => (
             <polygon key={RAY_ANGLES[i]} points={points} />
           ))}

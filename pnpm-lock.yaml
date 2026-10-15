@@ -152,6 +152,9 @@ importers:
 
   packages/shaders:
     dependencies:
+      '@paper-design/shaders':
+        specifier: 0.0.81
+        version: 0.0.81
       react-dom:
         specifier: ^19.2.0
         version: 19.3.0(react@19.3.0)
@@ -681,6 +684,9 @@ packages:
 
   '@oxc-project/types@0.151.0':
     resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
+
+  '@paper-design/shaders@0.0.81':
+    resolution: {integrity: sha512-jeGdyjMscZ2bxmQdo8lhwUufHUf4iq3s1ayjh8PXU7Go42Rw8E3I0It1FZdc3HuWt5J82m//DRWaxsRqRfA4Gg==}
 
   '@plausible-analytics/tracker@0.4.6':
     resolution: {integrity: sha512-nbu6xGgSP6jeYuoVklZBzucUnIpo75tVu3Kr+R0EDycVKaMC/jF5Q/YCaM/8gR4fPZ1IDcXt6FdBJFZ1uZwEPA==}
@@ -2511,6 +2517,8 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.151.0': {}
+
+  '@paper-design/shaders@0.0.81': {}
 
   '@plausible-analytics/tracker@0.4.6': {}
 

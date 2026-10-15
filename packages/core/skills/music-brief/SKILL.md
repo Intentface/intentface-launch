@@ -23,18 +23,20 @@ Read the script table in `brief.md` (rows with their beats) or, for a locked cut
 - **Tempo**: the video's `bpm`. It must give a whole number of frames per beat at 60 fps (90, 100, 120, 144). By mood: 90 or 100 for calm and premium, 120 for confident, 144 for hype.
 - **Sections** with timestamps from the script's rows or the shot list: intro under the title, build under the product flow, a breath (a beat or two of near silence) before the reveal, lift where the payoff shot lands, resolve under the end card.
 - **Hits**: exact times of the cuts that must land on a downbeat and of the logo. For the logo, also its sound (logo-animation skill): the pattern (two hits then a release, texture to tone, one swelling chord), the signature timbre, and a transient on the lock frame or 1 to 2 frames before it.
-- **Character**: instrumental, no vocals, and a mood in plain words that fits the brand (calm, confident, technical, warm).
+- **Character**: instrumental, no vocals, and a mood in plain words that fits the brand (calm, confident, technical, warm) and the film's agreed look and grade (`brief.md`): a pastel, glossy look wants a bright, airy track; a black, metal look a dark one. Brief the mood from the look, or the look from the mood, never neither.
 
 ## When the track arrives
 
 1. It goes in `videos/<id>/audio/`. Set `audio: { src: new URL("./audio/<file>", import.meta.url).href }` in `defineVideo`.
 2. `pnpm launch beats <id>` writes `audio/beats.json`.
 3. Read what it prints. If `confidence` is under 0.5, the grid is unreliable: keep `tempo()` at the brief's BPM and set `audio.offset` to the first strong onset. If the detected BPM is within 0.2 of the video's, keep `tempo()`. Otherwise import `beats.json` and time shots with `beatGrid(beats, 60)`: `span(a, b)` for durations, `beat(n)` for hits, `snap(frame)` to move a cut onto the nearest beat.
-4. Compare `sections` and `breaths` with the brief (or, for the person's own track, with the script): the reveal should sit in or just after a breath, the payoff on a section where energy goes up. Move shots to the track, not the track to the shots.
-5. Set `audio.offset` if the first downbeat is not at 0, so the title lands on it.
-6. `pnpm launch sound <id> --png` lists the track's events (impact, boom, cut to boom, riser, pulse, tail) with frames, and draws them on a spectrogram: put hits on those frames, and declare the ones that matter as `hits: [{ at, sound: "boom" }]` on the shot so `check` holds them within 2 frames.
-7. `pnpm launch check <id>` reports cuts off the detected beats and the loudness (-14 LUFS integrated, -1 dBTP peak). If it says the track needs limiting, ask for a louder master rather than raising `volume`.
-8. Preview render with audio and check the hits by frame in the studio (the waveform and beat ticks are under the timeline).
+4. Listen for the mood against the look in `brief.md`. A track darker or brighter than the agreed grade means one of them changes: ask which before timing anything.
+5. Compare `sections` and `breaths` with the brief (or, for the person's own track, with the script): the reveal should sit in or just after a breath, the payoff on a section where energy goes up. Move shots to the track, not the track to the shots.
+6. Set `audio.offset` if the first downbeat is not at 0, so the title lands on it.
+7. `pnpm launch sound <id> --png` lists the track's events (impact, boom, cut to boom, riser, pulse, tail) with frames, and draws them on a spectrogram: put hits on those frames, and declare the ones that matter as `hits: [{ at, sound: "boom" }]` on the shot so `check` holds them within 2 frames.
+8. `pnpm launch check <id>` reports cuts off the detected beats and the loudness (-14 LUFS integrated, -1 dBTP peak). If it says the track needs limiting, ask for a louder master rather than raising `volume`.
+9. A track that sings or speaks: find where its words fall, and cut picture to them ("There's a spark" is where the fire catches, "Never stop" where the last cut lands). `sound` and `beats` do not hear words; a local Whisper does, with word times good to about 0.3 s, even for a voice pitched down and buried in the mix: `uvx whisper-ctranslate2 <file> --model small --language en --word_timestamps True --output_format json`. Its words can be wrong ("This part" for "There's a spark"); match them to the lyrics Suno embeds in the file (`ffprobe` shows them), and put the hit on the nearest event `sound` found, not on Whisper's time.
+10. Preview render with audio and check the hits by frame in the studio (the waveform and beat ticks are under the timeline).
 
 ## When the cut outgrows the track
 

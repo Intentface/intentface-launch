@@ -87,6 +87,7 @@ the frame, so any frame renders alone.
 | `luma` | The next shot appears through noise, darkest first, like ink. |
 | `chromatic` | A glitchy RGB split. 12 to 20 frames. |
 | `honest` | A short dissolve where the edit skips time, so a slow result does not look instant. |
+| `pageCurl` | The outgoing shot peels off like a sheet of paper from an edge or a corner (`from`, default the bottom right), rolling back over itself and off the frame, its shadow on the next shot. With a translucent `paper` (`vellum`, `film`, `smoke`) the next shot shows through the lifting sheet. The outgoing shot is drawn once per strip of the curl (with a translucent paper, the next one too), so keep them to DOM, images and stills: a WebGL layer in one needs drawing as a still from the frame the curl starts (`LiquidMetal`'s `still`). About 54 frames. |
 | `wipeMask`, `circleMask`, `clockMask` | The same reveals as CSS masks, for any layer. |
 
 ## Capture scripts and config

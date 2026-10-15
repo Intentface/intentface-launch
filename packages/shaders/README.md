@@ -1,6 +1,6 @@
 # @intentface-launch/shaders
 
-The shader effects add-on for [@intentface-launch/core](https://www.npmjs.com/package/@intentface-launch/core): the 200 WebGPU components of the [Shaders library](https://shaders.com) (gradients, light, glass, distortions, particles) driven frame by frame, so every frame renders the same, alone and in any order.
+The shader effects add-on for [@intentface-launch/core](https://www.npmjs.com/package/@intentface-launch/core): the 200 WebGPU components of the [Shaders library](https://shaders.com) (gradients, light, glass, metal, distortions, particles) and [Paper's shaders](https://shaders.paper.design) (liquid metal, gradients, dithering) driven frame by frame, so every frame renders the same, alone and in any order. Your own type, pictures, footage and the video's cursor go in as their input: a headline in chrome, glass over a clip, letters that ripple where the cursor passes.
 
 ## Install
 
@@ -18,4 +18,4 @@ pnpm launch add shaders   # or, in an npm repo: npx intentface-launch add shader
 
 ## Licence
 
-MIT, as is the Shaders library it depends on.
+MIT. The Shaders library it depends on is MIT; Paper's shaders are Apache-2.0 (Powered by Paper Shaders: https://shaders.paper.design).

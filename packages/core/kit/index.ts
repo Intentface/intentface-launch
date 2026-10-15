@@ -43,6 +43,7 @@ export {
   type SpeedRaceProps,
 } from "./data.js";
 export { EndCard, type EndCardProps } from "./end-card.js";
+export { Flame, type FlameProps } from "./flame.js";
 export {
   type AreaStop,
   areaAt,
@@ -60,7 +61,26 @@ export {
 export { type MeasureOptions, measureTextNow, type TextMeasure, useFontsReady, useMeasureText } from "./fonts.js";
 export { Count, logLerp, Slam, type SlamProps, Sweep, type SweepProps } from "./kinetic.js";
 export type { ProductLook } from "./look.js";
+export { MiddleCard, type MiddleCardProps } from "./middle-card.js";
 export { MotionBlur } from "./motion-blur.js";
+export { type Leaf, leafShape, PageFlip, type PageFlipProps } from "./page-flip.js";
+export {
+  type ArtLayer,
+  type PageContent,
+  type Paper,
+  type PaperPreset,
+  type PaperSpec,
+  paperFor,
+  papers,
+  resolvePaper,
+} from "./paper.js";
+export {
+  type CanvasPicture,
+  picture,
+  TextImage,
+  type TextImageProps,
+  usePictures,
+} from "./picture.js";
 export { useProductLook } from "./product-look.js";
 export {
   colourOf,
@@ -74,6 +94,7 @@ export {
   Scanlines,
   Shader,
   type ShaderProps,
+  Smoke,
   shaderPrelude,
   shaders,
   type UniformValue,

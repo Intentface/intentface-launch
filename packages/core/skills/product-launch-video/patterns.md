@@ -42,6 +42,15 @@ To see one: `pnpm launch sheet example-<family> --shot <id> --every 3` in the pa
 | Proof by multiplication (`count-grid`) | A number that matters: teams, projects, rows processed | The grid rushes in at 60 px a frame under blur and brakes onto three cards over 48 frames; the label plate sits just above them, its content trailing 3 frames. Then cells fill outward from the centre, 5 frames per cell of distance, while the camera pulls back 1.7 → 1.2 over 60 frames (shorter than the count, so the final number is held still) and `Count` runs 3 → 2,480 on `ease.inOut` to keep pace with the fill. |
 | A wall of integrations (`wall`) | "Works with everything you use" | The headline on its own plate holds still in the middle. Tiles on a sunflower spiral (radius 140·√n, golden angle) flow outward from behind it, the index growing 0.1 a frame, so the field stays evenly filled; the camera pulls back 1.3 → 0.72 at an even rate in log space, so new tiles keep arriving from every edge. |
 
+## Shaders around and on UI (`example-shaders`)
+
+| Pattern (shot) | When | How |
+|---|---|---|
+| Middle card, frosted (`hero-frosted`) | A hero section or feature card set in light: a website's hero, a product's landing | `MiddleCard` (kit) over a `Shaders` layer (Satin in orange): the card 1500 × 820, radius 44, frosted glass (blur 36 px, a dark tint at 22%, a hairline edge). It opens on frame 1 over 30 frames from 96%, the blur coming in with it; the headline reveals 14 frames in. The site's nav and button are UI (`data-launch-check="off"`). |
+| Middle card, a window (`hero-window`) | A product's own gradient hero, shown as its site would | `blur="around"`: the card shows the shader (a MeshGradient) sharp; round it the same shader blurs to 64 px and washes pale (a pink tint at 45%) as the card opens, so the card is the subject. |
+| Fluid type (`fluid-type`) | A word that reacts to a cursor: "it responds", a playful headline | The word is a `textPicture` in a `Shaders` layer under `CursorRipples` (intensity 9, decay 4, chromatic split 1.2); the layer's `pointer` is the kit cursor's own path (`cursorAt(keys, f)`), and the `Cursor` is drawn `frosted` on top. The ripples follow the cursor and settle in about a second. |
+| Liquid metal (`liquid-metal`) | Premium UI: a button, a toggle, a badge | `LiquidMetal` (Paper's shader) in a ring round the button (the pill less its face, drawn on a canvas, with 16 px of room inside its own canvas), the face and label in the DOM. `matte` 0 splits colour along the bends; 1 is satin. Show it close: 1,200 px wide or more, with a slow push. |
+
 ## What they taught
 
 - **Measure before trusting the eye.** `pnpm launch measure` gave the numbers above: type scaled about its centre judders, rounding a spring every frame steps its tail, a slow pull-back makes held type creep. Crop to one element (`--crop`) before reading judder.

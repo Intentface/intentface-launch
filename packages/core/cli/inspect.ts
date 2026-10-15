@@ -28,7 +28,16 @@ export type Problem = {
   message: string;
 };
 
-type Sample = { frame: number; visible: number; size: number; weight: number; boxes: Box[]; clearance?: Clearance };
+type Sample = {
+  frame: number;
+  visible: number;
+  size: number;
+  weight: number;
+  boxes: Box[];
+  clearance?: Clearance;
+  /** Bleeds off the frame on purpose (declared so): no safe margin. */
+  bleed?: boolean;
+};
 export type Item = { id: number; shot: string; text: string; declared?: boolean; samples: Sample[] };
 
 /**
@@ -408,6 +417,7 @@ export async function sampleText(r: Renderer, frame: number, items: Map<number, 
       weight: s.weight,
       boxes: s.boxes,
       clearance: s.clearance,
+      bleed: s.bleed,
     });
   }
 }
@@ -461,7 +471,8 @@ export function textChecks(items: Map<number, Item>, info: Info, rules: Rules, s
     };
     report.push(entry);
 
-    const creep = creeping(readable, step, fps);
+    // Only DOM text snaps to whole pixels: a canvas (a label drawn at 3×, a word made of a shader) scales smoothly.
+    const creep = item.declared ? null : creeping(readable, step, fps);
     if (creep)
       problems.push({
         ...at,
@@ -490,14 +501,16 @@ export function textChecks(items: Map<number, Item>, info: Info, rules: Rules, s
         message: `${least.toFixed(0)} px at 1080p, minimum ${rules.minText}`,
       });
     }
-    const outside = readable.filter((s) =>
-      s.boxes.some(
-        (b) =>
-          b.x < margin - 1 ||
-          b.y < margin - 1 ||
-          b.x + b.width > width - margin + 1 ||
-          b.y + b.height > height - margin + 1,
-      ),
+    const outside = readable.filter(
+      (s) =>
+        !s.bleed &&
+        s.boxes.some(
+          (b) =>
+            b.x < margin - 1 ||
+            b.y < margin - 1 ||
+            b.x + b.width > width - margin + 1 ||
+            b.y + b.height > height - margin + 1,
+        ),
     );
     if (tooLong(outside)) {
       problems.push({

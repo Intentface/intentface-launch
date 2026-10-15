@@ -24,7 +24,7 @@ source: packages/core/kit
 | --- | --- |
 | `Camera` | Pans and pushes between keyframed views. Keys can name marks; `travel` rounds corners instead of stopping; `cut: true` jumps to a view on its frame, a cut inside the shot. |
 | `cameraAt`, `useCameraView`, `frameRect`, `fit` | The camera's view at a frame, and views that fit a rect or the whole content. |
-| `Cursor` | A synthetic pointer in content coordinates, constant size at any zoom. Clicks, drags, hovers. |
+| `Cursor` | A synthetic pointer in content coordinates, constant size at any zoom. Clicks, drags, hovers. `look="frosted"` draws it as frosted glass that blurs what is under it, for glossy UI; `look="glass"` as clear liquid glass that refracts what is under it (bent in at the rim, magnified inside, the colours fringing), for material and shader shots. |
 | `cursorKeys` | Cursor keys that retrace a capture's pointer. |
 | `cursorAt`, `cursorClicks`, `dragWindows` | Where the cursor is, and the frames it clicks and holds. |
 | `cursorSounds` | A sound on every click, ready for a shot's `sfx`. |
@@ -56,6 +56,8 @@ source: packages/core/kit
 | `Count` | A number counting up in tabular figures. |
 | `Captions` | Burned-in captions, clear of the safe area and platform UI. |
 | `useFontsReady`, `useMeasureText`, `measureTextNow` | Wait for a font and measure text with it. |
+| `TextImage` | A line of text drawn once as a picture (at `scale`, 4 by default) and laid exactly where the text would be. A camera can keep pushing in on it and it scales smoothly; DOM text under a slow push steps a pixel at a time. Declared for `check`; `declare={false}` inside a page flip or a curl, which copy it into every strip. |
+| `picture`, `usePictures` | Pictures drawn once on a canvas and kept as images every copy shares (the shaders add-on's textures use them too). |
 
 ## UI motion
 
@@ -68,6 +70,17 @@ source: packages/core/kit
 | `logLerp` | Log-space interpolation for zoom and altitude. |
 | `KeyChip` | Keyboard shortcut chips that press down. |
 | `Skeleton` | A shimmering loading skeleton that hands off to the real content. |
+
+## Paper
+
+| Tool | What it does |
+| --- | --- |
+| `PageFlip` | An open book seen from above whose leaves turn frame by frame on `turn` (2.35: two leaves over, the third 35% of the way). Each leaf curls as it goes (the outer edge lifts and leads, the spine end lands first and the edge floats down last), is shaded across its bend and casts a soft shadow that tightens where it nears the page. A turn reads at about 2 beats on `ease.inOut`. |
+| `papers` | The papers a leaf can be. Light: `film` (clear plastic: what is beneath stays sharp; a sheen and a bright edge), `vellum` (frosted: beneath shows blurred, more the higher the sheet lifts, and a lifted sheet glows), `parchment`, `paper` (opaque but for a ghost of the other side's print). Dark: `smoke` (smoked film), `graphite` (dark frosted vellum), `black` (black paper). |
+| `paperFor` | A paper from how much light it lets through, 0 (opaque) to 1 (clear), between the presets (`"dark"` for the dark ones). Or override any preset: `{ preset: "vellum", seeThrough: 0.6, blur: 2 }`. |
+| `PageContent` | A page is any React node, or art in layers, `{ layers: [{ depth: -2, node }, { depth: 0, node }, { depth: 5, node }] }`: each floats `depth` px off the page and shifts in parallax as the page tilts, and the page redraws like e-ink once when a leaf lands on or off it (`refresh`, in frames; 0 for none: several read as flicker). |
+
+A see-through leaf carries a copy of what is under it in every strip of its turn. Close up (3× zoom) that ran out and strips went missing from renders for a frame at a time: keep the paper free of `texture`, its `blur` light (1 to 2 px), and give a close-up's book only the pages in frame. A small book (under about 0.7×) wants `thickness={0}`: the page block's hairlines alias into dots.
 
 ## Data and end cards
 
@@ -101,3 +114,6 @@ source: packages/core/kit
 | `NoiseField` | Flowing noise through a colour ramp: smoke, aurora. |
 | `LightGlow`, `LightLeak` | A soft light, and a light leak drifting across. |
 | `FilmGrain`, `Scanlines`, `Halftone`, `Dither` | Texture over a shot. |
+| `Smoke` | Smoke rolling in from an edge (`from`) until it fills the frame with `color` on `progress` 0 to 1: billowing, curling, its thin edge lit (`light`). An ending into black, a transition into a dark shot. Drive `progress` steadily: an ease in keeps it off frame for its first second. |
+| `Flame` | A jet of fire leaving a point: turbulent, flickering, white hot at the nozzle. `tongues` splits it into flames across a fan (a logo's rays catching fire), `along` colours it hot to cool as real fire burns, `grow` lights it. |
+| `MiddleCard` | A rounded card in the middle of the frame over a shader or clip: frosted glass blurring it (`blur="card"`), or a sharp window with the surround blurred and washed (`blur="around"`). Opens on `at`; content goes inside at the card's size. The hero template. |

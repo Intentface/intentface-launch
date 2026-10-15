@@ -31,6 +31,14 @@ export type Transition = {
   /** How the overlay composites over the shots: `plus-lighter` adds it as light. */
   blend?: CSSProperties["mixBlendMode"];
   /**
+   * Draws the outgoing shot itself, for a transition that needs more than CSS
+   * on its wrapper (a page curl draws it once per strip of the curl). Gets
+   * both shots' content, each on its own clock, and returns what the outgoing
+   * shot's wrapper shows while they overlap; the outgoing shot then stays
+   * above the incoming one.
+   */
+  compose?: (p: number, frame: TransitionFrame, shots: { out: ReactNode; in: ReactNode }) => ReactNode;
+  /**
    * The styles put a CSS or SVG filter on the shots. Over a `Stage3D` shot a
    * filter stalls the renderer under several workers: cut, or use a transition
    * without one.

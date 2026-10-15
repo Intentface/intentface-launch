@@ -39,7 +39,12 @@ export const load = async (type: string) =>
 
 const pkgFile = join(here, "package.json");
 const pkg = JSON.parse(readFileSync(pkgFile, "utf8"));
-pkg["intentface-launch"].optimizeDeps = ["shaders/core", ...names.map((n) => `shaders/core/${n}`)];
+// Paper's shaders (paper.tsx) are one module, kept at the head of the list.
+pkg["intentface-launch"].optimizeDeps = [
+  "@paper-design/shaders",
+  "shaders/core",
+  ...names.map((n) => `shaders/core/${n}`),
+];
 writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`);
 execFileSync("pnpm", ["exec", "biome", "format", "--write", "definitions.ts", "package.json"], { cwd: here });
 console.log(`${names.length} components`);
