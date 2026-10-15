@@ -101,7 +101,14 @@ export const SiteShell = ({
           </div>
           <DocsNav groups={toGroups(tree.children)} />
           <div className="flex items-center justify-between border-ink-primary/8 border-t pt-2 pr-1 pl-0.5">
-            <span className="flex h-7 items-center px-1.5 font-mono text-ink-secondary text-xs">v{version}</span>
+            <a
+              href="https://www.npmjs.com/package/@intentface-launch/core"
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-7 items-center rounded-md px-1.5 font-mono text-ink-secondary text-xs transition-colors hover:bg-ink-primary/5 hover:text-ink-primary"
+            >
+              v{version}
+            </a>
             <div className="flex items-center gap-0.5">
               <a
                 href="/llms.txt"

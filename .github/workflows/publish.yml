@@ -1,7 +1,10 @@
 # Publishes the packages to npm when a version tag is pushed:
-#   bump "version" in packages/*/package.json (all three the same), commit, then
-#   git tag v0.1.0 && git push origin v0.1.0
-# Needs an NPM_TOKEN secret: an npm automation token with publish rights on @intentface-launch.
+#   bump "version" in packages/*/package.json and scripts/npx-alias/package.json
+#   (all four the same, and the alias's and add-ons' ranges on core), commit, then
+#   git tag v0.2.0 && git push origin v0.2.0
+# Trusted publishing: no token. Each package names this repo and publish.yml as a
+# trusted publisher on npmjs.com (package Settings, Trusted publishing), and npm
+# signs provenance itself.
 name: Publish
 
 on:
@@ -10,7 +13,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance
+  id-token: write # npm trusted publishing (OIDC)
 
 jobs:
   publish:
@@ -22,23 +25,29 @@ jobs:
           version: 10.33.2
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
       - run: pnpm install --frozen-lockfile
       - name: Versions match the tag
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          for p in packages/*/package.json; do
+          for p in packages/*/package.json scripts/npx-alias/package.json; do
             v=$(node -p "require('./$p').version")
             [ "$v" = "$tag" ] || { echo "$p is $v, tag is $tag"; exit 1; }
           done
       - run: pnpm typecheck
       - run: pnpm lint
-      # Core first, then the add-ons that peer on it; prepack builds each one's dist/.
-      - run: pnpm --filter @intentface-launch/core publish --access public --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: pnpm --filter @intentface-launch/three --filter @intentface-launch/shaders -r publish --access public --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Core first, then the add-ons that peer on it and the alias that depends on
+      # it; prepack builds each one's dist/. No workspace: ranges, so npm publishes
+      # the folders as they are.
+      - run: npm publish --access public
+        working-directory: packages/core
+      - run: npm publish --access public
+        working-directory: packages/three
+      - run: npm publish --access public
+        working-directory: packages/shaders
+      - run: npm publish --access public
+        working-directory: scripts/npx-alias

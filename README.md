@@ -86,9 +86,9 @@ The headline slams in on the first beat and the line springs in on the second. `
 
 | Package | What it is |
 | --- | --- |
-| `@intentface-launch/core` | Engine, kit (camera, cursor, captures, kinetic type, transitions), CLI, studio, and the skills Claude uses. |
-| `@intentface-launch/three` | The 3D add-on: `pnpm launch add three`. |
-| `@intentface-launch/shaders` | 200 WebGPU effects from the [Shaders library](https://shaders.com), on the video's clock: `pnpm launch add shaders`. |
+| [`@intentface-launch/core`](https://www.npmjs.com/package/@intentface-launch/core) | Engine, kit (camera, cursor, captures, kinetic type, transitions), CLI, studio, and the skills Claude uses. |
+| [`@intentface-launch/three`](https://www.npmjs.com/package/@intentface-launch/three) | The 3D add-on: `pnpm launch add three`. |
+| [`@intentface-launch/shaders`](https://www.npmjs.com/package/@intentface-launch/shaders) | 200 WebGPU effects from the [Shaders library](https://shaders.com), on the video's clock: `pnpm launch add shaders`. |
 
 A brand is an add-on too: a package with your fonts, logos and design, motion and copy rules, which `pnpm launch add <package>` installs and links into Claude's guide. Core itself is brand-neutral, so a video takes its look from your product.
 
