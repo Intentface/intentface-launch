@@ -8,8 +8,9 @@ import { ffmpeg, finished, REC709_FILTER, REC709_TAGS, run, write } from "./ffmp
 import { grab } from "./frames.js";
 import { writeLicences } from "./licences.js";
 import { mixAudio } from "./mix.js";
+import { trackProgress } from "./progress.js";
 import { resolveFrame } from "./review.js";
-import { assetPath, outDir, rocketBar, timer } from "./util.js";
+import { assetPath, outDir, rocketBar, timer, yieldToDesktop } from "./util.js";
 
 export type RenderOptions = {
   /** Output size multiplier: 0.5 for a quick 960×540 animatic, 2 for 4K. */
@@ -52,11 +53,22 @@ const RETRIES = 2;
 /** Frames per chunk: what a failure costs, and what `--resume` skips. */
 const CHUNK = 60;
 
+/** Memory one worker holds: its page and its encoder (0.2 GB on a flat video, 0.4 GB with shaders and 3D). */
+const WORKER_MEMORY = 0.35e9;
+
+/**
+ * Workers that fit in the memory free now, after 1 GB for the browser they share, the dev server
+ * and headroom, up to 8. More than fit buys nothing: on a 16 GB Mac already using swap, 8 workers
+ * pushed 2 GB more out to swap and rendered no faster than 6.
+ */
+const workersThatFit = () => Math.max(2, Math.floor((process.availableMemory() - 1e9) / WORKER_MEMORY));
+
 export async function render(videoId: string, options: RenderOptions = {}) {
   const { scale = 1, blur = 1, angle = 180, audio = true, crf = 16, master = false, quick = false } = options;
   const elapsed = timer();
   const phase = options.phase ?? -angle / 2;
   const stageSamples = options.samples;
+  yieldToDesktop();
   const { url } = await startServer();
   const probeBrowser = await launchBrowser();
   const probe = await openRenderer(probeBrowser, url, videoId, scale);
@@ -122,16 +134,25 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   const todo = all.filter((c) => !existsSync(c.file));
   if (todo.length < all.length) console.log(`  Reusing ${all.length - todo.length} of ${all.length} chunks.`);
 
-  const workers = Math.max(1, Math.min(options.workers ?? Math.min(8, cpus().length - 2), todo.length));
+  const cores = Math.min(8, cpus().length - 2);
+  const fit = workersThatFit();
+  const workers = Math.max(1, Math.min(options.workers ?? Math.min(cores, fit), todo.length));
+  if (!options.workers && fit < Math.min(cores, todo.length))
+    console.log(`  ${workers} workers, as many as the memory free now fits (--workers N to choose)`);
   const width = Math.round(info.width * scale);
   const height = Math.round(info.height * scale);
+  // Another format renders beside the default: <id>-vertical.mp4, preview-vertical.mp4.
+  const name = options.name ?? `${scale < 1 || quick ? "preview" : videoId}${formatSuffix(info)}`;
   const failed: string[] = [];
   let done = frames.length - todo.reduce((n, c) => n + c.frames.length, 0);
+  const progress = trackProgress(videoId, name, { total: frames.length, done, workers });
+  if (!process.stdout.isTTY) console.log("  Live progress in a terminal: pnpm launch watch");
   let moving = 0;
   let lastReport = 0;
   let lastReportAt = Date.now();
   let tick = 0;
   const report = setInterval(() => {
+    progress.update({ done });
     const line = `  ${done}/${frames.length} frames · ${elapsed()}`;
     if (process.stdout.isTTY) process.stdout.write(`\r\x1b[K  ${rocketBar(done / frames.length, tick++)}${line}`);
     // In a log: every tenth, and at least every 15 s, so a slow stretch is told from a stuck one.
@@ -145,15 +166,19 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   // Workers take chunks from one queue, so a slow stretch (3D) is shared out,
   // and a chunk that fails costs only itself: the others are kept for --resume.
   const queue = [...todo];
+  // One browser for every worker, each in a page of its own. With Chrome on Metal, pages in one
+  // browser render as fast as browsers of their own (flat and 3D, measured), and every extra
+  // browser costs about 185 MB and a GPU process.
+  const shared = await launchBrowser();
   await Promise.all(
     Array.from({ length: workers }, async () => {
-      // One browser per worker: pages in a shared browser queue on one GPU process.
-      let browser = await launchBrowser();
+      let browser = shared;
       let renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
       const fresh = async () => {
-        // The stall is in the browser's GPU process, shared by all its pages,
-        // and closing a wedged browser can hang too: abandon it for a new one.
-        within(browser.close(), 10_000).catch(() => {});
+        // The stall is in the browser's GPU process, shared by all its pages, and closing a
+        // wedged browser can hang too: leave it (the shared one closes at the end) for a new
+        // browser of this worker's own.
+        within(browser === shared ? renderer.close() : browser.close(), 10_000).catch(() => {});
         browser = await launchBrowser();
         renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
       };
@@ -179,6 +204,10 @@ export async function render(videoId: string, options: RenderOptions = {}) {
           "0",
           "-preset",
           "ultrafast",
+          // One thread encodes 100 fps, far more than a worker feeds it; x264's default
+          // (1.5 per core) holds 400 MB of frames per encoder for nothing.
+          "-threads",
+          "1",
           partial,
         ]);
         try {
@@ -209,13 +238,15 @@ export async function render(videoId: string, options: RenderOptions = {}) {
           await fresh();
         }
       }
-      await within(browser.close(), 10_000).catch(() => {});
+      await within(browser === shared ? renderer.close() : browser.close(), 10_000).catch(() => {});
     }),
   );
+  await within(shared.close(), 10_000).catch(() => {});
   clearInterval(report);
   if (process.stdout.isTTY) process.stdout.write(`\r\x1b[K  ${rocketBar(done / frames.length, tick)}\n`);
   console.log(`  ${frames.length} frames, ${moving} motion-blurred · ${elapsed()}`);
   if (failed.length > 0) {
+    progress.stop({ state: "failed", done, error: `${failed.length} chunk(s) failed; --resume renders only those` });
     throw new Error(
       `${failed.length} chunk(s) failed (frames ${failed.join(", ")}). ` +
         "Run the same command with --resume to render only those; finished chunks are kept.",
@@ -225,8 +256,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   const list = join(work, "chunks.txt");
   writeFileSync(list, all.map((c) => `file '${c.file}'`).join("\n"));
 
-  // Another format renders beside the default: <id>-vertical.mp4, preview-vertical.mp4.
-  const name = options.name ?? `${scale < 1 || quick ? "preview" : videoId}${formatSuffix(info)}`;
+  progress.update({ state: "encoding", done });
   const target = join(out, `${name}.mp4`);
   const audioFile = mixed ? mixed.file : audio && info.audio ? assetPath(info.audio.src) : null;
   if (audioFile && !existsSync(audioFile)) console.warn(`  audio not found: ${audioFile}`);
@@ -289,6 +319,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
       join(out, `${name}-master.mov`),
     ]);
   }
+  progress.stop({ state: "done", file: target });
   // The chunks stay: they are what `--shots` and `--resume` reuse. A render with other settings replaces them.
   const mb = (statSync(target).size / 1e6).toFixed(1);
   console.log(`  ${target} · ${width}×${height} · ${fps} fps · ${mb} MB · ${elapsed()}`);

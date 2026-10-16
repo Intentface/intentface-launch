@@ -59,9 +59,11 @@ has ways to start.
 - **Captures.** A capture script drives the running product in a browser one
   exact frame at a time. A snapshot saves the page's DOM and CSS, so close-ups
   stay sharp at any zoom.
-- **Rendering.** Work is split into one-second chunks that browser workers take
-  from a queue. Frames with motion blur render several subframes and average
-  them. A stopped render resumes with `--resume`.
+- **Rendering.** Work is split into one-second chunks that workers take from a
+  queue. Workers are pages in one headless browser, as many as the free memory
+  fits, at a lower CPU priority so the desktop stays responsive. Frames with
+  motion blur render several subframes and average them. A stopped render
+  resumes with `--resume`.
 - **Skills.** The method lives in skills that Claude loads: product-launch-video,
   creative-direction, kinetic-typography, ui-motion, micro-animations,
   logo-animation, motion-review, music-brief, sound-design and social-formats.

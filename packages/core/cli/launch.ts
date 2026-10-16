@@ -54,9 +54,11 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --master                 also write a ProRes 422 HQ .mov
       --gif [W]                also a looping GIF under 8 MB, for READMEs and chat (at most W px wide)
       --poster F               also frame F as a PNG, and a 1200×630 JPEG for link previews
-      --workers N              browsers in parallel (default 8); fewer stall less on 3D
+      --workers N              pages in parallel (default: as many as free memory fits, up to 8)
       --resume                 keep the chunks a failed render finished; render only the rest
       --check                  then run check on it
+  watch [id]                   a live progress bar for the render running here (one Claude started,
+                               say), each one's result as it ends, then the next; Ctrl-C to stop
   look <url>                   pictures of the running product, one tiled image, and its fonts,
                                colours, radii and :root tokens → out/look/
       --do "click:Run all" [--wait S]  a step, then a picture (click, hover, fill:Label=text,
@@ -251,6 +253,11 @@ async function main() {
           if (!(await check(id, { every: args.num("every"), samples: args.num("samples") }))) process.exitCode = 1;
         }
       }
+      break;
+    }
+    case "watch": {
+      const { watch } = await import("./progress.js");
+      await watch(id);
       break;
     }
     case "board": {

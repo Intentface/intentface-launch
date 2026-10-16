@@ -6,6 +6,27 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## Unreleased
+
+### Changed
+
+- **Renders leave the computer usable.** `render`'s workers are now pages in
+  one browser instead of a browser each, and their encoders run on one thread,
+  so a render holds about half the memory (8 workers: 1.7 GB, was 3.3 GB). By
+  default it starts as many workers as the memory free fits, up to 8, and says
+  so when that is fewer; `--workers N` still chooses. `render` and `check` run
+  at a lower CPU priority, so the desktop and your own browser come first. On a
+  machine with memory to spare, renders are as fast as before, and the frames
+  are identical.
+
+### Added
+
+- **`pnpm launch watch`** draws a live progress bar, with the time left, for
+  the render running in the launch folder, such as one Claude started:
+  Claude's output is not a terminal, so there it logs a line every tenth.
+  Run it in a terminal pane; it prints each render's result as it ends and
+  waits for the next, until Ctrl-C.
+
 ## 0.2.1 (2026-10-16)
 
 ### Fixed

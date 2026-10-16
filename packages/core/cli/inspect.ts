@@ -15,7 +15,7 @@ import { type Mix, mixAudio } from "./mix.js";
 import { launchCommand } from "./project.js";
 import { resolveFrame, tileImage } from "./review.js";
 import { analyseSound, findSound, heardAudio } from "./sound.js";
-import { assetPath, outDir, root } from "./util.js";
+import { assetPath, outDir, root, yieldToDesktop } from "./util.js";
 
 export type Rules = Required<Omit<CheckRules, "reading">> & { reading: NonNullable<CheckRules["reading"]> };
 
@@ -898,6 +898,7 @@ export async function inspect(
   rules: Rules,
   { every, samples = DRAFT_SAMPLES }: { every?: number; samples?: number } = {},
 ) {
+  yieldToDesktop();
   const { url } = await startServer();
   const browser = await launchBrowser();
   // 3D stages at draft samples: text in panels is never checked, and depth of

@@ -1,4 +1,5 @@
 import { mkdirSync } from "node:fs";
+import { setPriority } from "node:os";
 import { join } from "node:path";
 import { project } from "./project.js";
 
@@ -15,6 +16,19 @@ export function outDir(videoId: string, ...sub: string[]) {
 export function assetPath(src: string) {
   const path = decodeURIComponent(new URL(src, "http://x").pathname);
   return join(root(), path);
+}
+
+/**
+ * Long batch work (render, check) at a lower CPU priority, which the browsers and encoders it
+ * starts inherit: on an idle machine it runs as fast, and the desktop and the person's own
+ * browser are served first when they need the cores.
+ */
+export function yieldToDesktop() {
+  try {
+    setPriority(10);
+  } catch {
+    // Not allowed here (a container): run at normal priority.
+  }
 }
 
 export function timer() {

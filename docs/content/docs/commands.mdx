@@ -62,6 +62,7 @@ Commands are written as `pnpm launch <command>`. In an npm repo run them as
 | `pnpm launch render <id> --gif` | Also a looping GIF for READMEs, issues and chat, as large and smooth as fits 8 MB (`--gif 640` caps the width). Render a short `--from`/`--to` range for a clip. |
 | `pnpm launch render <id> --poster <frame>` | Also that frame (named as `still` names frames) as a PNG and, for a landscape video, a 1200×630 JPEG for link previews. |
 | `pnpm launch render <id> --resume` | Renders only the chunks a failed or stopped render left. |
+| `pnpm launch watch [id]` | In a terminal: a live progress bar, with the time left, for the render running in this launch folder, such as one Claude started (Claude's output is not a terminal, so it only logs a line every tenth). Prints each render's result as it ends and waits for the next, until Ctrl-C. |
 | `pnpm launch render <id> --format vertical` | Another shape the video declares in `formats`, as `<id>-vertical.mp4`. `still`, `sheet` and `check` take `--format` too. |
 | `pnpm launch render <id> --variant ep02` | One of the video's `variants`, as `<id>-ep02.mp4`. `--variant all` renders the video and every variant; every command takes `--variant`, and `check` takes `all` too. |
 | `pnpm launch captions <id>` | The video's captions as `out/<id>.srt` and `.vtt`. `render` writes them beside the mp4. |
