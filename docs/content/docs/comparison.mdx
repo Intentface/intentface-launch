@@ -1,0 +1,206 @@
+---
+title: Compared with other tools
+description: Other ways to make videos with code and agents, what each is good for, and where Intentface Launch fits among them.
+---
+
+Intentface Launch is an exploration. We built it for our own launch videos and
+keep developing it as we explore programmatic video. It is made to be shaped
+by product teams around their own product, brand and way of working, more a
+harness to adapt than a finished tool. It is MIT, and we do not sell it, host
+it or have a paid tier, so we have no stake in which tool you pick. This page
+is a map of good options, each described on its own terms. Most are free to
+try: make the same short video in two or three of them and see what works
+best for you.
+
+Checked on 18 October 2026 against each project's own README, docs and
+package registry. These projects move fast; if something here is out of date,
+please open an issue.
+
+## Where to start
+
+A starting point by what you are making, not a ranking. Several of these
+combine well, and many teams will use more than one.
+
+- **Videos from a website URL, a script or a brief, including explainers,
+  captions, talking-head recuts and decks, across many coding agents, with
+  cloud rendering:** [HyperFrames](#hyperframes).
+- **A general React framework for video, for production work, with an
+  embeddable player and serverless rendering:** [Remotion](#remotion).
+- **Polished product-demo shots on Remotion (chat streams, terminals, device
+  frames), themed like shadcn/ui:** [snapcn](#snapcn).
+- **Diagrams and technical explainers drawn on a canvas:**
+  [Motion Canvas or Revideo](#motion-canvas-and-revideo).
+- **Maths and algorithms, in Python:** [Manim](#manim).
+- **A launch video built from your product's own source and running UI,
+  adapted to your team's brand and workflow, with Claude Code on a Mac:**
+  [Intentface Launch](#intentface-launch).
+
+## At a glance
+
+| | Intentface Launch | HyperFrames | Remotion | snapcn | Motion Canvas, Revideo |
+| --- | --- | --- | --- | --- | --- |
+| **You write** | React shots | HTML, CSS, GSAP and the like | React | Remotion components | TypeScript scenes |
+| **Licence** | MIT | Apache-2.0 | Free for individuals and small teams; a company licence above 3 employees | MIT, plus paid Pro | MIT |
+| **Agents** | Claude Code | Most coding agents | Official skills | Skills, MCP with Pro | None official |
+| **Your UI** | Imported and captured | Captured from a URL | Built or imported | Recreated | Drawn |
+| **Cloud rendering** | No | Yes | Yes | Through Remotion | Revideo's render API |
+| **Version** | 0.2 | 0.8 | 4.x | Months old | 3.17, 0.11 |
+
+All of them render deterministically when scenes follow their rules (time
+from the frame number, seeded randomness): the same input gives the same
+frames. Each section below has the details and links to the licence and
+pricing pages.
+
+## Intentface Launch
+
+A React video engine, a CLI, a local studio and a set of Claude Code skills,
+built around one job: a launch video of a software product, made from the
+product itself. Claude reads and runs your app, agrees a brief and script
+with you, cuts to a music track's beats, sketches a storyboard you comment
+on, then builds and renders shot by shot.
+
+**Good for**
+
+- **The real product.** Videos import your components and data. Capture
+  scripts drive the running app one exact frame at a time, and DOM and CSS
+  snapshots keep close-ups sharp at any zoom.
+- **Shaping it to a team.** Core is brand-neutral. A brand add-on carries a
+  team's fonts, logos, design, and motion and copy rules. `launch/CLAUDE.md`
+  holds how your team works, and rules written there after one video carry
+  into the next.
+- **Review before building.** You comment per shot on a storyboard and
+  animatic before anything heavy is built.
+- **Checks a person usually does by eye.** `pnpm launch check` measures every
+  line of text on screen for reading time, size, contrast and room from the UI
+  beside it, and flags end frames that differ from the approved logo.
+- **Craft add-ons.** 3D with live UI on panels and real depth of field, and
+  WebGPU shaders on the video's clock.
+- **MIT throughout**, with no Remotion dependency and no telemetry.
+
+**Know before you choose it**
+
+- **Young.** On npm since 13 October 2026; 0.1.1 and 0.2.0 shipped broken
+  installs, fixed in 0.2.1. APIs, commands and skills will change.
+- **Tested on one setup.** An Apple M2 Pro Mac with Claude Opus 5.5 at High
+  effort. Other operating systems, GPUs and models are untested, and without a
+  GPU rendering is much slower. See [Requirements](/requirements).
+- **Claude Code in practice.** The skills install in other agents through the
+  skills CLI, but we have not tested that.
+- **Built for your source and a running app.** Captures can record any URL,
+  but the method expects the product's source and a demo or seeded mode you
+  control.
+- **Narrow.** Product launch videos, not explainers, captions, decks or general
+  motion graphics.
+- **No hosted rendering**, and no editor beyond the review studio.
+- **No music.** You bring or generate a track; the video is cut to it.
+
+## HyperFrames
+
+[HyperFrames](https://hyperframes.dev), from HeyGen, renders HTML, CSS, media
+and seekable animations to deterministic MP4: "Write HTML. Render video.
+Built for agents." It is used in production at HeyGen, Apache-2.0
+([licence](https://github.com/heygen-com/hyperframes/blob/main/LICENSE)), and
+moving fast.
+
+**Good for** a broad range of videos made by an agent: launch videos from a
+product URL, script or brief (its `/product-launch-video` skill, which shares
+a name with ours), faceless explainers, PR-to-video, captions, talking-head
+recuts, motion graphics and music videos. It renders in headless Chrome with
+FFmpeg, its 21 skills come as plugins for Claude Code, Codex, Cursor, Gemini
+CLI and GitHub Copilot, it captures a site's visuals and brand from a URL, and it renders
+locally or in HeyGen's cloud, on AWS Lambda or on Google Cloud Run. There is
+also a Studio app for working without code. The breadth is impressive.
+
+**Know before you choose it:** it is HTML-first, with no React runtime. A
+skill ports Remotion projects to HTML and GSAP, one way, so a product's own
+React components do not drop in. Cloud renders and some voice and music
+features use a HeyGen account. [Docs](https://hyperframes.heygen.com/introduction).
+
+## Remotion
+
+[Remotion](https://www.remotion.dev) is the established React framework for
+programmatic video, and a solid choice for production work: Studio, an
+embeddable Player, rendering on AWS Lambda, on Vercel or in the browser, a
+large ecosystem and [official agent skills](https://www.remotion.dev/docs/ai/skills).
+It has been in production for years, and much of programmatic video, ours
+included, builds on ideas it made common.
+
+**Good for** React video of any kind: video inside your own app, templated
+videos at scale, and anything that benefits from a mature ecosystem and
+documentation. If you know Remotion, our engine will feel familiar
+(`useFrame` for `useCurrentFrame`, `Sequence`, `interpolate`, `spring`).
+
+**Know before you choose it:** it is free for individuals, non-profits and
+companies of up to 3 employees, and a for-profit company above that needs a
+company licence, which funds the project. Remotion 5.0 (announced, not yet
+released) changes the terms slightly, for example counting contractors
+towards team size. Read the current [licence](https://www.remotion.dev/docs/license)
+and [pricing](https://www.remotion.dev/docs/license/pricing).
+
+## snapcn
+
+[snapcn](https://snapcn.dev), by Sri Nath under the community org Shadcn Labs,
+is a shadcn-style registry of Remotion components for product demo videos:
+AI chat streams, terminal sessions, device frames, captions, logo stings and
+whole scenes. You install components with `npx shadcn add`, and they are
+copied into your repo as source you own. It is a few months old and very
+active. We really dig shadcn/ui, and snapcn's approach is a cool one.
+
+**Good for** polished, recreated product-demo shots in a Remotion project,
+themed with shadcn/ui's tokens. It ships skills (including a launch-video
+workflow), a Claude Code plugin, an MCP server with Pro, and a browser editor
+that exports MP4, so you can try it without installing anything.
+
+**Know before you choose it:** it needs a Remotion project, and Remotion's
+licence applies. Free components are MIT; Pro components and the MCP server
+are paid, and company work needs its Commercial plan
+([pricing](https://snapcn.dev/docs/pricing)). Shots are recreations of a UI
+rather than captures of yours, which also means they need no running app.
+Captured UI and recreated shots can sit in one film.
+
+## Motion Canvas and Revideo
+
+[Motion Canvas](https://motion-canvas.io) animates on a canvas with
+TypeScript generator functions, with a web editor to sync scenes to audio. It
+is MIT and popular for explainers; its last stable release was 3.17.2, in
+December 2024. [Revideo](https://github.com/midrender/revideo), forked from
+it and MIT, adds a headless render API and a React player, and is the engine
+behind [Midrender](https://midrender.com).
+
+**Good for** diagrams, technical explainers and videos generated in batches,
+where the visuals are drawn rather than taken from a web app.
+
+**Know before you choose it:** scenes are drawn on a canvas, not DOM, so a web
+product's components do not drop in. Revideo sends anonymous render telemetry
+by default (`DISABLE_TELEMETRY=true` turns it off).
+
+## Manim
+
+[Manim](https://www.manim.community) (the community edition, MIT) animates
+maths and algorithms in Python, and is the standard there. It is not aimed at
+product videos.
+
+## An agent with no framework
+
+Ask a coding agent for a launch video with nothing installed, and it will
+usually write a script that screenshots pages with Playwright or Puppeteer
+and pipes them into ffmpeg.
+
+**Good for** a quick one-off or a proof of concept: you own every line and
+there is nothing to learn.
+
+**Know before you choose it:** each video rebuilds the same plumbing:
+deterministic timing, parallel rendering, audio and beat sync, transitions,
+legibility checks, safe zones for vertical cuts. That plumbing is what every
+tool on this page provides.
+
+## Generated footage
+
+Video models such as [Veo](https://deepmind.google/models/veo/),
+[Runway](https://runway.com) and [Kling](https://kling.ai) make footage from a
+prompt, and they can start from images, including screenshots of your UI.
+Combining generated footage with launch materials is an avenue we are
+exploring. Video models are still expensive and heavy to run, so they are not
+part of the harness yet. A clip you generate yourself goes in a video's
+`media/`, with its licence recorded, and plays in a shot with `Clip`, beside
+the product's real UI. The same works in the code-based tools above.
