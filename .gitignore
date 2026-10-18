@@ -16,6 +16,8 @@ videos/_*/
 *.jpg
 *.jpeg
 *.gif
+# The README's hero and the repo's social preview are served from git.
+!.github/assets/*
 *.webp
 *.avif
 *.mp4
