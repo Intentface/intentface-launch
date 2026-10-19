@@ -12,7 +12,7 @@ is a map of good options, each described on its own terms. Most are free to
 try: make the same short video in two or three of them and see what works
 best for you.
 
-Checked on 18 October 2026 against each project's own README, docs and
+Checked on 18 October 2026 (cinetic on 19 October) against each project's own README, docs and
 package registry. These projects move fast; if something here is out of date,
 please open an issue.
 
@@ -37,14 +37,14 @@ combine well, and many teams will use more than one.
 
 ## At a glance
 
-| | Intentface Launch | HyperFrames | Remotion | snapcn | Motion Canvas, Revideo |
-| --- | --- | --- | --- | --- | --- |
-| **You write** | React shots | HTML, CSS, GSAP and the like | React | Remotion components | TypeScript scenes |
-| **Licence** | MIT | Apache-2.0 | Free for individuals and small teams; a company licence above 3 employees | MIT, plus paid Pro | MIT |
-| **Agents** | Claude Code | Most coding agents | Official skills | Skills, MCP with Pro | None official |
-| **Your UI** | Imported and captured | Captured from a URL | Built or imported | Recreated | Drawn |
-| **Cloud rendering** | No | Yes | Yes | Through Remotion | Revideo's render API |
-| **Version** | 0.2 | 0.8 | 4.x | Months old | 3.17, 0.11 |
+| | Intentface Launch | HyperFrames | Remotion | cinetic | snapcn | Motion Canvas, Revideo |
+| --- | --- | --- | --- | --- | --- | --- |
+| **You write** | React shots | HTML, CSS, GSAP and the like | React | Remotion or HyperFrames, written by the agent | Remotion components | TypeScript scenes |
+| **Licence** | MIT | Apache-2.0 | Free for individuals and small teams; a company licence above 3 employees | MIT (the engine's licence applies) | MIT, plus paid Pro | MIT |
+| **Agents** | Claude Code | Most coding agents | Official skills | Most coding agents | Skills, MCP with Pro | None official |
+| **Your UI** | Imported and captured | Captured from a URL | Built or imported | Rebuilt | Recreated | Drawn |
+| **Cloud rendering** | No | Yes | Yes | No | Through Remotion | Revideo's render API |
+| **Version** | 0.2 | 0.8 | 4.x | 1.1 | Months old | 3.17, 0.11 |
 
 All of them render deterministically when scenes follow their rules (time
 from the frame number, seeded randomness): the same input gives the same
@@ -136,6 +136,40 @@ company licence, which funds the project. Remotion 5.0 (announced, not yet
 released) changes the terms slightly, for example counting contractors
 towards team size. Read the current [licence](https://www.remotion.dev/docs/license)
 and [pricing](https://www.remotion.dev/docs/license/pricing).
+
+## cinetic
+
+[cinetic](https://github.com/Leonxlnx/cinetic), by Leonxlnx, is an agent
+skill (MIT) that has your coding agent "direct a short film instead of
+arranging animation components": launch films, feature loops, logo stings,
+vertical videos and UI walkthroughs, built on Remotion by default or on
+HyperFrames. It installs with `npx skills add Leonxlnx/cinetic` or as a Claude
+Code plugin. First public release 28 September 2026; 1.1.0 on 18 October.
+
+**Good for** a complete, finished-looking film from a short brief, including
+an invented brand when there is none. The agent writes three concepts and
+picks one, draws its moves at random from a library of 273 measured
+techniques in 14 categories (so two films do not share the same push-in and
+end card), times everything on one beat grid, scores the sound with
+[earshot](https://github.com/Leonxlnx/earshot) on the frames the picture
+computes, and renders true motion blur with BT.709 colour. Then it reviews
+its own render with contact sheets, pixel forensics, an audio-sync audit and
+critic prompts. Its evaluation against the same agent without it is
+published round by round, losses included. Its technique library, each move
+with its timing in frames and when to use it, is worth reading whatever you
+use.
+
+**Know before you choose it:** it has a strong house style. When the agent
+invents the look, hard bans rule out serif and italic type, glow, glass,
+purple, orange and multi-hue gradients, and overshoot on copy; a brand you
+supply overrides them. Product UI is rebuilt from your components or by
+hand, not captured from the running app. Its own evaluation puts a run at
+about three times the time and tokens of the agent without it (95 minutes
+and 626k tokens on average). Remotion's licence applies when you build on
+Remotion. The scripts need Python with numpy, scipy, librosa and OpenCV
+besides Node and ffmpeg. Its description asks the agent to use it for any
+video request, so install it in a repo of its own rather than beside another
+video skill set.
 
 ## snapcn
 
