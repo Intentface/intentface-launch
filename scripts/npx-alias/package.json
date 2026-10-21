@@ -1,6 +1,6 @@
 {
   "name": "intentface-launch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "license": "MIT",
   "description": "Runs the intentface-launch CLI from @intentface-launch/core: product launch videos written as code.",
   "homepage": "https://launch.intentface.com",
