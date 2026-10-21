@@ -96,6 +96,25 @@ Trees that follow a pointer are stepped from the start of the shot like simulati
 - **Footage under glass in black and white**, graded in the file (`ffmpeg -vf hue=s=0`): glass and crystal refract the stack under them, and read adjustment effects there as white.
 - **UI materials close up.** A liquid-metal button reads as worth touching only big: a macro close-up (the button 1,200 px wide or more) with a slow push to about 1.3, never a small button on a big ground.
 
+## Writing your own shader
+
+For a look neither library has, write a fragment shader for core's `Shader` (kit): WebGL 1, `void main()` writing premultiplied `gl_FragColor`, with the prelude's `u_time`, `u_frame`, `u_progress`, `u_seed`, `u_resolution`, `v_uv` and its helpers (`hash11`, `hash12`, `noise`, `fbm`, `toLinear`, `toSrgb`, `dither8`).
+
+For the craft (signed distance functions, noise, colour spaces, tonemapping, debug views), the `shader-art-coding` skill from [gokayfem/shader-skills](https://github.com/gokayfem/shader-skills) (MIT) is a sound reference. We reviewed it at commit `e09bc99` (19 October 2026): markdown, a GLSL library and one standard-library Python helper, with no hooks, no network access and nothing that touches credentials. Its marketplace install follows `main`, so copy the reviewed commit instead, from the product repo's root:
+
+```sh
+git clone https://github.com/gokayfem/shader-skills .shader-skills
+git -C .shader-skills checkout e09bc993bf04201f26c03c87c89210e9b472f526
+cp -R .shader-skills/skills/shader-art-coding .claude/skills/ && rm -rf .shader-skills
+```
+
+Port its code; do not paste it:
+
+- **It writes Shadertoy shaders for WebGL 2** (GLSL ES 3.00: `uint`, bit shifts, `texture()`, `mainImage`, `iTime`, `iResolution`). Rewrite for WebGL 1 and the prelude's uniforms. Its integer hashes need WebGL 2: use the prelude's `hash12` and `noise`, and rename its functions where they clash with the prelude's.
+- **Nothing per frame that is meant to hold still.** Its dither, grain and ray jitter on `iFrame` change every frame and compress into blocks; use `dither8()`, which is seeded by `u_seed` and holds still.
+- **Not its links.** Its references point to Shadertoy examples, which are CC BY-NC-SA unless they say otherwise: do not copy from them.
+- **This guide first.** The skill loads on any "procedural texture or generative visual"; inside a video, the rules here and in core's guide (time from the frame, `waitFor`, cost) win where they differ.
+
 ## Cost
 
 Each `Shaders` layer is a WebGPU context and a compile when its shot mounts (about 0.2 s), so keep a few per shot. A layer renders twice per frame (effects with compute passes would otherwise show the frame before), and motion blur multiplies that by its samples. Measured: a 660-frame test video with four layers and 120 blurred frames rendered at 1080p60 in 50 s.

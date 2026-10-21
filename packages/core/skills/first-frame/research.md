@@ -1,0 +1,21 @@
+# First frame: sources
+
+Checked 21 October 2026 against each platform's own help pages first. Undocumented and third-party points are marked.
+
+The main gap: no platform documents which frame it uses for a video's cover when none is uploaded. "The first frame" appears only in older third-party guides. Plan for "the platform picks a frame".
+
+| Platform | Cover upload | Default without one | Feed playback |
+| --- | --- | --- | --- |
+| LinkedIn | Desktop, after uploading ("Video thumbnail"); not in the mobile steps. [Help](https://www.linkedin.com/help/linkedin/answer/a7486279) | Undocumented | "Some videos on LinkedIn may play automatically without sound"; desktop on/off, mobile Never / Wi‑Fi / data. [Help](https://www.linkedin.com/help/linkedin/answer/a565326). Ads autoplay muted; captions "help ensure your message is clear from the first frame". [Ads](https://business.linkedin.com/advertise/ads/sponsored-content/video-ads) |
+| X | Media Studio only (verified subscribers), same aspect as the video. [Help](https://help.x.com/en/using-x/media-studio-faqs) | Undocumented | Autoplays in timelines; settings per app and web; data saver and "Prevent video autoplay" stop it. [Help](https://help.x.com/en/using-x/x-videos), [Accessibility](https://help.x.com/en/resources/accessibility). Muted is implied, not stated. |
+| Facebook | Pages, from a computer: Change thumbnail (suggested, upload, from video). [Help](https://www.facebook.com/help/569371393126980). Profiles unconfirmed. | An "automatically suggested thumbnail" | Plays silently in Feed; may need a tap on slow connections. [Help](https://www.facebook.com/help/633446180035470). Reels default to sound on. Desktop Feed shows 1:1 (ads guidance). [Help](https://www.facebook.com/business/help/682655495435254) |
+| Instagram | At sharing only, from the video or an image; not editable after. [Help](https://help.instagram.com/2720958398006062) | Undocumented | No autoplay switch; feed sound needs a tap; Reels sound on. Hook in the first 3 s, view rate measured past 3 s. [Creators](https://creators.instagram.com/blog/helping-creators-of-all-sizes-break-through) |
+| YouTube | Verified accounts; Shorts in Studio on a computer. A vertical video's 16:9 thumbnail is replaced by an auto 4:5 frame on Home. [Help](https://support.google.com/youtube/answer/72431) | Auto-generated choices | Home and search play inline "on mute with captions auto-enabled"; off to save battery on some devices. [Help](https://support.google.com/youtube/answer/7640367). Desktop hover previews a clip from the first half. [Help](https://support.google.com/youtube/answer/7074781) |
+| TikTok | "Select cover": a frame. [Help](https://support.tiktok.com/en/using-tiktok/creating-videos/editing-posting-and-deleting). Own image: creators' reports only. | Undocumented | Sound on. "Introduce your content proposition in the first 3 seconds", hook in 6. [Ads](https://ads.tiktok.com/help/article/creative-best-practices) |
+| Bluesky | None; the video service makes the thumbnail. [Docs](https://docs.bsky.app/docs/tutorials/video) | Undocumented | Autoplays by default, can be turned off. [Blog](https://bsky.social/about/blog/09-11-2024-video). Muted: implied by the app's code only. |
+| Threads | None documented | Undocumented | Autoplays (third-party report). |
+| Links | Slack expands video only from allowlisted hosts. [Help](https://slack.com/help/articles/204399343). Discord needs `og:image` for a video preview. [Docs](https://docs.discord.com/developers/link-previews/overview). Messages plays an `og:video` mp4 within 1 MB for the main resource, 10 MB in all. [TN3156](https://developer.apple.com/documentation/technotes/tn3156-create-rich-previews-for-messages) | | |
+
+Meta: "65% of people who watch the first three seconds of a video will watch for at least ten seconds"; "41% of videos were basically meaningless without sound" (about 2016). [Meta](https://www.facebook.com/business/news/updated-features-for-video-ads)
+
+Uncertain: every platform's default cover frame; whether X and Bluesky feed autoplay is muted; Threads in general; Instagram's 3:4 grid (third parties); organic feed crops on Facebook and LinkedIn; raw .mp4 links in Slack, Discord and Messages.

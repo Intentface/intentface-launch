@@ -103,6 +103,20 @@ The libraries' own components run on the wall clock. `Shaders` and `PaperShader`
 
 Rendering needs WebGPU (Paper's shaders need WebGL 2), which the renderer's Chromium has. In the studio, use a browser with WebGPU.
 
+## Writing your own shader
+
+For a look neither library has, write a fragment shader for core's `Shader` ([Kit](/kit#shaders)): WebGL 1, `void main()` writing premultiplied `gl_FragColor`, with the prelude's `u_time`, `u_frame`, `u_progress`, `u_seed`, `u_resolution` and `v_uv`, and its helpers (`hash11`, `hash12`, `noise`, `fbm`, `toLinear`, `toSrgb`, `dither8`).
+
+For the craft (signed distance functions, noise, colour spaces, tonemapping, debug views), the `shader-art-coding` skill from [gokayfem/shader-skills](https://github.com/gokayfem/shader-skills) (MIT) is a sound reference. We reviewed it at commit `e09bc99` (19 October 2026): markdown, a GLSL library and one standard-library Python helper, with no hooks, no network access and nothing that touches credentials. Its marketplace install follows `main`, so copy the reviewed commit instead, from the product repo's root:
+
+```sh
+git clone https://github.com/gokayfem/shader-skills .shader-skills
+git -C .shader-skills checkout e09bc993bf04201f26c03c87c89210e9b472f526
+cp -R .shader-skills/skills/shader-art-coding .claude/skills/ && rm -rf .shader-skills
+```
+
+It writes Shadertoy shaders for WebGL 2, so port its code rather than pasting it: rewrite for WebGL 1 and the prelude's uniforms, use the prelude's hashes (its integer hashes need WebGL 2), and replace its per-frame dither and grain with `dither8()`, which holds still. Do not copy from the Shadertoy examples it links to; they are CC BY-NC-SA unless they say otherwise.
+
 ## What reads well
 
 - Materials that live inside the letters (chrome, black glass, liquid metal, gold, ice, crystal over footage) read as premium; outer glows and neon halos read as cheap.

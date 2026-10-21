@@ -79,6 +79,27 @@ Or open the studio (`pnpm launch dev`) and pick the video.
 | `fluid-type` | Fluid type under a cursor | A word that reacts: ripples follow the frosted cursor through the letters and settle (`pointer` on a `Shaders` layer). |
 | `liquid-metal` | Liquid metal, polished to matte | Premium UI: a button's rim in liquid metal, from mirror chrome to satin (`LiquidMetal`'s `matte`). |
 
+## Broadcast and analogue: `example-broadcast`
+
+Pictures drawn with Canvas 2D (paths, fills and text, no shaders) as pure
+functions of the frame, shown on core's `Tube`: a cathode-ray tube with
+phosphor, beam, mask and curved glass, and events on frames. A pure
+`draw(ctx, frame)` also runs unchanged outside the renderer, in a page or a
+player.
+
+| Shot | Pattern | Use it for |
+| --- | --- | --- |
+| `power-on` | Power on | A cold open: the raster opens from a line through snow, the colours swim, a test card settles. |
+| `ident` | Station ident | A product's name over a "we are live" moment: a turning wireframe globe, a stacked wordmark, an "On air" tally. |
+| `teletext` | Teletext page | A changelog or feature list as a page of text in the seven teletext colours. |
+| `scope` | Vector scope | A signal or a voice: a green Lissajous trace leaving a fading tail on long phosphor. |
+| `clock` | Station clock | A countdown to a launch: the seconds fill, and "Next" turns to "Now" at the hour. |
+| `chrome` | 80s tape intro | A logo reveal on tape: a laser grid, the mark flying in, chrome letters rising, a light sweep, a typed tagline. |
+| `surf` | Starfield, snow, off | An ending: stars streaking, a channel change into snow, the set switching off to a fading spot. |
+
+Snow is new noise in every pixel every frame, so it costs far more to encode
+than the picture (40 to 120 Mbit/s against under 3): keep channel changes short.
+
 ## Add a pattern
 
 A new pattern goes in the example video of its family (or a new

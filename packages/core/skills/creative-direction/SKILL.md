@@ -117,6 +117,6 @@ Before the final render, and when a board review comes back:
 - Trim every head and tail: enter late, leave early.
 - Cut words the picture says.
 - Sound-off test: read the stills of the whole board (`pnpm launch board`) as if on a phone, muted. Is the claim clear by the end?
-- First-3-seconds test: would the opening stop your own scroll? If not, rebuild the hook.
+- First-3-seconds test: would the opening stop your own scroll? If not, rebuild the hook. Frame 0 is the most interesting picture the film has, seen as a still in a feed; it needs to make someone stop, not to explain (first-frame skill).
 
 Hand back, with the storyboard: the claim, the register, the device, the energy curve as a line of numbers, and which shot is the hero reveal.

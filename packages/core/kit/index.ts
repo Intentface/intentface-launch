@@ -138,6 +138,7 @@ export {
   typingCadence,
   typingFrames,
 } from "./text.js";
+export { phosphors, Tube, type TubeDraw, type TubeProps, type TubeScreen, type TubeSettings } from "./tube.js";
 export {
   KeyChip,
   type KeyChipProps,

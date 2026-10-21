@@ -87,6 +87,10 @@ Inside the safe area, by band:
 - `render` writes H.264 (CRF 16), yuv420p, Rec.709, AAC at 320 kb/s, 1080p at 60 fps. The platforms re-encode every upload; a common recommendation for broad compatibility is 30 fps at 8 to 12 Mb/s, AAC 48 kHz, and YouTube suggests about 8 Mb/s for 1080p SDR. There is no 30 fps option for the final render today (`--preview` is 30 fps but 960 × 540); if a placement rejects 60 fps, re-encode the final with ffmpeg.
 - Captions: `render` writes `.srt` and `.vtt` beside the mp4; upload them as well as, or instead of, burning them in.
 
+## The first frame
+
+In a feed, a video is first a still: frame 0 (or a frame the platform picks) before it plays, muted when it does. The first-frame skill has what each platform shows, which take a cover, and how to make frame 0 interesting enough to stop someone, small and cropped.
+
 ## Before delivery
 
 - [ ] The shapes the placements need, from the tables above, declared in `formats`.
