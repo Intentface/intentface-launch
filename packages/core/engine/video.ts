@@ -264,6 +264,15 @@ export type VideoConfig = {
   /** Colour behind everything, and what transitions fade through. */
   background?: string;
   /**
+   * What is transparent in `render --alpha` (a ProRes 4444 .mov with alpha, to lay over other
+   * footage in an editor). `"page"` (the default): the background is left out and everything the
+   * shots draw keeps its own opacity, for type and UI over someone else's picture. `"black"`: the
+   * video is light on a black background (a sting, glows, 3D light, which has no opacity of its
+   * own), keyed by brightness: each pixel's alpha is its brightest channel and its colour is
+   * divided by it (After Effects' Unmult), so it lays over other footage as light.
+   */
+  alpha?: "page" | "black";
+  /**
    * What `check` holds this video's text to, over the project's rules (core,
    * installed add-ons, launch.config.ts). For a video outside a brand whose
    * stricter rules are installed in the repo: `{ reading: { min: 1, cps: 14 } }`.

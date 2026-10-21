@@ -26,6 +26,7 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --samples N              3D stages at N samples per frame (8: a quick draft of a 96-sample stage)
       --stage-debug            per frame, the 3D stage's passes beside the frame: one sample without
                                post, what glass sees, the floor's reflection, alpha, the backdrop
+      --alpha                  with transparency, as render --alpha has it (on a checkerboard in a grid)
   sheet <id> [--shot s]        contact sheet, every --every N frames (default 6)
       --from F --to F          range, same frame names as still
       --size W  --cols N       tile width (default 320) and columns (default 6)
@@ -52,6 +53,8 @@ const HELP = `intentface-launch <command>   (pnpm launch <command> in a product 
       --angle 180 --phase -90  shutter angle and phase, in degrees
       --from F --to F          frame range
       --master                 also write a ProRes 422 HQ .mov
+      --alpha                  also a ProRes 4444 .mov with alpha, keyed as the video's alpha says
+                               (the page's own transparency, or "black": light keyed by brightness)
       --gif [W]                also a looping GIF under 8 MB, for READMEs and chat (at most W px wide)
       --poster F               also frame F as a PNG, and a 1200×630 JPEG for link previews
       --workers N              pages in parallel (default: as many as free memory fits, up to 8)
@@ -164,6 +167,7 @@ async function main() {
         zoom: args.num("zoom"),
         samples: args.num("samples"),
         stageDebug: args.flags["stage-debug"] === true,
+        alpha: args.flags.alpha === true,
       });
       for (const f of files) console.log(`  ${f.file}\n      ${f.line}`);
       break;
@@ -235,6 +239,7 @@ async function main() {
           workers: args.num("workers"),
           audio: args.flags.audio !== false,
           master: args.flags.master === true,
+          alpha: args.flags.alpha === true,
           gif: args.flags.gif === true ? true : args.num("gif"),
           poster: args.str("poster"),
           quick: preview,

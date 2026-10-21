@@ -137,7 +137,22 @@ export type StillOptions = {
   samples?: number;
   /** One image per frame of the 3D stage's passes beside the finished frame. */
   stageDebug?: boolean;
+  /** With transparency, as `render --alpha` keys it: RGBA PNGs, and a grid over a checkerboard. */
+  alpha?: boolean;
 };
+
+/** Straight RGBA laid over a grey checkerboard, so what is transparent shows. */
+async function overChecker(raw: Buffer, width: number, height: number) {
+  const board = Buffer.alloc(width * height * 3);
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++)
+      board.fill(((x >> 5) + (y >> 5)) % 2 ? 0x99 : 0x66, (y * width + x) * 3, (y * width + x) * 3 + 3);
+  return sharp(board, { raw: { width, height, channels: 3 } })
+    .composite([{ input: raw, raw: { width, height, channels: 4 } }])
+    .removeAlpha()
+    .raw()
+    .toBuffer();
+}
 
 /**
  * Render frames to PNG, exactly as the final render has them (motion blur
@@ -154,7 +169,12 @@ export async function stills(videoId: string, specs: string[], o: StillOptions =
     height: Math.round(o.crop.height),
   };
   const scale = crop ? (o.zoom ?? Math.min(4, Math.max(1, Math.round(960 / crop.width)))) : (o.scale ?? 1);
-  const r = await openRenderer(browser, url, videoId, scale, { samples: o.samples, debug: o.stageDebug });
+  const r = await openRenderer(browser, url, videoId, scale, {
+    samples: o.samples,
+    debug: o.stageDebug,
+    alpha: o.alpha,
+  });
+  const alpha = o.alpha ? r.info.alpha : undefined;
   const frames = specs.map((t) => resolveFrame(r.info, t, o.shot));
   if (o.stageDebug) {
     const out = await stageDebug(browser, r, videoId, frames, { shot: o.shot, size: o.size });
@@ -168,20 +188,21 @@ export async function stills(videoId: string, specs: string[], o: StillOptions =
   const tiles: { src: string; caption: string }[] = [];
   const tile = o.size ?? 480;
   for (const frame of frames) {
-    const { raw } = await grab(r, frame, { region: crop });
+    const { raw } = await grab(r, frame, { region: crop, alpha });
     const d = describeFrame(r.info, frame, o.shot);
     const line = describeLine(d, frame);
     if (o.grid) {
-      const jpg = await sharp(raw, { raw: { width: w, height: h, channels: 3 } })
+      const opaque = alpha ? await overChecker(raw, w, h) : raw;
+      const jpg = await sharp(opaque, { raw: { width: w, height: h, channels: 3 } })
         .resize(tile)
         .jpeg({ quality: 88 })
         .toBuffer();
       tiles.push({ src: `data:image/jpeg;base64,${jpg.toString("base64")}`, caption: line });
       continue;
     }
-    const name = `${d.shot ? `${d.shot}+${d.offset}-` : ""}f${frame}${crop ? `-crop${crop.x}_${crop.y}_${crop.width}x${crop.height}` : ""}${formatSuffix(r.info)}.png`;
+    const name = `${d.shot ? `${d.shot}+${d.offset}-` : ""}f${frame}${crop ? `-crop${crop.x}_${crop.y}_${crop.width}x${crop.height}` : ""}${alpha ? "-alpha" : ""}${formatSuffix(r.info)}.png`;
     const file = join(outDir(videoId, "stills"), name);
-    writeFileSync(file, await encodePng(raw, w, h));
+    writeFileSync(file, await encodePng(raw, w, h, alpha ? 4 : 3));
     out.push({ file, line });
   }
   if (o.grid) {

@@ -6,6 +6,24 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## Unreleased
+
+### Added
+
+- **Transparent video.** `render <id> --alpha` also writes `<id>-alpha.mov`,
+  ProRes 4444 with a 16-bit alpha channel, to lay a sting, a title or a whole
+  transition over other footage in an editor. `alpha` on the video says what is
+  transparent: `"page"` (the default) leaves the background out and keeps the
+  shots' own opacity, motion blur included; `"black"` keys light on a black
+  background by brightness, for glows and 3D light, which have no opacity of
+  their own. The mp4 is the same frames over the background. `still --alpha`
+  shows frames as the key has them, on a checkerboard in a `--grid`.
+
+### Fixed
+
+- **3D stages keep black black.** The dither against banding no longer lifts
+  pixels that are exactly black by a level; grain is unchanged.
+
 ## 0.2.2 (2026-10-16)
 
 ### Changed

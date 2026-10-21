@@ -35,6 +35,9 @@ export type LaunchBridge = {
     height: number;
     fps: number;
     durationInFrames: number;
+    background: string;
+    /** How `render --alpha` keys the video (see `VideoConfig.alpha`). */
+    alpha: "page" | "black";
     /** The format on screen, and every format the video declares (its own included). */
     format: string;
     formats: Video["formats"];
@@ -140,7 +143,7 @@ export function mountRenderer(video: Video, element: HTMLElement) {
       show(next);
     };
     if (shown.reference) return <Reference video={video} frame={frame} {...shown.reference} />;
-    return <Stage video={video} frame={frame} />;
+    return <Stage video={staged} frame={frame} />;
   }
   const ready = async () => {
     await settle();
@@ -152,8 +155,11 @@ export function mountRenderer(video: Video, element: HTMLElement) {
   const params = new URLSearchParams(location.search);
   const samples = Number(params.get("samples"));
   setRenderQuality({ samples: samples > 0 ? samples : undefined, debug: params.has("debug") });
+  // `render --alpha` on a video keyed by its page: nothing behind the shots, so the frame keeps their opacity.
+  const transparent = params.has("alpha") && video.alpha !== "black";
+  const staged = transparent ? { ...video, background: "transparent" } : video;
   document.body.style.margin = "0";
-  document.body.style.background = video.background;
+  document.body.style.background = staged.background;
   const root = createRoot(element);
   flushSync(() => root.render(<Host />));
 
@@ -167,6 +173,8 @@ export function mountRenderer(video: Video, element: HTMLElement) {
       height: video.height,
       fps: video.fps,
       durationInFrames: video.durationInFrames,
+      background: video.background,
+      alpha: video.alpha ?? "page",
       format: video.format,
       formats: video.formats,
       captions: video.captionCues,

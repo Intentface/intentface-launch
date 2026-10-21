@@ -120,6 +120,7 @@ Plan them before building, since each changes the framing:
 - 16:9, 9:16 and 1:1 (`width`/`height` in `defineVideo`),
 - light and dark,
 - with and without sound,
+- transparent, for an editor to lay over a show's own picture (a podcast or talk intro): build it black to black and deliver `render --alpha`, ProRes 4444. A light sting takes `alpha: "black"`: its glows and 3D light have no opacity of their own, so it is keyed by brightness and lays over the picture as light. Then nothing may lift the black: `grain={0}` on stages, no dark shapes or shadows (black keys to a hole), and the first and last frames checked for zero alpha in the .mov. Lay the result over a mid grey to judge it: a key that is clean on black can still show a veil there. As a transition between two clips the black itself must cover the outgoing clip: `alpha: "page"`, a background layer of its own that builds in and breaks up (the podcast intro in marketing-material builds it from text-mode blocks), and the 3D only while it is whole,
 - a loop, whose last frame equals its first, motion included,
 - product states (thinking, success) if the logo lives in an AI or SaaS product.
 

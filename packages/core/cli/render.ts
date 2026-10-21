@@ -30,6 +30,12 @@ export type RenderOptions = {
   crf?: number;
   /** Also keep a ProRes 422 HQ master. */
   master?: boolean;
+  /**
+   * Also a ProRes 4444 .mov with alpha (`<name>-alpha.mov`), keyed as the video's `alpha` says
+   * (its page's own transparency, or light on black by brightness). The mp4 and master are the
+   * same frames laid over the video's background.
+   */
+  alpha?: boolean;
   name?: string;
   quick?: boolean;
   /** Keep the chunks a failed or stopped render finished, and render only the rest. */
@@ -50,6 +56,14 @@ export type RenderOptions = {
 /** New browsers to try a stalled frame in before giving up. */
 const RETRIES = 2;
 
+/**
+ * ffmpeg 8 asks the stdin pipe for its size, and on macOS a pipe reports only what it holds (64 KB).
+ * With RGBA frames it then logs "Truncating packet of size 8294400 to 65536" now and then, yet
+ * reads the whole frame: chunk frames compared pixel for pixel with stills of the same frames
+ * were identical. Hidden, so a sound render does not look broken.
+ */
+const PIPE_SIZE_NOISE = /^Truncating packet of size \d+ to 65536$/;
+
 /** Frames per chunk: what a failure costs, and what `--resume` skips. */
 const CHUNK = 60;
 
@@ -64,7 +78,7 @@ const WORKER_MEMORY = 0.35e9;
 const workersThatFit = () => Math.max(2, Math.floor((process.availableMemory() - 1e9) / WORKER_MEMORY));
 
 export async function render(videoId: string, options: RenderOptions = {}) {
-  const { scale = 1, blur = 1, angle = 180, audio = true, crf = 16, master = false, quick = false } = options;
+  const { scale = 1, blur = 1, angle = 180, audio = true, crf = 16, master = false, quick = false, alpha } = options;
   const elapsed = timer();
   const phase = options.phase ?? -angle / 2;
   const stageSamples = options.samples;
@@ -73,7 +87,20 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   const probeBrowser = await launchBrowser();
   const probe = await openRenderer(probeBrowser, url, videoId, scale);
   const info: Info = probe.info;
+  // The background as 8-bit sRGB, for laying alpha frames over it (any CSS colour the video gives).
+  const background = await probe.page.evaluate((color) => {
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx) return [0, 0, 0];
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 1, 1);
+    return [...ctx.getImageData(0, 0, 1, 1).data.slice(0, 3)];
+  }, info.background);
   await probeBrowser.close();
+  const keyed = alpha ? info.alpha : undefined;
+  if (keyed === "black" && Math.max(...background) > 8)
+    console.warn(
+      `  alpha: "black" keys light on black, but the background is ${info.background}: it will not be transparent.`,
+    );
   // Mixed first, so a missing sound fails before minutes of frames.
   const mixed = audio ? await mixAudio(videoId, info) : null;
 
@@ -99,6 +126,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     samples: stageSamples ?? null,
     format: info.format,
     variant: info.variant,
+    alpha: keyed ?? null,
   });
   const settingsFile = join(work, "settings.json");
   const keep = options.resume || !!options.shots?.length;
@@ -173,43 +201,52 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   await Promise.all(
     Array.from({ length: workers }, async () => {
       let browser = shared;
-      let renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
+      const quality = { samples: stageSamples, alpha: !!keyed };
+      let renderer = await openRenderer(browser, url, videoId, scale, quality);
       const fresh = async () => {
         // The stall is in the browser's GPU process, shared by all its pages, and closing a
         // wedged browser can hang too: leave it (the shared one closes at the end) for a new
         // browser of this worker's own.
         within(browser === shared ? renderer.close() : browser.close(), 10_000).catch(() => {});
         browser = await launchBrowser();
-        renderer = await openRenderer(browser, url, videoId, scale, { samples: stageSamples });
+        renderer = await openRenderer(browser, url, videoId, scale, quality);
       };
-      const options = { samples: blur, angle, phase, step, noBlur: quick, format: quick ? "jpeg" : "png" } as const;
+      const options = {
+        samples: blur,
+        angle,
+        phase,
+        step,
+        noBlur: quick,
+        format: quick ? "jpeg" : "png",
+        alpha: keyed,
+      } as const;
       for (let chunk = queue.shift(); chunk; chunk = queue.shift()) {
         const partial = chunk.file.replace(/\.mkv$/, ".partial.mkv");
-        // Raw RGB in; blur is already averaged in grab(). Lossless intermediate:
-        // the final pass does the colour conversion once.
-        const encoder = ffmpeg([
-          "-f",
-          "rawvideo",
-          "-pix_fmt",
-          "rgb24",
-          "-s",
-          `${width}x${height}`,
-          "-framerate",
-          String(fps),
-          "-i",
-          "-",
-          "-c:v",
-          "libx264rgb",
-          "-crf",
-          "0",
-          "-preset",
-          "ultrafast",
-          // One thread encodes 100 fps, far more than a worker feeds it; x264's default
-          // (1.5 per core) holds 400 MB of frames per encoder for nothing.
-          "-threads",
-          "1",
-          partial,
-        ]);
+        // Raw RGB (RGBA with alpha) in; blur is already averaged in grab(). Lossless
+        // intermediate: the final pass does the colour conversion once.
+        const encoder = ffmpeg(
+          [
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            keyed ? "rgba" : "rgb24",
+            "-s",
+            `${width}x${height}`,
+            "-framerate",
+            String(fps),
+            "-i",
+            "-",
+            ...(keyed
+              ? ["-c:v", "ffv1", "-pix_fmt", "bgra"]
+              : ["-c:v", "libx264rgb", "-crf", "0", "-preset", "ultrafast"]),
+            // One thread encodes 100 fps, far more than a worker feeds it; x264's default
+            // (1.5 per core) holds 400 MB of frames per encoder for nothing.
+            "-threads",
+            "1",
+            partial,
+          ],
+          { ignore: PIPE_SIZE_NOISE },
+        );
         try {
           for (const frame of chunk.frames) {
             let grabbed: Awaited<ReturnType<typeof grab>> | undefined;
@@ -265,6 +302,17 @@ export async function render(videoId: string, options: RenderOptions = {}) {
   const offset = (mixed ? 0 : (info.audio?.offset ?? 0)) + from / info.fps;
   const volume = mixed ? 1 : (info.audio?.volume ?? 1);
   const seconds = (to - from) / info.fps;
+  // Alpha chunks are laid over the video's background for the mp4 and the master.
+  const [r, g, b] = background.map((c) => c.toString(16).padStart(2, "0"));
+  const picture = (filter: string) =>
+    keyed
+      ? [
+          "-filter_complex",
+          `color=c=0x${r}${g}${b}:s=${width}x${height}:r=${fps}[bg];[bg][0:v]overlay=shortest=1:format=auto,${filter}[v]`,
+          "-map",
+          "[v]",
+        ]
+      : ["-vf", filter, ...(withAudio ? ["-map", "0:v"] : [])];
 
   await run([
     "-f",
@@ -274,10 +322,9 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     "-i",
     list,
     ...(withAudio ? ["-ss", String(Math.max(0, offset)), "-i", audioFile] : []),
-    "-vf",
     // 4:2:0 needs even sides: a half-size preview of a 1080×1350 video is 540×675. Crops at most
     // one pixel row or column, and only when a side is odd.
-    `crop=trunc(iw/2)*2:trunc(ih/2)*2,${REC709_FILTER}`,
+    ...picture(`crop=trunc(iw/2)*2:trunc(ih/2)*2,${REC709_FILTER}`),
     "-c:v",
     "libx264",
     "-preset",
@@ -289,7 +336,7 @@ export async function render(videoId: string, options: RenderOptions = {}) {
     "-r",
     String(fps),
     ...REC709_TAGS,
-    ...(withAudio ? ["-c:a", "aac", "-b:a", "320k", "-af", `volume=${volume}`, "-map", "0:v", "-map", "1:a"] : []),
+    ...(withAudio ? ["-c:a", "aac", "-b:a", "320k", "-af", `volume=${volume}`, "-map", "1:a"] : []),
     "-t",
     String(seconds),
     "-movflags",
@@ -306,18 +353,49 @@ export async function render(videoId: string, options: RenderOptions = {}) {
       "-i",
       list,
       ...(withAudio ? ["-ss", String(Math.max(0, offset)), "-i", audioFile] : []),
-      "-vf",
-      REC709_FILTER.replace("yuv420p", "yuv422p10le"),
+      ...picture(REC709_FILTER.replace("yuv420p", "yuv422p10le")),
       "-c:v",
       "prores_ks",
       "-profile:v",
       "3",
       ...REC709_TAGS,
-      ...(withAudio ? ["-c:a", "pcm_s16le", "-map", "0:v", "-map", "1:a"] : []),
+      ...(withAudio ? ["-c:a", "pcm_s16le", "-map", "1:a"] : []),
       "-t",
       String(seconds),
       join(out, `${name}-master.mov`),
     ]);
+  }
+  if (keyed) {
+    // ProRes 4444 with a 16-bit alpha channel, straight (not premultiplied), as editors expect it.
+    const file = join(out, `${name}-alpha.mov`);
+    await run([
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      list,
+      ...(withAudio ? ["-ss", String(Math.max(0, offset)), "-i", audioFile] : []),
+      "-vf",
+      REC709_FILTER.replace("yuv420p", "yuva444p10le"),
+      "-c:v",
+      "prores_ks",
+      "-profile:v",
+      "4",
+      "-alpha_bits",
+      "16",
+      "-vendor",
+      "apl0",
+      ...REC709_TAGS,
+      ...(withAudio ? ["-c:a", "pcm_s16le", "-map", "0:v", "-map", "1:a"] : []),
+      "-t",
+      String(seconds),
+      file,
+    ]);
+    const mb = (statSync(file).size / 1e6).toFixed(1);
+    console.log(
+      `  ${file} · ProRes 4444 with alpha (${keyed === "black" ? "light keyed from black" : "the page's own"}) · ${mb} MB`,
+    );
   }
   progress.stop({ state: "done", file: target });
   // The chunks stay: they are what `--shots` and `--resume` reuse. A render with other settings replaces them.

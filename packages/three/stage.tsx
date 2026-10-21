@@ -95,7 +95,7 @@ export type Stage3DProps = {
    * a layer behind a transparent stage, glass panels refract and blur it.
    */
   backdrop?: ReactNode;
-  /** Film grain amplitude in 8-bit steps / 255. Dither against banding is always on. */
+  /** Film grain amplitude in 8-bit steps / 255. Dither against banding is always on, except on exact black. */
   grain?: number;
   exposure?: number;
   /** Bloom, vignette, aberration, grade and LUT. */

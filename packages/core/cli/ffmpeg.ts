@@ -1,9 +1,18 @@
 import { type ChildProcess, spawn } from "node:child_process";
 
-export function ffmpeg(args: string[], { quiet = true } = {}): ChildProcess {
+/** `ignore`: lines of ffmpeg's log known to be harmless, left out of the output. */
+export function ffmpeg(
+  args: string[],
+  { quiet = true, ignore }: { quiet?: boolean; ignore?: RegExp } = {},
+): ChildProcess {
   const child = spawn("ffmpeg", ["-hide_banner", "-loglevel", quiet ? "error" : "info", "-y", ...args], {
-    stdio: ["pipe", "inherit", "inherit"],
+    stdio: ["pipe", "inherit", ignore ? "pipe" : "inherit"],
   });
+  if (ignore)
+    child.stderr?.on("data", (data: Buffer) => {
+      for (const line of data.toString().split("\n"))
+        if (line.trim() && !ignore.test(line.trim())) process.stderr.write(`${line}\n`);
+    });
   return child;
 }
 

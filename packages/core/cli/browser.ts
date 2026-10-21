@@ -102,12 +102,12 @@ export function formatSuffix(info: Info) {
 /**
  * Draft and debug settings for a render page: `samples` overrides every
  * `Stage3D`'s sample count, `debug` makes stages keep their passes for
- * `debugViews()`.
+ * `debugViews()`, `alpha` captures frames with their transparency (`render --alpha`).
  */
-export type PageQuality = { samples?: number; debug?: boolean };
+export type PageQuality = { samples?: number; debug?: boolean; alpha?: boolean };
 
 const qualityQuery = (q: PageQuality = {}) =>
-  `${q.samples ? `&samples=${Math.round(q.samples)}` : ""}${q.debug ? "&debug" : ""}`;
+  `${q.samples ? `&samples=${Math.round(q.samples)}` : ""}${q.debug ? "&debug" : ""}${q.alpha ? "&alpha" : ""}`;
 
 /** One headless page showing `videoId` at native size × `scale`. */
 export async function openRenderer(
@@ -139,6 +139,9 @@ export async function openRenderer(
   const info = (await page.evaluate(() => window.__launch?.info)) as Info;
   await page.setViewportSize({ width: info.width, height: info.height });
   const cdp: CDPSession = await context.newCDPSession(page);
+  // Screenshots are taken over an opaque white page unless told otherwise.
+  if (quality?.alpha)
+    await cdp.send("Emulation.setDefaultBackgroundColorOverride", { color: { r: 0, g: 0, b: 0, a: 0 } });
   return {
     page,
     info,

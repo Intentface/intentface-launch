@@ -59,6 +59,7 @@ Commands are written as `pnpm launch <command>`. In an npm repo run them as
 | `pnpm launch render <id>` | The final 1080p60 mp4. |
 | `pnpm launch render <id> --scale 2` | 4K. |
 | `pnpm launch render <id> --master` | Also writes a ProRes 422 HQ `.mov`. |
+| `pnpm launch render <id> --alpha` | Also writes `<id>-alpha.mov`, ProRes 4444 with a 16-bit alpha channel (straight), to lay over other footage in an editor. The video's `alpha` says what is transparent: `"page"` (the default) leaves the background out and keeps the shots' own opacity; `"black"` keys light on a black background by brightness (alpha from the brightest channel, colour divided by it), for stings, glows and 3D light, which have no opacity of their own. The mp4 is the same frames over the background. For a transition between two clips, use `"page"` with a background layer of your own that builds in and out. `still --alpha` shows frames as the key has them, on a checkerboard in a `--grid`. |
 | `pnpm launch render <id> --gif` | Also a looping GIF for READMEs, issues and chat, as large and smooth as fits 8 MB (`--gif 640` caps the width). Render a short `--from`/`--to` range for a clip. |
 | `pnpm launch render <id> --poster <frame>` | Also that frame (named as `still` names frames) as a PNG and, for a landscape video, a 1200×630 JPEG for link previews. |
 | `pnpm launch render <id> --resume` | Renders only the chunks a failed or stopped render left. |

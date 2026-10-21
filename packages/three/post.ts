@@ -301,7 +301,10 @@ void main() {
   }
   vec2 q = gl_FragCoord.xy + mod(frame, 997.0) * vec2(17.31, 11.17);
   float n = hash(q) + hash(q + 71.3) - 1.0;
-  c += n * (grain + 1.0 / 255.0);
+  // The dither against banding leaves exact black alone: there it can only round up, so it would
+  // lift black by a level (and key into a veil of specks under render --alpha). Grain stays.
+  float lit = step(1e-6, max(c.r, max(c.g, c.b)));
+  c += n * (grain + lit / 255.0);
   gl_FragColor = vec4(c * alpha, alpha);
 }`;
 
