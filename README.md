@@ -11,10 +11,10 @@ Intentface Launch is an exploration. We built it for our own launch videos and k
 [![Claude Code skills](https://img.shields.io/badge/Claude%20Code-skills-d97757)](https://launch.intentface.com/skills)
 <!-- TODO(joni): add a CI badge once a CI workflow exists (only publish.yml today) -->
 
-<!-- TODO(joni): drag-drop the trailer MP4 here in the GitHub editor for inline playback -->
-[![Intentface Launch, made with Intentface Launch](.github/assets/hero.gif)](https://www.youtube.com/watch?v=psV-O07yDBg)
 
-*Intentface Launch, made with Intentface Launch. [Watch the full trailer](https://www.youtube.com/watch?v=psV-O07yDBg).*
+https://github.com/user-attachments/assets/59ec249b-beb0-4e18-a1b9-7baa8c433d81
+
+*Intentface Launch, made with Intentface Launch. [Watch on Youtube](https://www.youtube.com/watch?v=psV-O07yDBg).*
 
 ## Quick start
 
