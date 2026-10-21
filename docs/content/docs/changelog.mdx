@@ -6,6 +6,35 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## 0.2.4 (2026-10-21)
+
+### Added
+
+- **`Tube`**, a picture drawn with Canvas 2D shown on a modelled cathode-ray
+  tube: phosphor that fades (`phosphor`: `standard`, `slow`, `trails`, or
+  `long` for a scope's tail), a beam that widens on highlights, an aperture
+  grille, slot or shadow mask, curved glass and halation. Events on frames:
+  `power` on and off, `tune` (a channel change through snow), `degauss`;
+  `snow` and `tape` wear. The phosphor is computed by drawing the frames
+  before, so any frame renders alone. Text the picture returns is declared to
+  `check`.
+- **Broadcast examples** (`videos/example-broadcast` in the repo): a test card
+  on power-on, a station ident, a teletext page, a vector scope, a station
+  clock, an 80s tape intro, and a starfield into snow and switch-off, each a
+  pure draw function.
+- **The first-frame skill.** In a feed a video is first a still: frame 0 is the
+  most interesting picture the film has (one striking subject, lit, already
+  moving; dark is fine, empty is not), still striking small and cropped, with
+  what each platform shows before playback and which take a cover (checked 21
+  October 2026). It replaces the rule that a film fades up from black.
+- **The svg-drawing skill.** Pictures drawn in SVG or Canvas 2D: taking a
+  picture apart into its parts, geometry generated from code, line weights,
+  drawing order, solid objects in 3D as line drawings, and lines that draw on
+  and keep moving.
+- **Writing your own shader**, in the shaders guide: core's `Shader` prelude,
+  and a reviewed, pinned install of a third-party skill for shader craft, with
+  what to port.
+
 ## 0.2.3 (2026-10-21)
 
 ### Added

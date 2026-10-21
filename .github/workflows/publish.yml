@@ -1,7 +1,7 @@
 # Publishes the packages to npm when a version tag is pushed:
 #   bump "version" in packages/*/package.json and scripts/npx-alias/package.json
 #   (all four the same, and the alias's and add-ons' ranges on core), commit, then
-#   git tag v0.2.3 && git push origin v0.2.3
+#   git tag v0.2.4 && git push origin v0.2.4
 # Trusted publishing: no token. Each package names this repo and publish.yml as a
 # trusted publisher on npmjs.com (package Settings, Trusted publishing), and npm
 # signs provenance itself.
