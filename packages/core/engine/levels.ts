@@ -19,8 +19,8 @@ export type Levels = {
   high: number[];
   /** Seconds where something starts: a syllable, a hit. */
   onsets: number[];
-  /** [start, end] seconds of sound between silences of 180 ms or more: a voice's phrases. */
-  phrases: [number, number][];
+  /** [start, end] seconds of sound between silences of 180 ms or more: a voice's phrases. (Typed as plain arrays so an imported JSON file fits.) */
+  phrases: number[][];
 };
 
 export type Band = "rms" | "sub" | "low" | "mid" | "high";
@@ -86,6 +86,9 @@ export function audioLevels(data: Levels) {
       return Math.min(1, p);
     },
     /** The phrase sounding at `t`, or null in a silence. */
-    phraseAt: (t: number) => data.phrases.find(([s, e]) => t >= s && t < e) ?? null,
+    phraseAt: (t: number): [number, number] | null => {
+      const p = data.phrases.find(([s, e]) => t >= s && t < e);
+      return p ? [p[0], p[1]] : null;
+    },
   };
 }

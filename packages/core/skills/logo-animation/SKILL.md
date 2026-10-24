@@ -41,6 +41,7 @@ To animate parts, the parts must be addressable. If the brand package exports th
 | Particles, many into one | stands for many things becoming one | `random(seed)` for placement; only with a reason (the catalogue, the community) |
 | Light sweep, glint | is premium or physical | one light event (`Stage3D`'s `light`), synced to the hit |
 | States (listening, thinking, success) | lives inside the product | loops on `frame % period`, 300 ms to 1.5 s per state |
+| Lens of oil (refraction) | is bold and simple, and should feel physical: light through a liquid | `OilLens` (kit): a dome of oil magnifies the mark, splits its edges into spectral fringes and reveals it only where it has reached; `oilDomes.tile` for an icon, `oilDomes.orb` for a wordmark; `ascii` builds it in from glyphs; see below |
 | Point of view (anamorphic) | is made of lines or rays from a point | parts scattered in 3D that are the mark from exactly one camera angle; see below |
 
 **Symbol, then wordmark.** The symbol performs; the wordmark resolves 9 to 24 frames after the symbol settles, with a simpler motion (fade, short slide or mask) so it does not compete.
@@ -67,6 +68,16 @@ To animate parts, the parts must be addressable. If the brand package exports th
 - **Push straight on through the hub.** Widen the lens (24° → 40°) at constant zoom, so the tilted streams open out in depth and pass the lens, and open the focus back into bokeh. Do not turn the camera here: a 16° drift swung every stream to one side of the frame.
 - **Fade the light, not the page.** Scale every gain by one fade (`ease.inOut` to 0) as the streams fly past; close to the lens they stack, so the fans come back at about 60% of the level they left at. The streams return to black about 20 frames before the end.
 - **Cut the length to the sound.** Measure the tail (`ffmpeg -ss <t> -t 0.1 -af volumedetect`) and end where it is inaudible (-57 dB at 4.4 s here): shorter than the full sting (5 s) on the same track, with the lock still on the boom.
+
+**A lens of oil, after Apple Music's 2026 sting.** The film was shot in camera: a transducer playing low notes under a tray of mineral oil, the marks in clear acrylic beneath it. `OilLens` models the optics, so it reads the same way.
+
+- Two notes, two shots: the icon grows out of an orb into its tile on the first; the wordmark (or the mark again, closer) opens out of a second orb on the second. Cut on the second note's hit, and keep each orb in the middle, where the last mark left: an orb rising somewhere else reads as a jump.
+- Low, few notes. The oil reads only while it moves slowly; time ripples to a bed's pulses (one crest per pulse) and keep them under about 1 px high, or strokes bead.
+- Size the mark to the dome: about 45% of an icon tile, and an orb about 1.25 times as wide as a wordmark. The early dome magnifies about 3×, so a mark that fills its tile spills out of it.
+- Glyphs (`ascii`) say "written, then seen": at the dome's front and over the inside for the first second, resolving into light; a row-slip glitch only in the first few frames. A brand with its own glitch glyphs uses them (`glyphs`, `font`).
+- An unseen lens reads as the mark itself moving: `reflect` 0 (no studio highlights to outline it) and a dome whose rim meets the flat oil with no slope (`flat` about 3, `edge` above 1). A brand's colours replace the rainbow with `optics.palette`.
+- For a hard exit, `tear` on the same lens (with the oil flat, it shows the exact mark) over about 16 frames, on a clock stepping every 2 frames: bands pushed further, more of them dropped, the split in the mark's own colours (`tint`), glyphs scrambling over it; black on the last hit.
+- The lock is the oil gone flat: the floor is then the mark undistorted. Hand off to the exact SVG as for a 3D stage (below), with the floor pure black.
 
 **Revealing a wordmark from the real component.** Clip a copy of the logo component per letter cell with `clip-path: inset(…)` computed from the frame, for example opening each letter vertically out of a line. Once every letter has settled, swap all the copies for one unclipped component.
 
@@ -98,7 +109,8 @@ A 3 s sting (180 frames; 6 beats at 120 BPM):
 
 Everything before the lock is optional; the held frame is not. It must be the brand's logo component, unmodified: exact colours, proportions, clear space, centred.
 
-- `spring()` and `springTo()` approach their target and never exactly reach it, and a blur of 0.001 px is still a filter. From the lock on, render the logo with no transform, filter or opacity at all (a condition on the frame), or lock with `progress` or `springEase`, which end exactly on 1.
+- `spring()` and `springTo()` approach their target and never exactly reach it, and a blur of 0.001 px is still a filter. From the lock on, render the logo with no filter or opacity and no transform but a push's scale (a condition on the frame), or lock with `progress` or `springEase`, which end exactly on 1.
+- **A held logo that keeps pushing in** (a dead-still end card reads as too stationary) scales with a `transform` on a box laid out once at the logo's size, never by changing its width, height or `size`. Layout snaps a box to whole pixels, so a size that grows by a fraction of a pixel a frame steps a pixel at a time: an asterisk mark pushed in by its `size` had 0.08 px of judder and its centre wandered 0.12 px a frame, which a viewer saw as jank on the slow tail; by `transform: scale()` about its centre, 0.01 to 0.03 px. Give the `matches` reference the same scale. Check with `pnpm launch measure <id> --from <lock> --to <end> --crop <x,y,w,h>` round the logo.
 - Make `check` prove it: `matches: { at: "end", reference: () => <Logo …same position and size… />, label: "lockup" }` on the end card's shot. `check` renders the held frame and the reference alone on the video's background, and fails when more than 0.1% of pixels differ (the three pictures go to `out/check/`). Use the brand's static lockup component as the reference when the brand ships one, and the same component as the animation's final state, so the check catches a spring that never quite arrives or a filter left on. Against an approved PNG: `pnpm launch diff <id> --frame <shot>:end --against approved-logo.png`.
 
 ## 6. The sonic logo

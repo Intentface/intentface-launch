@@ -69,6 +69,18 @@ Each picture is a pure function of the frame drawn with Canvas 2D (paths, fills,
 - **The mask reads at 2 px.** A 6 px triad (`maskScale` 2, the default) still reads as a mask after a recompress at CRF 30 and a shrink to 640 px; at 1 px it blurs into stripes of two colours. Too fine for the render's scale (a contact sheet), the mask and scanlines show as their average.
 - **Judge colour on stills, not sheets.** On a contact sheet (1/6 scale), Chrome's screenshot of the second and later tubes on a page comes out green; the canvas itself, stills at 0.25 or above and the render are right.
 
+## Logo stings through oil (`example-logo`)
+
+Core's `OilLens`: a camera looking straight down through oil at a bright mark on a dark floor. The domes are fitted to Apple Music's 2026 sting (`oilDomes`), with each shot's optics (`oilShots`).
+
+| Pattern (shot) | When | How |
+|---|---|---|
+| A mark in a tile (`tile`) | Opening on the product's icon | `oilDomes.tile` (`size` 560, `pace` 1.2: the film's timing 20% slower), the mark 250 px wide: about 45% of the tile, so the magnified mark stays inside it. `ascii`: the front band for 0.6 s and 80% of the cells resolving over 0.8 s, row slips only in the first 0.3 s; as the mark sinks (`scale` 1 → 0.3 over 0.3 s, accelerating) its cells turn back into glyphs. |
+| A wordmark out of an orb (`orb`) | The name after the icon, or an end card | `oilDomes.orb` with `aspect` 2.6 and `size` about 1.25 times the word's width, so its rim lies on the word's ends at its widest (0.94 s) and smears them; flat by 1.6 s. `gloss` falls to 0 by 0.6 s, so the orb's outline goes and the word is left. The word is a `picture()` of text in the look's face. |
+
+- **Ripples read as water above about 1 px.** Ripples phased to a track's pulses (`ripplePhase` advancing 2π per pulse, so a crest leaves the centre on each) were beading a mark's strokes at 1.1 px over a 44 px wavelength; 0.5 px over 56 px reads as oil.
+- **The floor is the film's black.** Any lift in `look.floor` shows as a wash that pops when the exact logo takes over on a black ground. Hand off once the dome is flat: fade the SVG in over the oil, then fade the oil out under it, so its glow decays round the mark (`diff` across the hand-off: 0.006% of pixels changed).
+
 ## What they taught
 
 - **Measure before trusting the eye.** `pnpm launch measure` gave the numbers above: type scaled about its centre judders, rounding a spring every frame steps its tail, a slow pull-back makes held type creep. Crop to one element (`--crop`) before reading judder.

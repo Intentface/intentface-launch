@@ -63,6 +63,22 @@ export { Count, logLerp, Slam, type SlamProps, Sweep, type SweepProps } from "./
 export type { ProductLook } from "./look.js";
 export { MiddleCard, type MiddleCardProps } from "./middle-card.js";
 export { MotionBlur } from "./motion-blur.js";
+export {
+  type CurveKey,
+  monotoneCurve,
+  type OilAnimated,
+  type OilAscii,
+  type OilDome,
+  type OilDomeTiming,
+  OilLens,
+  type OilLensProps,
+  type OilLook,
+  type OilOptics,
+  oilDomes,
+  oilLook,
+  oilOptics,
+  oilShots,
+} from "./oil-lens.js";
 export { type Leaf, leafShape, PageFlip, type PageFlipProps } from "./page-flip.js";
 export {
   type ArtLayer,

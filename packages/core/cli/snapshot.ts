@@ -202,7 +202,9 @@ export async function snapshotPage(
     if (focused) {
       focused.removeAttribute("data-launch-focus");
       focused.focus({ preventScroll: true });
-      if (focused instanceof HTMLInputElement) focused.setSelectionRange(focused.value.length, focused.value.length);
+      // Number, range and other inputs without a caret have a null selectionStart and throw on setSelectionRange.
+      if (focused instanceof HTMLInputElement && focused.selectionStart !== null)
+        focused.setSelectionRange(focused.value.length, focused.value.length);
     }
   });
   const viewport = page.viewportSize() ?? { width: 1440, height: 900 };
