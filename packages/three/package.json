@@ -1,6 +1,6 @@
 {
   "name": "@intentface-launch/three",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "license": "MIT",
   "description": "3D for intentface-launch: live UI on panels in space, thin-lens depth of field, soft light, glass, reflections and in-camera motion blur.",
   "keywords": [

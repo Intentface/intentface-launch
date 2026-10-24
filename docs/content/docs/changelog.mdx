@@ -6,6 +6,36 @@ description: What changed in each release of the packages and skills, newest fir
 Update with `pnpm update @intentface-launch/core` (and the add-ons you use),
 then `pnpm launch update` to refresh the skills and guides in `launch/`.
 
+## 0.2.5 (2026-10-24)
+
+### Added
+
+- **`OilLens`**, a logo seen through a moving lens of oil, after Apple Music's
+  2026 sting: per pixel, a ray refracts through a dome of oil once per
+  wavelength onto the mark, so the dome magnifies it, splits its edges into
+  spectral fringes on its steep rim and reveals it only where it has reached.
+  `oilDomes.tile` (an icon growing into an app tile) and `oilDomes.orb` (a
+  wordmark opening out of an orb) are the film's domes, `oilShots` their
+  optics. `ascii` writes the mark in glyphs while it builds in, `tear` tears it
+  apart for a hard exit, `optics.palette` splits the fringes into a brand's
+  colours. It blurs its own motion. Ported from Travis Fischer's study (MIT).
+- **Oil logo examples** (`videos/example-logo` in the repo): a mark in a tile,
+  and a wordmark out of an orb.
+
+### Fixed
+
+- **Snapshots of pages with a focused number or range input.** A capture
+  crashed putting the caret back after the snapshot; inputs without a caret
+  are now left as they are.
+- **`audioLevels` takes an imported levels file** without a type error.
+
+### Changed
+
+- **A held logo pushed in scales with a transform** (core's guide and the
+  logo-animation skill): a box whose size grows by a fraction of a pixel a
+  frame is snapped to whole pixels and steps a pixel at a time (0.08 px of
+  judder against 0.01 to 0.03 px, measured on a mark).
+
 ## 0.2.4 (2026-10-21)
 
 ### Added
